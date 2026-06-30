@@ -13,15 +13,18 @@
   <meta property="og:description" content="Built in Saudi — built-in-saudi.com" />
   <meta property="og:url" content="https://built-in-saudi.com/" />
 
-  <!-- Google Analytics (GA4) -->
-  <!-- GA_MEASUREMENT_ID will be replaced with the real G-XXXXXXXXXX id -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+  <!-- Google Analytics (GA4) — DISABLED until a Measurement ID is wired in.
+       To enable: replace G-XXXXXXXXXX below with the real GA4 Measurement ID
+       (Analytics > Admin > Data streams > your web stream), then uncomment.
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'GA_MEASUREMENT_ID');
+    gtag('config', 'G-XXXXXXXXXX');
   </script>
+  -->
+  <!-- END Google Analytics -->
 
   <style>
     :root { color-scheme: light dark; }
