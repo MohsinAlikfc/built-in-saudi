@@ -5,6 +5,7 @@ import { useLocale } from '../../i18n'
 import { BellIcon } from '../../components/icons'
 import { pushSupported, currentSubscription, enablePush, disablePush } from '../../lib/push'
 import { alertsHelp } from './alertsHelp'
+import { reverseGeocode } from './geo'
 import { CITIES, DEFAULT_CITY } from './cities'
 
 type PrayerKey = 'fajr' | 'sunrise' | 'dhuhr' | 'asr' | 'maghrib' | 'isha'
@@ -29,7 +30,7 @@ const STR = {
     hoursAgo: (n: number) => `${n} ${n === 1 ? 'hour' : 'hours'} ago`,
     soon: 'now', hijriYear: 'Hijri year', prevYear: 'Previous year', nextYear: 'Next year', thisYear: 'This year',
     upcoming: 'Islamic dates',
-    privacy: 'Computed locally — your location is never uploaded.',
+    privacy: 'Prayer times are computed in your browser.',
     geoError: 'Couldn’t get your location — please pick a city instead.',
     enableAlerts: 'Enable alerts', alertsOn: 'Alerts on', close: 'Close',
     alertsFailed: 'We couldn’t turn on alerts just yet', alertsFixHint: 'Try this:',
@@ -54,7 +55,7 @@ const STR = {
     hoursAgo: (n: number) => `قبل ${n} ساعة`,
     soon: 'الآن', hijriYear: 'السنة الهجرية', prevYear: 'السنة السابقة', nextYear: 'السنة التالية', thisYear: 'هذه السنة',
     upcoming: 'المناسبات الإسلامية',
-    privacy: 'يُحسب محليًا — لا يُرفع موقعك أبدًا.',
+    privacy: 'تُحسب مواقيت الصلاة داخل متصفحك.',
     geoError: 'تعذّر تحديد موقعك — يرجى اختيار مدينة بدلاً من ذلك.',
     enableAlerts: 'تفعيل التنبيهات', alertsOn: 'التنبيهات مفعّلة', close: 'إغلاق',
     alertsFailed: 'تعذّر تفعيل التنبيهات حتى الآن', alertsFixHint: 'جرّب هذا:',
@@ -67,7 +68,9 @@ interface Loc { lat: number; lng: number; tz: string; label: string }
 
 // Remember the chosen location across visits.
 const LOC_KEY = 'bis-prayer-loc'
-type SavedLoc = { mode: 'city'; cityId: string } | { mode: 'geo'; lat: number; lng: number; tz: string }
+type SavedLoc =
+  | { mode: 'city'; cityId: string }
+  | { mode: 'geo'; lat: number; lng: number; tz: string; label?: string }
 function saveLoc(v: SavedLoc) { try { localStorage.setItem(LOC_KEY, JSON.stringify(v)) } catch { /* ignore */ } }
 function readLoc(): SavedLoc | null {
   try { const r = localStorage.getItem(LOC_KEY); return r ? (JSON.parse(r) as SavedLoc) : null } catch { return null }
@@ -113,7 +116,8 @@ export default function PrayerTimesTool() {
         if (c) { setCityId(c.id); setLoc({ lat: c.lat, lng: c.lng, tz: c.tz, label: locale === 'ar' ? c.ar : c.en }); return }
       } else {
         setCityId('')
-        setLoc({ lat: saved.lat, lng: saved.lng, tz: saved.tz, label: STR[locale].myLocation })
+        setLoc({ lat: saved.lat, lng: saved.lng, tz: saved.tz, label: saved.label || STR[locale].myLocation })
+        if (!saved.label) resolveGeoLabel(saved.lat, saved.lng, saved.tz)
         return
       }
     }
@@ -125,6 +129,7 @@ export default function PrayerTimesTool() {
         setCityId('')
         setLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude, tz, label: STR[locale].myLocation })
         saveLoc({ mode: 'geo', lat: pos.coords.latitude, lng: pos.coords.longitude, tz })
+        resolveGeoLabel(pos.coords.latitude, pos.coords.longitude, tz)
         setLocating(false)
       },
       () => setLocating(false), // keep the default city silently
@@ -199,6 +204,15 @@ export default function PrayerTimesTool() {
     } finally { setPushBusy(false) }
   }
 
+  // Resolve a "City, Country" label for granted coordinates (best-effort).
+  function resolveGeoLabel(lat: number, lng: number, tz: string) {
+    reverseGeocode(lat, lng, locale).then((name) => {
+      if (!name) return
+      setLoc((prev) => ({ ...prev, label: name }))
+      saveLoc({ mode: 'geo', lat, lng, tz, label: name })
+    })
+  }
+
   function useMyLocation() {
     setGeoError('')
     if (!navigator.geolocation) { setGeoError(s.geoError); return }
@@ -209,6 +223,7 @@ export default function PrayerTimesTool() {
         setCityId('')
         setLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude, tz, label: s.myLocation })
         saveLoc({ mode: 'geo', lat: pos.coords.latitude, lng: pos.coords.longitude, tz })
+        resolveGeoLabel(pos.coords.latitude, pos.coords.longitude, tz)
         setLocating(false)
       },
       () => { setGeoError(s.geoError); setLocating(false) },
@@ -230,36 +245,13 @@ export default function PrayerTimesTool() {
         </button>
       </section>
 
-      {/* Location — a chip that reveals the picker only when tapped */}
-      {!showLocPicker ? (
-        <button className="pray__loc-chip" data-testid="loc-chip"
-          onClick={() => { setPendingCity(cityId || DEFAULT_CITY.id); setShowLocPicker(true) }}>
-          <LocPin />
-          <span className="pray__loc-name">{loc.label}</span>
-          <span className="pray__loc-caret" aria-hidden="true">▾</span>
-        </button>
-      ) : (
-        <div className="pray__locpick" data-testid="loc-picker">
-          <label className="field">
-            <span className="field__label">{s.chooseCity}</span>
-            <select className="input" value={pendingCity} autoFocus data-testid="loc-select"
-              onChange={(e) => setPendingCity(e.target.value)}>
-              {CITIES.map((c) => (
-                <option key={c.id} value={c.id}>{locale === 'ar' ? c.ar : c.en}</option>
-              ))}
-            </select>
-          </label>
-          <button className="btn pray__locpick-geo" data-testid="loc-geo"
-            onClick={() => { useMyLocation(); setShowLocPicker(false) }}>
-            <LocPin /> {s.useMyLocation}
-          </button>
-          <div className="pray__locpick-actions">
-            <button className="btn" data-testid="loc-cancel" onClick={() => setShowLocPicker(false)}>{s.cancel}</button>
-            <button className="btn btn--primary" data-testid="loc-save"
-              onClick={() => { pickCity(pendingCity); setShowLocPicker(false) }}>{s.save}</button>
-          </div>
-        </div>
-      )}
+      {/* Location — a chip that opens the picker sheet */}
+      <button className="pray__loc-chip" data-testid="loc-chip"
+        onClick={() => { setPendingCity(cityId || DEFAULT_CITY.id); setShowLocPicker(true) }}>
+        <LocPin />
+        <span className="pray__loc-name">{loc.label}</span>
+        <span className="pray__loc-caret" aria-hidden="true">▾</span>
+      </button>
       {geoError && <p className="pray__geoerr">{geoError}</p>}
       {pushOn && <p className="pray__notify-note">{s.notifyNote}</p>}
 
@@ -287,7 +279,60 @@ export default function PrayerTimesTool() {
         <AlertsHelpDialog failedMsg={s.alertsFailed} help={alertsHelp(locale)} detail={helpDetail}
           closeLabel={s.close} onClose={() => setHelpOpen(false)} />
       )}
+      {showLocPicker && (
+        <LocationSheet
+          locale={locale} s={s} pending={pendingCity} onPick={setPendingCity}
+          onUseLocation={() => { useMyLocation(); setShowLocPicker(false) }}
+          onCancel={() => setShowLocPicker(false)}
+          onSave={() => { pickCity(pendingCity); setShowLocPicker(false) }}
+        />
+      )}
     </div>
+  )
+}
+
+function LocationSheet({ locale, s, pending, onPick, onUseLocation, onCancel, onSave }: {
+  locale: 'en' | 'ar'
+  s: typeof STR['en']
+  pending: string
+  onPick: (id: string) => void
+  onUseLocation: () => void
+  onCancel: () => void
+  onSave: () => void
+}) {
+  return createPortal(
+    <div className="sheet-overlay" role="dialog" aria-modal="true" data-testid="loc-sheet" onClick={onCancel}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <span className="sheet__grip" aria-hidden="true" />
+        <h3 className="sheet__title">{s.location}</h3>
+
+        <button className="sheet__geo" data-testid="loc-geo" onClick={onUseLocation}>
+          <LocPin /> {s.useMyLocation}
+        </button>
+
+        <p className="sheet__hint">{s.chooseCity}</p>
+        <ul className="sheet__cities" data-testid="loc-cities">
+          {CITIES.map((c) => {
+            const selected = pending === c.id
+            return (
+              <li key={c.id}>
+                <button className={`sheet__city ${selected ? 'is-sel' : ''}`}
+                  aria-pressed={selected} onClick={() => onPick(c.id)}>
+                  <span>{locale === 'ar' ? c.ar : c.en}</span>
+                  {selected && <span className="sheet__check" aria-hidden="true">✓</span>}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+
+        <div className="sheet__actions">
+          <button className="btn" data-testid="loc-cancel" onClick={onCancel}>{s.cancel}</button>
+          <button className="btn btn--primary" data-testid="loc-save" onClick={onSave}>{s.save}</button>
+        </div>
+      </div>
+    </div>,
+    document.body,
   )
 }
 

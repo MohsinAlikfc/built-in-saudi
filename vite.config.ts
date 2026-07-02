@@ -2,6 +2,7 @@ import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { execSync } from 'node:child_process'
 import { en } from './src/i18n/en'
 import { ar } from './src/i18n/ar'
 import { siteMeta, liveToolSeo, type ToolSeo } from './src/i18n/seo'
@@ -76,9 +77,17 @@ function prerenderPlugin(): Plugin {
       const dist = 'dist'
       // Stamp a build id so open tabs can detect a new deploy (see useVersionCheck).
       const build = String(Date.now())
+      // Extract a user-facing "what changed" note from the latest commit: a
+      // `Changelog: …` trailer if present, else the commit subject line.
+      let notes = ''
+      try {
+        const msg = execSync('git log -1 --pretty=%B', { encoding: 'utf8' })
+        const m = msg.match(/^Changelog:\s*(.+)$/im)
+        notes = (m ? m[1] : msg.split('\n')[0]).trim().slice(0, 180)
+      } catch { /* no git in this environment — leave notes empty */ }
       let shell = readFileSync(join(dist, 'index.html'), 'utf8')
       shell = shell.replace('</head>', `<meta name="build" content="${build}" /></head>`)
-      writeFileSync(join(dist, 'version.json'), JSON.stringify({ build }))
+      writeFileSync(join(dist, 'version.json'), JSON.stringify({ build, notes }))
 
       writeFileSync(join(dist, '404.html'), shell) // SPA fallback
 

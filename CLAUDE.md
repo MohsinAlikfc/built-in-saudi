@@ -106,6 +106,10 @@ Cloud DNS**, project **`blitz-ksa`**, zone `built-in-saudi`.
 
 - The build stamps `<meta name="build">` + writes `/version.json`; `useVersionCheck`
   polls it (cache-busted) and reloads open tabs when a new deploy is detected.
+- **Changelog in the update toast:** the build puts a user-facing note into
+  `version.json` `notes` — a `Changelog: …` trailer from the latest commit if
+  present, else the commit subject. `UpdatedToast` shows it after the reload. So
+  **write a clear commit subject (or a `Changelog:` line) describing what changed.**
 - Every tool loads via **`lazyTool()`** (`src/lib/lazyTool.tsx`), which reloads once
   if a hashed chunk 404s after a redeploy. **Use `lazyTool`, never bare `React.lazy`**
   for tool components.

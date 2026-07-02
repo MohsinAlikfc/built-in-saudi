@@ -16,9 +16,12 @@ export function useVersionCheck() {
       try {
         const res = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' })
         if (!res.ok) return
-        const { build } = await res.json()
+        const { build, notes } = await res.json()
         if (!stopped && build && build !== current) {
-          try { sessionStorage.setItem('bis-reloaded', 'update') } catch { /* ignore */ }
+          try {
+            sessionStorage.setItem('bis-reloaded', 'update')
+            if (notes) sessionStorage.setItem('bis-update-notes', String(notes))
+          } catch { /* ignore */ }
           window.location.reload()
         }
       } catch { /* offline / transient — ignore */ }
