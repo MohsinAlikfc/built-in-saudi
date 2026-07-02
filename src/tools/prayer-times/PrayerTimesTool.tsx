@@ -18,6 +18,9 @@ const STR = {
     today: 'Today', converter: 'Date converter',
     gregorian: 'Gregorian date', hijri: 'Hijri date',
     day: 'Day', month: 'Month', year: 'Year',
+    prevDay: 'Previous day', nextDay: 'Next day',
+    inDays: (n: number) => `in ${n} ${n === 1 ? 'day' : 'days'}`,
+    daysAgo: (n: number) => `${n} ${n === 1 ? 'day' : 'days'} ago`,
     upcoming: 'Upcoming Islamic dates',
     privacy: 'Computed locally — your location is never uploaded.',
     geoError: 'Couldn’t get your location — please pick a city instead.',
@@ -34,6 +37,9 @@ const STR = {
     today: 'اليوم', converter: 'محوّل التاريخ',
     gregorian: 'التاريخ الميلادي', hijri: 'التاريخ الهجري',
     day: 'اليوم', month: 'الشهر', year: 'السنة',
+    prevDay: 'اليوم السابق', nextDay: 'اليوم التالي',
+    inDays: (n: number) => `بعد ${n} يوم`,
+    daysAgo: (n: number) => `قبل ${n} يوم`,
     upcoming: 'المناسبات الإسلامية القادمة',
     privacy: 'يُحسب محليًا — لا يُرفع موقعك أبدًا.',
     geoError: 'تعذّر تحديد موقعك — يرجى اختيار مدينة بدلاً من ذلك.',
@@ -223,15 +229,38 @@ function Converter({ locale, s, dateFmt }: {
 
   const hijriAsGreg = useMemo(() => dateFmt.format(hijriToGregorian(hy, hm, hd)), [hy, hm, hd, dateFmt])
 
+  const shiftGreg = (delta: number) => {
+    const [y, m, d] = greg.split('-').map(Number)
+    if (y) setGreg(toISO(new Date(y, m - 1, d + delta)))
+  }
+  const daysFromToday = useMemo(() => {
+    const [y, m, d] = greg.split('-').map(Number)
+    if (!y) return null
+    const today = new Date(); today.setHours(0, 0, 0, 0)
+    return Math.round((new Date(y, m - 1, d).getTime() - today.getTime()) / 86400000)
+  }, [greg])
+  const countdown = daysFromToday === null ? ''
+    : daysFromToday === 0 ? s.today
+      : daysFromToday > 0 ? s.inDays(daysFromToday) : s.daysAgo(-daysFromToday)
+
   return (
     <section className="pray__card">
       <div className="pray__card-head"><h2>{s.converter}</h2></div>
 
       <label className="field">
         <span className="field__label">{s.gregorian}</span>
-        <input className="input" type="date" value={greg} onChange={(e) => setGreg(e.target.value)} />
+        <input className="input" type="date" value={greg} data-testid="conv-greg"
+          onChange={(e) => setGreg(e.target.value)} />
       </label>
-      <p className="pray__conv-out" dir={locale === 'ar' ? 'rtl' : 'ltr'}>{gregAsHijri}</p>
+      <div className="pray__conv-controls">
+        <button className="btn" data-testid="conv-prev-day" aria-label={s.prevDay}
+          onClick={() => shiftGreg(-1)}>−</button>
+        <button className="btn" data-testid="conv-today" onClick={() => setGreg(toISO(new Date()))}>{s.today}</button>
+        <button className="btn" data-testid="conv-next-day" aria-label={s.nextDay}
+          onClick={() => shiftGreg(1)}>+</button>
+        <span className="pray__countdown" data-testid="conv-countdown">{countdown}</span>
+      </div>
+      <p className="pray__conv-out" dir={locale === 'ar' ? 'rtl' : 'ltr'} data-testid="conv-hijri-out">{gregAsHijri}</p>
 
       <div className="pray__hijri-inputs">
         <label className="field">

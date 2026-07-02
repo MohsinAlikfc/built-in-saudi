@@ -419,3 +419,8 @@ html { -webkit-tap-highlight-color: transparent; }
   .pw__out-row { flex-direction: column; }
   .pw__out-row .btn { width: 100%; justify-content: center; }
 }
+
+/* Hijri converter fine-tune controls (#7) */
+.pray__conv-controls { display: flex; gap: 0.5rem; align-items: center; margin: 0.6rem 0; flex-wrap: wrap; }
+.pray__conv-controls .btn { padding: 0.5rem 0.85rem; min-width: 2.6rem; justify-content: center; }
+.pray__countdown { font-size: 0.85rem; font-weight: 600; color: var(--green-600); margin-inline-start: auto; }
