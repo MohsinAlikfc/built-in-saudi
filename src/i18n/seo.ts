@@ -130,6 +130,11 @@ export const liveToolSeo: ToolSeo[] = [
     ar: { name: 'نص بديل', description: 'ولّد نصًا بديلًا بالفقرات أو الجُمل أو الكلمات — نص Lorem ipsum الكلاسيكي أو نص حشو عربي. يعمل بالكامل داخل متصفحك.' },
   },
   {
+    id: 'json-formatter',
+    en: { name: 'JSON Formatter', description: 'Format, minify and validate JSON in your browser — 2/4-space indent, sort keys, and a precise line/column error when invalid. Nothing uploaded.' },
+    ar: { name: 'منسّق JSON', description: 'نسّق وصغّر وتحقّق من JSON داخل متصفحك — مسافة ٢/٤، ترتيب المفاتيح، ورسالة خطأ دقيقة بالسطر والعمود. دون رفع أي شيء.' },
+  },
+  {
     id: 'base64',
     en: { name: 'Base64 Convert', description: 'Encode and decode Base64 text with full UTF-8 support and a URL-safe option — entirely in your browser.' },
     ar: { name: 'ترميز وفكّ Base64', description: 'رمّز وفكّ نصوص Base64 بدعم كامل لـ UTF-8 وخيار آمن للروابط — بالكامل داخل متصفحك.' },

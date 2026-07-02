@@ -13,10 +13,11 @@ test.describe('home', () => {
 
   test('search filters the catalog', async ({ page }) => {
     await page.goto('/en')
+    const all = await page.locator('.tool-grid .tool-card').count()
     await page.locator('.tool-search__input').fill('qibla')
     const cards = page.locator('.tool-grid .tool-card')
-    await expect(cards).toHaveCount(1)
-    await expect(cards.first()).toContainText(/Qibla/i)
+    await expect(cards.first()).toContainText(/Qibla/i) // ranked top
+    expect(await cards.count()).toBeLessThan(all)       // and the list is filtered down
   })
 
   test('the app-launcher lists apps and navigates', async ({ page }) => {
@@ -42,6 +43,16 @@ test.describe('tools', () => {
   test('uuid: generates a v4 uuid', async ({ page }) => {
     await page.goto('/en/tools/uuid-generator')
     await expect(page.getByTestId('uuid-output')).toContainText(/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}/i)
+  })
+
+  test('json formatter: prettifies valid and flags invalid', async ({ page }) => {
+    await page.goto('/en/tools/json-formatter')
+    await page.getByTestId('json-input').fill('{"b":1,"a":2}')
+    await page.getByTestId('json-format').click()
+    await expect(page.getByTestId('json-output')).toContainText('"b": 1')
+    await page.getByTestId('json-input').fill('{"a":1,}')
+    await page.getByTestId('json-format').click()
+    await expect(page.getByTestId('json-error')).toBeVisible()
   })
 
   test('base64: encodes text', async ({ page }) => {

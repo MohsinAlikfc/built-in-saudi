@@ -12,6 +12,7 @@ import { uuidGeneratorTool } from './uuid-generator/meta'
 import { wordCounterTool } from './word-counter/meta'
 import { languageDetectTool } from './language-detect/meta'
 import { loremTool } from './lorem/meta'
+import { jsonFormatterTool } from './json-formatter/meta'
 import { base64Tool } from './base64/meta'
 import { dateDiffTool } from './date-diff/meta'
 import { zipInspectorTool } from './zip-inspector/meta'
@@ -38,6 +39,7 @@ export const tools: Tool[] = [
   wordCounterTool,
   languageDetectTool,
   loremTool,
+  jsonFormatterTool,
   base64Tool,
   dateDiffTool,
   zipInspectorTool,

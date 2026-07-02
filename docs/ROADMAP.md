@@ -19,6 +19,27 @@ optional [backend worker](./BACKEND.md).
 ## Status legend
 ✅ live · 📝 spec ready · 🧭 idea (spec TBD)
 
+## Curation notes (Claude)
+**New ideas worth adding** (on-brand: privacy-first, Saudi wedge, client-side):
+- **EXIF / metadata stripper** — remove GPS + camera metadata from photos before
+  sharing. Strong privacy wedge; we already have a metadata *viewer*, this is the
+  actionable counterpart. `client`, T1.
+- **QR / barcode reader** — scan via camera or an uploaded image (BarcodeDetector
+  API + jsQR fallback). Natural pair to the QR generator. `client`, T2.
+- **Arabic ↔ Western numeral converter** (٠١٢٣ ↔ 0123) + digit-aware text. Tiny,
+  Saudi-local. `client`, T3.
+- **Iqama / ID expiry countdown** — paste an expiry (Hijri or Gregorian), get the
+  days remaining + a reminder. Saudi-local, high intent. `client`, T3.
+- **Color contrast / palette checker** — WCAG contrast + shades. Design, T2.
+
+**Pushback (reconsider / likely cut):**
+- **YouTube thumbnail downloader** — off-brand (depends on YouTube's CDN, no real
+  privacy wedge, thin value). Recommend dropping or making it an external showcase.
+- **Typing speed tester** — filler; weak fit with the "sharp everyday utilities"
+  brand. Low priority at best.
+- **Text to speech** — the Web Speech API is inconsistent across
+  browsers/languages (esp. Arabic); ship only if quality is acceptable, else skip.
+
 ## Generators
 | Tool | Slug | Runs | Priority | Status |
 |------|------|------|----------|--------|
@@ -61,7 +82,7 @@ optional [backend worker](./BACKEND.md).
 | Tool | Slug | Runs | Priority | Status |
 |------|------|------|----------|--------|
 | [Word & character counter](./tools/word-counter.md) | `/tools/word-counter` | client | T2 | 📝 |
-| [JSON formatter](./tools/json-formatter.md) | `/tools/json-formatter` | client | T1 | 📝 |
+| [JSON formatter](./tools/json-formatter.md) | `/tools/json-formatter` | client | T1 | ✅ live |
 | Regex tester | `/tools/regex-tester` | client | T2 | 🧭 |
 | JWT decoder | `/tools/jwt-decoder` | client | T2 | 🧭 |
 | Diff checker | `/tools/diff-checker` | client | T3 | 🧭 |
