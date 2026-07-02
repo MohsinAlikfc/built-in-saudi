@@ -130,6 +130,7 @@ export default function PrayerTimesTool() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [viewDateStr, setViewDateStr] = useState('') // '' = live (now-centric)
   const [showMore, setShowMore] = useState(false)
+  const [dateOpen, setDateOpen] = useState(false)
   const [now, setNow] = useState(() => new Date())
 
   // Refresh "now" every 30s (not every second) for the countdown, and also when
@@ -403,13 +404,21 @@ export default function PrayerTimesTool() {
         })}
       </ul>
       <div className="pray__more">
-        <button className="btn" data-testid="pray-more" onClick={() => setShowMore((v) => !v)}>
-          {showMore ? s.showLess : s.showMore}
-        </button>
-        <input className="input pray__more-date" type="date" value={viewDateStr} data-testid="pray-date"
-          onChange={(e) => setViewDateStr(e.target.value)} />
-        {viewDateStr && (
-          <button className="btn" data-testid="pray-today" onClick={() => setViewDateStr('')}>{s.today}</button>
+        <div className="pray__more-pill">
+          <button className="pray__more-main" data-testid="pray-more" onClick={() => setShowMore((v) => !v)}>
+            {showMore ? s.showLess : s.showMore}
+          </button>
+          <button className="pray__more-toggle" data-testid="pray-date-toggle" aria-expanded={dateOpen}
+            aria-label={s.today} onClick={() => setDateOpen((v) => !v)}>▾</button>
+        </div>
+        {dateOpen && (
+          <div className="pray__more-menu">
+            <input className="input" type="date" value={viewDateStr} data-testid="pray-date"
+              onChange={(e) => setViewDateStr(e.target.value)} />
+            {viewDateStr && (
+              <button className="btn" data-testid="pray-today" onClick={() => { setViewDateStr(''); setDateOpen(false) }}>{s.today}</button>
+            )}
+          </div>
         )}
       </div>
       <p className="pray__method-note">{s.method}</p>

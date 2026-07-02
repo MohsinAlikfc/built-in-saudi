@@ -187,6 +187,7 @@ http('sendDue', async (req, res) => {
       if (err && (err.statusCode === 404 || err.statusCode === 410)) {
         await doc.ref.delete(); removed++; continue
       }
+      console.error('push failed:', (err && err.statusCode) || '', String((err && (err.body || err.message)) || err).slice(0, 200))
     }
     // One-time warning ~7 days before expiry.
     if (expMs && !s.expiryWarned && nowMs >= expMs - WARN_DAYS * 86400000) {
@@ -205,5 +206,26 @@ http('sendDue', async (req, res) => {
       nextKind: next ? next.kind : null,
     })
   }
+  console.log(`sendDue checked=${snap.size} sent=${sent} removed=${removed}`)
   res.json({ ok: true, checked: snap.size, sent, removed })
+})
+
+// GET ?secret=… → snapshot of subscriptions for debugging (no PII beyond a
+// truncated endpoint). Lets us diagnose alert delivery without the user.
+http('debug', async (req, res) => {
+  if ((req.query.secret || '') !== (process.env.SENDER_SECRET || 'x')) return res.status(403).send('nope')
+  const snap = await db.collection(COL).limit(50).get()
+  const now = Date.now()
+  const ms = (t) => (t && typeof t.toMillis === 'function' ? t.toMillis() : null)
+  const subs = snap.docs.map((d) => {
+    const s = d.data()
+    return {
+      endpoint: String((s.subscription && s.subscription.endpoint) || '').slice(0, 70),
+      locale: s.locale, prefs: s.prefs, nextPrayer: s.nextPrayer, nextKind: s.nextKind,
+      nextNotifyAt: ms(s.nextNotifyAt) ? new Date(ms(s.nextNotifyAt)).toISOString() : null,
+      dueInMin: ms(s.nextNotifyAt) ? Math.round((ms(s.nextNotifyAt) - now) / 60000) : null,
+      expiresInDays: ms(s.expiresAt) ? Math.round((ms(s.expiresAt) - now) / 86400000) : null,
+    }
+  })
+  res.json({ count: snap.size, now: new Date().toISOString(), subs })
 })

@@ -696,3 +696,12 @@ html { -webkit-tap-highlight-color: transparent; }
 .zip__size { font-variant-numeric: tabular-nums; color: var(--ink-soft); }
 .zip__meta { font-size: 0.76rem; color: var(--ink-faint); white-space: nowrap; }
 @media (max-width: 560px) { .zip__meta { display: none; } }
+
+/* Prayer list "more" — subtle split pill with a hidden date picker */
+.pray__more { display: flex; flex-direction: column; align-items: center; gap: 0.55rem; margin-top: 0.9rem; }
+.pray__more-pill { display: inline-flex; align-items: stretch; border: 1px solid var(--line-soft); border-radius: 999px; overflow: hidden; }
+.pray__more-main, .pray__more-toggle { background: none; border: none; color: var(--ink-faint); font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; padding: 0.35rem 0.95rem; transition: color 0.15s, background 0.15s; }
+.pray__more-main:hover, .pray__more-toggle:hover { color: var(--green-700); background: color-mix(in srgb, var(--green-400) 8%, transparent); }
+.pray__more-toggle { padding-inline: 0.65rem; border-inline-start: 1px solid var(--line-soft); }
+.pray__more-menu { display: flex; gap: 0.5rem; align-items: center; }
+.pray__more-menu .input { width: auto; }
