@@ -42,7 +42,7 @@ export function HomePage() {
           <input
             ref={inputRef}
             type="search"
-            className="tool-search__input flex-1 border-none bg-transparent outline-none font-body text-[1rem] text-ink py-[0.7rem] placeholder:text-ink-faint [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+            className="tool-search__input flex-1 min-w-0 border-none bg-transparent outline-none font-body text-[1rem] text-ink py-[0.7rem] placeholder:text-ink-faint truncate [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
             placeholder={t.catalog.searchPlaceholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}

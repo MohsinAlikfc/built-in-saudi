@@ -313,7 +313,7 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
    ====================================================================== */
 
 .app-shell { display: flex; flex-direction: column; min-height: 100dvh; }
-.app-main { flex: 1 0 auto; }
+.app-main { flex: 1 0 auto; overflow-x: clip; } /* never let a child scroll the body sideways */
 
 /* Header, nav, launcher & footer: migrated to Tailwind utilities (#33). */
 

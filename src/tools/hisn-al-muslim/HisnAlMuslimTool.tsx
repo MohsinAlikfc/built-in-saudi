@@ -64,7 +64,7 @@ export default function HisnAlMuslimTool() {
         <SearchIcon className="w-5 h-5 text-ink-faint flex-none" />
         <input
           type="search" dir="auto" data-testid="hisn-search"
-          className="flex-1 border-none bg-transparent outline-none font-body text-[1rem] text-ink py-[0.6rem] placeholder:text-ink-faint"
+          className="flex-1 min-w-0 border-none bg-transparent outline-none font-body text-[1rem] text-ink py-[0.6rem] placeholder:text-ink-faint"
           placeholder={s.search} value={query} onChange={(e) => setQuery(e.target.value)} aria-label={s.search}
         />
       </div>
