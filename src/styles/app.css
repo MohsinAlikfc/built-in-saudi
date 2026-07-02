@@ -68,55 +68,18 @@
 
 
 /* ── QR tool ─────────────────────────────────────── */
-.qr { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.5rem; align-items: start; }
-.qr__panel { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); padding: 1.3rem; }
 
-.qr__types { display: flex; flex-wrap: wrap; gap: 0.4rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--line-soft); }
-.qr__type {
-  display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.8rem;
-  border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
-  font-weight: 600; font-size: 0.88rem; color: var(--ink-soft);
-  transition: all 0.16s ease;
-}
-.qr__type svg { width: 17px; height: 17px; }
-.qr__type:hover { border-color: color-mix(in srgb, var(--green-500) 40%, transparent); color: var(--green-700); }
-.qr__type.is-active { background: var(--green-600); border-color: var(--green-700); color: var(--sand-100); box-shadow: var(--shadow-sm); }
 
-.qr__fields { padding: 1.2rem 0; }
-.qr__row { display: grid; gap: 0.9rem; }
 
-.qr__style { border: none; padding: 1.2rem 0 0; border-top: 1px solid var(--line-soft); display: grid; gap: 1.1rem; }
-.qr__style legend { font-family: var(--font-body); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); padding: 0; }
-.qr__control { display: grid; gap: 0.5rem; }
-.qr__control > label { font-size: 0.82rem; font-weight: 600; color: var(--ink-soft); display: flex; justify-content: space-between; }
 
 
 input[type='range'] { width: 100%; accent-color: var(--green-600); }
 
-.qr__colors { display: flex; gap: 1rem; }
-.swatch { display: inline-flex; align-items: center; gap: 0.55rem; font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); }
-.swatch input[type='color'] { width: 34px; height: 34px; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: none; cursor: pointer; }
 
 /* Preview */
-.qr__preview { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 0.9rem; }
-.qr__stage {
-  aspect-ratio: 1; display: grid; place-items: center; padding: clamp(1rem, 4vw, 2rem);
-  border-radius: var(--r-lg); border: 1px solid var(--line); box-shadow: var(--shadow-md);
-  transition: background 0.2s;
-}
-.qr__svg { width: 100%; height: 100%; display: grid; place-items: center; animation: fadeUp 0.3s ease; }
-.qr__svg svg { width: 100%; height: 100%; }
-.qr__empty { text-align: center; color: var(--ink-faint); font-size: 0.92rem; padding: 1.5rem; }
-.qr__error { color: var(--danger); font-weight: 600; }
 
-.qr__actions { display: flex; gap: 0.6rem; }
-.qr__actions .btn { flex: 1; justify-content: center; }
 
-.qr__encoded { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.78rem; background: var(--sand-100); border: 1px solid var(--line-soft); border-radius: var(--r-sm); padding: 0.6rem 0.75rem; overflow: hidden; }
-.qr__encoded-label { font-family: var(--font-body); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); font-size: 0.66rem; }
-.qr__encoded code { font-family: var(--font-mono); font-size: 0.78rem; color: var(--green-700); word-break: break-all; }
 
-.qr__privacy { font-size: 0.8rem; color: var(--ink-faint); display: flex; align-items: center; gap: 0.4rem; }
 
 /* ── Message page (404 / coming soon) ────────────── */
 
@@ -645,7 +608,6 @@ html { -webkit-tap-highlight-color: transparent; }
 
 /* Nativization pass: flatten the tool "well" cards — hairline border, no floating
    shadow, restrained rounding — so tools feel flush and app-like, not carded. */
-.qr__panel, .pw__out, .wc__stat, .dd__hero, .pray__card, .meta__list, .zip__list,
 .lang__result, .lorem__out, .cal2__detail {
   box-shadow: none;
   border-radius: var(--r-md);

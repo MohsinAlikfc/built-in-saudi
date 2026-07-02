@@ -118,15 +118,19 @@ export default function QrCodeTool() {
   }
 
   return (
-    <div className="qr">
+    <div className="grid grid-cols-1 md:grid-cols-[1.15fr_0.85fr] gap-6 items-start">
       {/* Controls */}
-      <div className="qr__panel">
-        <div className="qr__types" role="group" aria-label={q.style}>
+      <div className="bg-[var(--surface)] border border-[color:var(--line-soft)] rounded-lg shadow-[var(--shadow-sm)] p-[1.3rem]">
+        <div className="flex flex-wrap gap-[0.4rem] pb-[1.1rem] border-b border-[color:var(--line-soft)]" role="group" aria-label={q.style}>
           {TYPE_DEFS.map((d) => (
             <button
               key={d.id}
               aria-pressed={type === d.id}
-              className={`qr__type ${type === d.id ? 'is-active' : ''}`}
+              className={`inline-flex items-center gap-[0.4rem] px-[0.8rem] py-[0.5rem] border rounded-full font-semibold text-[0.88rem] transition-all duration-150 [&_svg]:size-[17px] ${
+                type === d.id
+                  ? 'bg-green-600 border-green-700 text-sand-100 shadow-[var(--shadow-sm)]'
+                  : 'bg-[var(--surface)] border-[color:var(--line)] text-ink-soft hover:border-[color-mix(in_srgb,var(--green-500)_40%,transparent)] hover:text-green-700'
+              }`}
               onClick={() => { setType(d.id); setError('') }}
             >
               <d.Icon /> <span>{q.types[d.id]}</span>
@@ -134,7 +138,7 @@ export default function QrCodeTool() {
           ))}
         </div>
 
-        <div className="qr__fields">
+        <div className="py-[1.2rem]">
           {type === 'link' && (
             <Field label={q.fieldUrl}>
               <input className="input" type="url" inputMode="url" placeholder={q.placeholderUrl}
@@ -150,7 +154,7 @@ export default function QrCodeTool() {
           )}
 
           {type === 'wifi' && (
-            <div className="qr__row">
+            <div className="grid gap-[0.9rem]">
               <Field label={q.fieldSsid}>
                 <input className="input" value={wifi.ssid} placeholder={q.placeholderSsid}
                   onChange={(e) => setWifi({ ...wifi, ssid: e.target.value })} />
@@ -177,7 +181,7 @@ export default function QrCodeTool() {
           )}
 
           {type === 'email' && (
-            <div className="qr__row">
+            <div className="grid gap-[0.9rem]">
               <Field label={q.fieldTo}>
                 <input className="input" type="email" placeholder={q.placeholderEmail}
                   value={email.to} onChange={(e) => setEmail({ ...email, to: e.target.value })} />
@@ -201,10 +205,10 @@ export default function QrCodeTool() {
           )}
         </div>
 
-        <fieldset className="qr__style">
-          <legend>{q.style}</legend>
+        <fieldset className="border-0 pt-[1.2rem] px-0 pb-0 border-t border-[color:var(--line-soft)] grid gap-[1.1rem]">
+          <legend className="font-body text-[0.72rem] tracking-[0.08em] uppercase text-ink-faint p-0">{q.style}</legend>
 
-          <div className="qr__control">
+          <div className="grid gap-[0.5rem] [&>label]:text-[0.82rem] [&>label]:font-semibold [&>label]:text-ink-soft [&>label]:flex [&>label]:justify-between">
             <label>{q.errorCorrection}</label>
             <div className="seg" role="group" aria-label={q.errorCorrection}>
               {EC_LEVELS.map((lvl) => (
@@ -215,24 +219,24 @@ export default function QrCodeTool() {
             </div>
           </div>
 
-          <div className="qr__control">
+          <div className="grid gap-[0.5rem] [&>label]:text-[0.82rem] [&>label]:font-semibold [&>label]:text-ink-soft [&>label]:flex [&>label]:justify-between">
             <label htmlFor="qr-size">{q.exportSize} <span className="muted">{size}px</span></label>
             <input id="qr-size" type="range" min={128} max={1024} step={32}
               value={size} onChange={(e) => setSize(Number(e.target.value))} />
           </div>
 
-          <div className="qr__control">
+          <div className="grid gap-[0.5rem] [&>label]:text-[0.82rem] [&>label]:font-semibold [&>label]:text-ink-soft [&>label]:flex [&>label]:justify-between">
             <label htmlFor="qr-margin">{q.quietZone} <span className="muted">{margin}</span></label>
             <input id="qr-margin" type="range" min={0} max={8} step={1}
               value={margin} onChange={(e) => setMargin(Number(e.target.value))} />
           </div>
 
-          <div className="qr__colors">
-            <label className="swatch">
+          <div className="flex gap-4">
+            <label className="inline-flex items-center gap-[0.55rem] text-[0.85rem] font-semibold text-ink-soft [&_input[type=color]]:w-[34px] [&_input[type=color]]:h-[34px] [&_input[type=color]]:p-0 [&_input[type=color]]:border [&_input[type=color]]:border-[color:var(--line)] [&_input[type=color]]:rounded-lg [&_input[type=color]]:bg-none [&_input[type=color]]:cursor-pointer">
               <input type="color" value={fg} onChange={(e) => setFg(e.target.value)} />
               <span>{q.foreground}</span>
             </label>
-            <label className="swatch">
+            <label className="inline-flex items-center gap-[0.55rem] text-[0.85rem] font-semibold text-ink-soft [&_input[type=color]]:w-[34px] [&_input[type=color]]:h-[34px] [&_input[type=color]]:p-0 [&_input[type=color]]:border [&_input[type=color]]:border-[color:var(--line)] [&_input[type=color]]:rounded-lg [&_input[type=color]]:bg-none [&_input[type=color]]:cursor-pointer">
               <input type="color" value={bg} onChange={(e) => setBg(e.target.value)} />
               <span>{q.background}</span>
             </label>
@@ -241,19 +245,19 @@ export default function QrCodeTool() {
       </div>
 
       {/* Preview + export */}
-      <div className="qr__preview">
-        <div className="qr__stage" style={{ background: bg }} role="img"
+      <div className="sticky top-[88px] flex flex-col gap-[0.9rem]">
+        <div className="aspect-square grid place-items-center p-[clamp(1rem,4vw,2rem)] rounded-lg border border-[color:var(--line)] shadow-[var(--shadow-md)] transition-[background] duration-200" style={{ background: bg }} role="img"
           aria-label={hasCode ? `${q.encodes}: ${value}` : q.empty} aria-live="polite">
           {hasCode ? (
-            <div className="qr__svg" aria-hidden="true" dangerouslySetInnerHTML={{ __html: svg }} />
+            <div className="w-full h-full grid place-items-center animate-[fadeUp_0.3s_ease] [&_svg]:w-full [&_svg]:h-full" aria-hidden="true" dangerouslySetInnerHTML={{ __html: svg }} />
           ) : (
-            <div className="qr__empty">
-              {error ? <span className="qr__error">{error}</span> : <span>{q.empty}</span>}
+            <div className="text-center text-ink-faint text-[0.92rem] p-6">
+              {error ? <span className="text-[color:var(--danger)] font-semibold">{error}</span> : <span>{q.empty}</span>}
             </div>
           )}
         </div>
 
-        <div className="qr__actions">
+        <div className="flex gap-[0.6rem] [&>.btn]:flex-1 [&>.btn]:justify-center">
           <button className="btn btn--primary" onClick={downloadPng} disabled={!hasCode}>
             <DownloadIcon /> {q.png}
           </button>
@@ -266,13 +270,13 @@ export default function QrCodeTool() {
         </div>
 
         {hasCode && (
-          <p className="qr__encoded">
-            <span className="qr__encoded-label">{q.encodes}</span>
+          <p className="flex flex-col gap-[0.2rem] text-[0.78rem] bg-sand-100 border border-[color:var(--line-soft)] rounded-[5px] px-[0.75rem] py-[0.6rem] overflow-hidden [&_code]:font-mono [&_code]:text-[0.78rem] [&_code]:text-green-700 [&_code]:break-all">
+            <span className="font-body uppercase tracking-[0.06em] text-ink-faint text-[0.66rem]">{q.encodes}</span>
             <code dir="ltr">{value}</code>
           </p>
         )}
 
-        <p className="qr__privacy"><span aria-hidden="true">🔒</span> {q.privacy}</p>
+        <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {q.privacy}</p>
       </div>
     </div>
   )
