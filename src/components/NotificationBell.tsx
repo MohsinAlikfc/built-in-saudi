@@ -2,38 +2,33 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '../i18n'
 import { BellIcon } from './icons'
 
-// Bump this id to re-announce something new (a fresh id ignores old dismissals).
+// Bump this id to re-announce something new (a fresh id shows the banner again).
 const NOTIF_ID = 'launch'
 const KEY = `bis-notif-${NOTIF_ID}`
 
-function wasDismissed(): boolean {
-  try { return localStorage.getItem(KEY) === 'dismissed' } catch { return false }
+function wasSeen(): boolean {
+  try { return localStorage.getItem(KEY) === 'seen' } catch { return false }
 }
 
 /**
- * Startpage announcement: shows a banner that auto-minimizes to a bell after a
- * few seconds. Clicking the bell reopens it. Dismissing sets a localStorage flag
- * so we don't nag again (next visit starts minimized as the bell).
+ * Startpage announcement — deliberately minimal: on first visit a banner shows,
+ * then auto-closes to a bell after a few seconds and marks itself seen (so it
+ * won't nag again). No buttons. Tap the bell to peek at it again.
  */
 export function NotificationBell() {
   const { t } = useLocale()
   const n = t.notif
-  const dismissed = useRef(wasDismissed())
-  const [open, setOpen] = useState(!dismissed.current)
+  const [open, setOpen] = useState(!wasSeen())
   const timer = useRef<number | undefined>(undefined)
 
   useEffect(() => {
-    if (open && !dismissed.current) {
-      timer.current = window.setTimeout(() => setOpen(false), 6000)
-      return () => window.clearTimeout(timer.current)
-    }
+    if (!open) return
+    timer.current = window.setTimeout(() => {
+      try { localStorage.setItem(KEY, 'seen') } catch { /* ignore */ }
+      setOpen(false)
+    }, 6000)
+    return () => window.clearTimeout(timer.current)
   }, [open])
-
-  function dismiss() {
-    try { localStorage.setItem(KEY, 'dismissed') } catch { /* ignore */ }
-    dismissed.current = true
-    setOpen(false)
-  }
 
   if (!open) {
     return (
@@ -51,8 +46,6 @@ export function NotificationBell() {
         <strong className="notif__title">{n.title}</strong>
         <p className="notif__msg">{n.message}</p>
       </div>
-      <button className="notif__btn" aria-label={n.dismiss} title={n.dismiss}
-        data-testid="notif-dismiss" onClick={dismiss}>✕</button>
     </div>
   )
 }
