@@ -5,3 +5,7 @@ dist/
 .DS_Store
 Thumbs.db
 *.log
+
+# Playwright
+playwright-report/
+test-results/

@@ -94,7 +94,17 @@ npm run dev        # dev server
 npm run typecheck  # tsc --noEmit
 npm run build      # dist/ + SPA 404 + per-tool prerender
 npm run preview    # preview the production build
+npm run test:e2e   # Playwright e2e (serves the build, runs e2e/*.spec.ts)
 ```
+
+## Testing (e2e)
+
+Playwright specs live in `e2e/`, driven by the `data-testid`s tools already
+expose. `npm run test:e2e` builds nothing itself — it starts `vite preview` on
+:4173 and tests the current `dist/` (so `npm run build` first, or it serves a
+stale build). CI/container path: `docker compose -f docker-compose.e2e.yml run
+--rm e2e` (Playwright's official image, tag must match the `@playwright/test`
+version). **Keep tests green and add a spec when you add a tool.**
 
 ## Deploy
 
