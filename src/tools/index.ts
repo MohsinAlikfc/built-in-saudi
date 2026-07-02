@@ -8,6 +8,7 @@ import { uuidGeneratorTool } from './uuid-generator/meta'
 import { wordCounterTool } from './word-counter/meta'
 import { base64Tool } from './base64/meta'
 import { dateDiffTool } from './date-diff/meta'
+import { zipInspectorTool } from './zip-inspector/meta'
 import { ImageIcon, PaletteIcon, RulerIcon, BracesIcon } from '../components/icons'
 
 /**
@@ -26,6 +27,7 @@ export const tools: Tool[] = [
   wordCounterTool,
   base64Tool,
   dateDiffTool,
+  zipInspectorTool,
 
   // ── Roadmap ──────────────────────────────────────────────
   {

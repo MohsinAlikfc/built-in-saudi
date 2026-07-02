@@ -680,3 +680,19 @@ html { -webkit-tap-highlight-color: transparent; }
 .qibla__actions { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
 .qibla__compass-on { display: inline-flex; align-items: center; padding: 0.5rem 0.9rem; color: var(--green-700); font-weight: 600; }
 .qibla__hint { font-size: 0.85rem; color: var(--ink-faint); text-align: center; max-width: 32ch; }
+
+/* ── Dropzone (file tools) ── */
+.dropzone { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 2rem 1rem; border: 2px dashed var(--line); border-radius: var(--r-md); background: var(--surface); text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.dropzone:hover { border-color: color-mix(in srgb, var(--green-500) 45%, transparent); background: color-mix(in srgb, var(--green-400) 6%, transparent); }
+.dropzone__input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.dropzone small { color: var(--ink-faint); font-size: 0.82rem; }
+
+/* Archive inspector list */
+.zip__list { display: flex; flex-direction: column; border: 1px solid var(--line-soft); border-radius: var(--r-md); overflow: hidden; }
+.zip__row { display: grid; grid-template-columns: 1fr auto auto; gap: 0.8rem; align-items: center; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--line-soft); font-size: 0.9rem; }
+.zip__row:last-child { border-bottom: none; }
+.zip__row.is-dir { color: var(--ink-soft); }
+.zip__name { font-family: var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zip__size { font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+.zip__meta { font-size: 0.76rem; color: var(--ink-faint); white-space: nowrap; }
+@media (max-width: 560px) { .zip__meta { display: none; } }
