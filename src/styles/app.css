@@ -750,3 +750,11 @@ html { -webkit-tap-highlight-color: transparent; }
 .lang__conf { font-size: 0.8rem; color: var(--ink-faint); font-family: var(--font-mono); }
 .lang__alts { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-top: 0.3rem; }
 .lang__alts-label { font-size: 0.76rem; color: var(--ink-faint); }
+
+/* Lorem ipsum */
+.lorem__controls { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.lorem__count { width: 5rem; text-align: center; }
+.lorem__opt { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--ink-soft); }
+.lorem__out { padding: 1.1rem; border: 1px solid var(--line-soft); border-radius: var(--r-md); background: var(--surface); line-height: 1.7; }
+.lorem__out p { margin: 0 0 0.9rem; }
+.lorem__out p:last-child { margin-bottom: 0; }

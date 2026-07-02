@@ -7,6 +7,7 @@ import { passwordGeneratorTool } from './password-generator/meta'
 import { uuidGeneratorTool } from './uuid-generator/meta'
 import { wordCounterTool } from './word-counter/meta'
 import { languageDetectTool } from './language-detect/meta'
+import { loremTool } from './lorem/meta'
 import { base64Tool } from './base64/meta'
 import { dateDiffTool } from './date-diff/meta'
 import { zipInspectorTool } from './zip-inspector/meta'
@@ -28,6 +29,7 @@ export const tools: Tool[] = [
   uuidGeneratorTool,
   wordCounterTool,
   languageDetectTool,
+  loremTool,
   base64Tool,
   dateDiffTool,
   zipInspectorTool,

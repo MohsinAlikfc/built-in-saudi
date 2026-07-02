@@ -190,6 +190,14 @@ export function GridIcon({ className }: P) {
   )
 }
 
+export function ParagraphIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h10" />
+    </svg>
+  )
+}
+
 export function GlobeIcon({ className }: P) {
   return (
     <svg {...base} className={className} aria-hidden="true">

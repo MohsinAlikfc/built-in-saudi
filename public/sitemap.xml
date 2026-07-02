@@ -207,4 +207,18 @@
     <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/tools/detect-language"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/tools/detect-language"/>
   </url>
+  <url>
+    <loc>https://built-in-saudi.com/en/tools/lorem-ipsum</loc>
+    <lastmod>2026-07-02</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/tools/lorem-ipsum"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/tools/lorem-ipsum"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/tools/lorem-ipsum"/>
+  </url>
+  <url>
+    <loc>https://built-in-saudi.com/ar/tools/lorem-ipsum</loc>
+    <lastmod>2026-07-02</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/tools/lorem-ipsum"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/tools/lorem-ipsum"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/tools/lorem-ipsum"/>
+  </url>
 </urlset>
