@@ -65,6 +65,14 @@ const STR = {
 
 interface Loc { lat: number; lng: number; tz: string; label: string }
 
+// Remember the chosen location across visits.
+const LOC_KEY = 'bis-prayer-loc'
+type SavedLoc = { mode: 'city'; cityId: string } | { mode: 'geo'; lat: number; lng: number; tz: string }
+function saveLoc(v: SavedLoc) { try { localStorage.setItem(LOC_KEY, JSON.stringify(v)) } catch { /* ignore */ } }
+function readLoc(): SavedLoc | null {
+  try { const r = localStorage.getItem(LOC_KEY); return r ? (JSON.parse(r) as SavedLoc) : null } catch { return null }
+}
+
 export default function PrayerTimesTool() {
   const { locale } = useLocale()
   const s = STR[locale]
@@ -90,17 +98,27 @@ export default function PrayerTimesTool() {
     return () => { window.clearInterval(id); document.removeEventListener('visibilitychange', onVisible) }
   }, [])
 
-  // Auto-request the visitor's location on load (falls back silently to the city).
+  // Restore the remembered location; otherwise auto-request it once (and save it).
   useEffect(() => {
+    const saved = readLoc()
+    if (saved) {
+      if (saved.mode === 'city') {
+        const c = CITIES.find((x) => x.id === saved.cityId)
+        if (c) { setCityId(c.id); setLoc({ lat: c.lat, lng: c.lng, tz: c.tz, label: locale === 'ar' ? c.ar : c.en }); return }
+      } else {
+        setCityId('')
+        setLoc({ lat: saved.lat, lng: saved.lng, tz: saved.tz, label: STR[locale].myLocation })
+        return
+      }
+    }
     if (!navigator.geolocation) return
     setLocating(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
         setCityId('')
-        setLoc({
-          lat: pos.coords.latitude, lng: pos.coords.longitude,
-          tz: Intl.DateTimeFormat().resolvedOptions().timeZone, label: STR[locale].myLocation,
-        })
+        setLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude, tz, label: STR[locale].myLocation })
+        saveLoc({ mode: 'geo', lat: pos.coords.latitude, lng: pos.coords.longitude, tz })
         setLocating(false)
       },
       () => setLocating(false), // keep the default city silently
@@ -155,6 +173,7 @@ export default function PrayerTimesTool() {
     setCityId(id)
     setGeoError('')
     setLoc({ lat: c.lat, lng: c.lng, tz: c.tz, label: locale === 'ar' ? c.ar : c.en })
+    saveLoc({ mode: 'city', cityId: id })
   }
 
   function useMyLocation() {
@@ -163,11 +182,10 @@ export default function PrayerTimesTool() {
     setLocating(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
         setCityId('')
-        setLoc({
-          lat: pos.coords.latitude, lng: pos.coords.longitude,
-          tz: Intl.DateTimeFormat().resolvedOptions().timeZone, label: s.myLocation,
-        })
+        setLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude, tz, label: s.myLocation })
+        saveLoc({ mode: 'geo', lat: pos.coords.latitude, lng: pos.coords.longitude, tz })
         setLocating(false)
       },
       () => { setGeoError(s.geoError); setLocating(false) },
