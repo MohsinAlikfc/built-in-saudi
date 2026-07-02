@@ -20,16 +20,15 @@ const NAMES = {
   ar: { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' },
 }
 const BODY = {
-  en: (p, m) => `${p} is in about ${m} min`,
-  ar: (p, m) => `${p} بعد حوالي ${m} دقيقة`,
+  en: (p) => `It’s time for ${p}`,
+  ar: (p) => `حان وقت ${p}`,
 }
 
 /** Next enabled prayer notification strictly after `from`, using Umm al-Qura. */
 function computeNext(lat, lng, prefs, from) {
   const params = adhan.CalculationMethod.UmmAlQura()
   const coords = new adhan.Coordinates(lat, lng)
-  const minutesBefore = Number(prefs.minutesBefore ?? 10)
-  const beforeMs = minutesBefore * 60000
+  const beforeMs = 0 // notify at the adhan time; Iqama is shown client-side
   const enabled = new Set(prefs.prayers && prefs.prayers.length ? prefs.prayers : ALL_PRAYERS)
   for (let d = 0; d < 2; d++) {
     const date = new Date(from.getTime() + d * 86400000)
@@ -38,7 +37,7 @@ function computeNext(lat, lng, prefs, from) {
       if (!enabled.has(name)) continue
       const prayerAt = pt[name]
       const notifyAt = new Date(prayerAt.getTime() - beforeMs)
-      if (notifyAt > from) return { name, notifyAt, prayerAt, minutesBefore }
+      if (notifyAt > from) return { name, notifyAt, prayerAt }
     }
   }
   return null
@@ -120,11 +119,10 @@ http('sendDue', async (req, res) => {
     if (s.enabled === false || !s.nextPrayer) { continue }
     const locale = s.locale === 'ar' ? 'ar' : 'en'
     const prayer = NAMES[locale][s.nextPrayer] || s.nextPrayer
-    const mins = Number((s.prefs && s.prefs.minutesBefore) ?? 10)
     try {
       await webpush.sendNotification(s.subscription, JSON.stringify({
         title: prayer,
-        body: BODY[locale](prayer, mins),
+        body: BODY[locale](prayer),
         tag: 'prayer',
         url: `${ORIGIN}/${locale}/tools/prayer-times`,
       }))

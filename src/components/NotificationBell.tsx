@@ -5,7 +5,7 @@ import { BellIcon } from './icons'
 // The current announcement. Set to `null` when there's nothing worth telling —
 // then NOTHING renders (no banner, no bell). Bump the id + update `t.notif`
 // (en.ts / ar.ts) whenever there's real news to re-announce it once.
-const ANNOUNCEMENT_ID: string | null = 'launch'
+const ANNOUNCEMENT_ID: string | null = null
 const KEY = `bis-notif-${ANNOUNCEMENT_ID}`
 
 function wasSeen(): boolean {

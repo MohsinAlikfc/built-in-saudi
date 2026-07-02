@@ -11,12 +11,21 @@ import { CITIES, DEFAULT_CITY } from './cities'
 type PrayerKey = 'fajr' | 'sunrise' | 'dhuhr' | 'asr' | 'maghrib' | 'isha'
 const PRAYER_ORDER: PrayerKey[] = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha']
 
+// Iqama (congregation) periods after the adhan, per common Saudi practice.
+type IqamaKey = 'fajr' | 'dhuhr' | 'asr' | 'maghrib' | 'isha'
+const IQAMA_MIN: Record<IqamaKey, number> = { fajr: 20, dhuhr: 15, asr: 15, maghrib: 10, isha: 15 }
+const IQAMA_KEYS: IqamaKey[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha']
+const POST_IQAMA_MIN = 15 // keep showing the prayer this long after iqama, then resume "next"
+
 const STR = {
   en: {
     location: 'Location', useMyLocation: 'Use my location', myLocation: 'My location',
     save: 'Save', cancel: 'Cancel', chooseCity: 'Choose a city',
     prayerTimes: 'Prayer times', method: 'Umm al-Qura method',
     next: 'Next prayer', inTime: (h: number, m: number) => `in ${h}h ${m}m`,
+    timeForPrayer: 'It’s time for prayer',
+    iqamaIn: (m: number) => `Iqama in ${m} min`,
+    iqamaNow: 'Iqama now', iqamaAfter: (m: number) => `Iqama −${m} min`,
     calcFor: 'Calculated for', locating: 'Finding your location…',
     today: 'Today', converter: 'Date converter',
     gregorian: 'Gregorian date', hijri: 'Hijri date',
@@ -42,6 +51,9 @@ const STR = {
     save: 'حفظ', cancel: 'إلغاء', chooseCity: 'اختر مدينة',
     prayerTimes: 'مواقيت الصلاة', method: 'طريقة أم القرى',
     next: 'الصلاة التالية', inTime: (h: number, m: number) => `بعد ${h} س ${m} د`,
+    timeForPrayer: 'حان وقت الصلاة',
+    iqamaIn: (m: number) => `الإقامة بعد ${m} د`,
+    iqamaNow: 'حان وقت الإقامة', iqamaAfter: (m: number) => `الإقامة −${m} د`,
     calcFor: 'محسوبة ليوم', locating: 'جارٍ تحديد موقعك…',
     today: 'اليوم', converter: 'محوّل التاريخ',
     gregorian: 'التاريخ الميلادي', hijri: 'التاريخ الهجري',
@@ -174,6 +186,35 @@ export default function PrayerTimesTool() {
     return { h: Math.floor(diff / 3600000), m: Math.floor((diff % 3600000) / 60000) }
   }, [nextInfo, now])
 
+  // Iqama window: from a prayer's adhan until iqama + POST_IQAMA_MIN. Inside it the
+  // hero shows "it's time for prayer" with an iqama countdown (negative after iqama).
+  const active = useMemo(() => {
+    const params = CalculationMethod.UmmAlQura()
+    const coords = new Coordinates(loc.lat, loc.lng)
+    let best: { key: IqamaKey; adhan: Date; iqama: Date } | null = null
+    for (const offset of [-1, 0]) {
+      const pt = new PrayerTimes(coords, new Date(now.getTime() + offset * 86400000), params)
+      for (const key of IQAMA_KEYS) {
+        const adhan = pt[key] as Date
+        const end = adhan.getTime() + (IQAMA_MIN[key] + POST_IQAMA_MIN) * 60000
+        if (now.getTime() >= adhan.getTime() && now.getTime() < end) {
+          if (!best || adhan > best.adhan) best = { key, adhan, iqama: new Date(adhan.getTime() + IQAMA_MIN[key] * 60000) }
+        }
+      }
+    }
+    return best
+  }, [now, loc.lat, loc.lng])
+
+  const iqamaText = useMemo(() => {
+    if (!active) return ''
+    const diff = active.iqama.getTime() - now.getTime()
+    if (Math.abs(diff) < 60000) return s.iqamaNow
+    const mins = Math.floor(Math.abs(diff) / 60000)
+    return diff > 0 ? s.iqamaIn(mins) : s.iqamaAfter(mins)
+  }, [active, now, s])
+
+  const highlightKey: PrayerKey = active ? active.key : nextInfo.key
+
   function pickCity(id: string) {
     const c = CITIES.find((x) => x.id === id)
     if (!c) return
@@ -196,7 +237,7 @@ export default function PrayerTimesTool() {
       } else {
         const r = await enablePush(
           { lat: loc.lat, lng: loc.lng, tz: loc.tz }, locale,
-          { minutesBefore: 10, prayers: ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] },
+          { minutesBefore: 0, prayers: ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] },
         )
         if (r.status === 'ok') setPushOn(true)
         else { setHelpDetail(r.detail || ''); setHelpOpen(true) } // blocked/unsupported/error → how-to + reason
@@ -234,32 +275,32 @@ export default function PrayerTimesTool() {
   return (
     <div className="pray">
       {/* Big next-prayer hero */}
-      <section className="pray__hero" data-testid="next-prayer">
-        <span className="pray__hero-label">{s.next}</span>
-        <span className="pray__hero-name">{s.prayers[nextInfo.key]}</span>
-        <span className="pray__hero-time">{timeFmt.format(nextInfo.time)}</span>
-        <span className="pray__hero-count">{s.inTime(countdown.h, countdown.m)}</span>
-        <button className={`pray__hero-alerts ${pushOn ? 'is-on' : ''}`} data-testid="pray-notify"
-          disabled={pushBusy} aria-pressed={!!pushOn} onClick={togglePush}>
-          <BellIcon /> {pushOn ? s.alertsOn : s.enableAlerts}
-        </button>
+      <section className={`pray__hero ${active ? 'is-active' : ''}`} data-testid="next-prayer">
+        <span className="pray__hero-label">{active ? s.timeForPrayer : s.next}</span>
+        <span className="pray__hero-name">{s.prayers[active ? active.key : nextInfo.key]}</span>
+        <span className="pray__hero-time">{timeFmt.format(active ? active.adhan : nextInfo.time)}</span>
+        <span className="pray__hero-count" data-testid="hero-count">
+          {active ? iqamaText : s.inTime(countdown.h, countdown.m)}
+        </span>
+        <div className="pray__hero-actions">
+          <button className="pray__hero-pill" data-testid="loc-chip"
+            onClick={() => { setPendingCity(cityId || DEFAULT_CITY.id); setShowLocPicker(true) }}>
+            <LocPin /> <span className="pray__hero-pill-name">{loc.label}</span>
+            <span className="pray__loc-caret" aria-hidden="true">▾</span>
+          </button>
+          <button className={`pray__hero-pill pray__hero-alerts ${pushOn ? 'is-on' : ''}`} data-testid="pray-notify"
+            disabled={pushBusy} aria-pressed={!!pushOn} onClick={togglePush}>
+            <BellIcon /> {pushOn ? s.alertsOn : s.enableAlerts}
+          </button>
+        </div>
       </section>
-
-      {/* Location — a chip that opens the picker sheet */}
-      <button className="pray__loc-chip" data-testid="loc-chip"
-        onClick={() => { setPendingCity(cityId || DEFAULT_CITY.id); setShowLocPicker(true) }}>
-        <LocPin />
-        <span className="pray__loc-name">{loc.label}</span>
-        <span className="pray__loc-caret" aria-hidden="true">▾</span>
-      </button>
       {geoError && <p className="pray__geoerr">{geoError}</p>}
-      {pushOn && <p className="pray__notify-note">{s.notifyNote}</p>}
 
       {/* Prayer times — flush, no card/well (nativization) */}
       {locating && <p className="pray__locating" data-testid="pray-locating">{s.locating}</p>}
       <ul className={`pray__times ${locating ? 'is-locating' : ''}`}>
         {PRAYER_ORDER.map((k) => {
-          const isNext = k === nextInfo.key
+          const isNext = k === highlightKey
           return (
             <li key={k} className={`pray__row ${isNext ? 'is-next' : ''}`}>
               <span className="pray__name">{s.prayers[k]}</span>
@@ -272,8 +313,6 @@ export default function PrayerTimesTool() {
         })}
       </ul>
       <p className="pray__method-note">{s.method}</p>
-
-      <p className="qr__privacy"><span aria-hidden="true">🔒</span> {s.privacy}</p>
 
       {helpOpen && (
         <AlertsHelpDialog failedMsg={s.alertsFailed} help={alertsHelp(locale)} detail={helpDetail}

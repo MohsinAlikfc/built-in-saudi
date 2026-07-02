@@ -10,7 +10,6 @@ export function Footer() {
       <SaduDivider className="sadu--footer" />
       <div className="wrap site-footer__inner">
         <div className="site-footer__col">
-          <p className="site-footer__ethos">{t.footer.ethos}</p>
           <p className="site-footer__made" lang="ar">
             صُنع بعناية في المملكة العربية السعودية
           </p>

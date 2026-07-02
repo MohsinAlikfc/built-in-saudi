@@ -43,7 +43,6 @@ export function Header() {
         </Link>
 
         <nav className="site-nav" aria-label="Primary">
-          <AppLauncher />
           <Link
             to={swapLocaleInPath(location.pathname, other)}
             className="site-nav__link lang-toggle"
@@ -53,6 +52,7 @@ export function Header() {
           >
             {t.switchLanguage}
           </Link>
+          <AppLauncher />
         </nav>
       </div>
     </header>
