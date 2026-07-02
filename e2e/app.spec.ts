@@ -123,6 +123,13 @@ test.describe('tools', () => {
     await expect(page.getByText(/never uploaded|never leaves/i)).toBeVisible()
   })
 
+  test('image converter: renders the dropzone', async ({ page }) => {
+    await page.goto('/en/tools/image-format-converter')
+    await expect(page.getByTestId('image-format-converter')).toBeVisible()
+    await expect(page.getByTestId('ifc-drop')).toBeVisible()
+    await expect(page.getByText(/never uploaded|never leaves/i)).toBeVisible()
+  })
+
   test('hash generator: SHA-256 of "abc" matches the known vector', async ({ page }) => {
     await page.goto('/en/tools/hash-generator')
     await page.getByTestId('hash-algo-SHA-256').click()

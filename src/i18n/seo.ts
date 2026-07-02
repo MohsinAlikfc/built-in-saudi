@@ -25,6 +25,11 @@ export interface ToolSeo {
 /** Live (routable) tools only — used to prerender /<locale>/tools/<id>/. */
 export const liveToolSeo: ToolSeo[] = [
   {
+    id: 'image-format-converter',
+    en: { name: 'Image Converter', description: 'Convert images between PNG, JPG and WebP in your browser — quality for lossy formats, background fill when flattening a transparent PNG to JPG. Never uploaded.' },
+    ar: { name: 'محوّل صيغ الصور', description: 'حوّل الصور بين PNG وJPG وWebP داخل متصفحك — جودة للصيغ ذات الفقد، ولون خلفية عند تسطيح PNG الشفاف إلى JPG. لا تُرفع أبدًا.' },
+  },
+  {
     id: 'image-compressor',
     en: { name: 'Image Compressor', description: 'Compress and resize JPG/PNG/WebP images in your browser — quality + max-width, before→after size and % saved. The image is never uploaded.' },
     ar: { name: 'ضاغط الصور', description: 'اضغط الصور وغيّر حجمها داخل متصفحك — الجودة وأقصى عرض، والحجم قبل وبعد ونسبة التوفير. لا تُرفع الصورة أبدًا.' },

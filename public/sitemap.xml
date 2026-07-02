@@ -403,4 +403,18 @@
     <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/tools/image-compressor"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/tools/image-compressor"/>
   </url>
+  <url>
+    <loc>https://built-in-saudi.com/en/tools/image-format-converter</loc>
+    <lastmod>2026-07-02</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/tools/image-format-converter"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/tools/image-format-converter"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/tools/image-format-converter"/>
+  </url>
+  <url>
+    <loc>https://built-in-saudi.com/ar/tools/image-format-converter</loc>
+    <lastmod>2026-07-02</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/tools/image-format-converter"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/tools/image-format-converter"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/tools/image-format-converter"/>
+  </url>
 </urlset>
