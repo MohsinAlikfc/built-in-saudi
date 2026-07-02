@@ -1,5 +1,6 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { execSync } from 'node:child_process'
@@ -126,7 +127,7 @@ function prerenderPlugin(): Plugin {
 
 // Custom domain serves from root, so base is '/'.
 export default defineConfig({
-  plugins: [react(), prerenderPlugin()],
+  plugins: [tailwindcss(), react(), prerenderPlugin()],
   base: '/',
   build: { target: 'es2020', sourcemap: false },
 })

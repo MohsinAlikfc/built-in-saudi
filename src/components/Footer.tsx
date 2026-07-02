@@ -29,9 +29,10 @@ export function Footer() {
           </a>
         </nav>
       </div>
-      <div className="wrap site-footer__base">
+      {/* Pilot: migrated to Tailwind utilities (brand tokens mapped in tailwind.css). */}
+      <div className="wrap flex items-center gap-[0.6rem] mt-[1.8rem] text-[0.82rem] text-ink-faint font-mono">
         <span>© {year} Built in Saudi</span>
-        <span className="site-footer__dot">·</span>
+        <span className="opacity-50">·</span>
         <span>built-in-saudi.com</span>
       </div>
     </footer>

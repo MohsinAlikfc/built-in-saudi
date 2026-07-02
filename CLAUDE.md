@@ -78,6 +78,13 @@ Warm Najdi-craft editorial aesthetic. Tokens in `src/styles/theme.css`
 - **Personalisation over preferences** — remember choices in `localStorage` (e.g. prayer location `bis-prayer-loc`, seen-tools) rather than settings pages.
 - Tools may **diverge in look/personality**; the shared chassis (Layout, tokens, registry) stays modular.
 
+**Tailwind (incremental migration, #33):** Tailwind v4 (`@tailwindcss/vite`,
+**utilities-only, no preflight**) coexists with the hand-written CSS in
+`src/styles/tailwind.css`, with the brand tokens mapped — so `bg-green-600`,
+`text-ink-faint`, `rounded-md`, `font-display` etc. use the design system.
+Migrate **tool-by-tool** to utilities (the Footer base line is the pilot); don't
+rip out `theme.css`/`app.css` wholesale. Keep the e2e suite green after each move.
+
 ## Conventions
 
 - TypeScript strict; run `npm run typecheck` before pushing.

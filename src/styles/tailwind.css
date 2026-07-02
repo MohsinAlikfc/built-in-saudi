@@ -1,0 +1,31 @@
+/* Tailwind v4 — utilities only (NO preflight) so it coexists with the existing
+   hand-written CSS without resetting anything. Brand design tokens are mapped so
+   utilities like `bg-green-600`, `text-sand-100`, `rounded-md`, `font-display`
+   use the design system. Migrate components to these utilities tool-by-tool. */
+@layer theme, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@theme {
+  --color-sand-50: #faf7f0;
+  --color-sand-100: #f4ecdd;
+  --color-sand-200: #e9dcc4;
+  --color-sand-300: #dcc9a6;
+  --color-ink: #12211b;
+  --color-ink-soft: #40514a;
+  --color-ink-faint: #6b7a72;
+  --color-green-700: #0b3d2e;
+  --color-green-600: #0e5a3f;
+  --color-green-500: #127a54;
+  --color-green-400: #2f9b70;
+  --color-gold-500: #c08a2d;
+  --color-gold-400: #d6a33f;
+
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+}
