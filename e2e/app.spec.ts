@@ -20,12 +20,15 @@ test.describe('home', () => {
     expect(await cards.count()).toBeLessThan(all)       // and the list is filtered down
   })
 
-  test('the app-launcher lists apps and navigates', async ({ page }) => {
+  test('the app-launcher is hidden on home, opens + searches on tool pages', async ({ page }) => {
     await page.goto('/en')
+    await expect(page.getByTestId('app-launcher')).toHaveCount(0) // home IS the menu
+    await page.goto('/en/tools/qr-code')
     await page.getByTestId('app-launcher').click()
     await expect(page.getByTestId('app-launcher-panel')).toBeVisible()
-    await page.getByTestId('launcher-qr-code').click()
-    await expect(page).toHaveURL(/\/tools\/qr-code$/)
+    await page.getByTestId('launcher-search').fill('uuid')
+    await page.getByTestId('launcher-uuid-generator').click()
+    await expect(page).toHaveURL(/\/tools\/uuid-generator$/)
   })
 })
 

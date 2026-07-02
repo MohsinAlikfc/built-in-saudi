@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { useLocale, swapLocaleInPath, setStoredLocale, localizeTool } from '../i18n'
+import { useLocale, localePath, swapLocaleInPath, setStoredLocale, localizeTool } from '../i18n'
 import { getTool } from '../tools'
 import { AppLauncher } from './AppLauncher'
 
@@ -8,18 +8,23 @@ export function Header() {
   const location = useLocation()
   const other = locale === 'ar' ? 'en' : 'ar'
 
-  // App-bar title: the current tool's name (the logo was removed — the launcher
-  // opens the app menu, which is the same as the home page).
+  // The home page *is* the app menu, so the launcher is hidden there. On every
+  // other page the launcher opens the menu, followed by the name: the current
+  // tool's name (app-bar) on a tool page, else the site name.
+  const isHome = /^\/(en|ar)\/?$/.test(location.pathname)
   const match = location.pathname.match(/\/tools\/([^/]+)/)
   const currentTool = match ? getTool(match[1]) : null
   const context = currentTool && currentTool.component ? localizeTool(currentTool, locale).name : ''
+  const siteName = locale === 'ar' ? 'بُنِيَ في السعودية' : 'Built in Saudi'
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-[10px] backdrop-saturate-[1.4] bg-[color-mix(in_srgb,var(--sand-50)_82%,transparent)] border-b border-[color:var(--line-soft)]">
       <div className="wrap flex items-center justify-between h-[68px] max-[560px]:h-[60px]">
         <div className="flex items-center gap-3 min-w-0">
-          <AppLauncher />
-          {context && <span className="font-display font-semibold text-[1.16rem] text-green-700 truncate">{context}</span>}
+          {!isHome && <AppLauncher />}
+          <Link to={localePath(locale)} className="font-display font-semibold text-[1.16rem] text-green-700 truncate no-underline" aria-label={siteName}>
+            {context || siteName}
+          </Link>
         </div>
 
         <Link
