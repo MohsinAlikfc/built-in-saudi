@@ -123,12 +123,12 @@ export default function ZipInspectorTool() {
           {file.entries === null && <p className="pray__geoerr">{s.notZip}</p>}
 
           {file.entries && (
-            <div className="zip__list" data-testid="zip-list">
+            <div className="flex flex-col border border-[color:var(--line-soft)] rounded-md overflow-hidden" data-testid="zip-list">
               {file.entries.map((e, i) => (
-                <div key={i} className={`zip__row ${e.dir ? 'is-dir' : ''}`}>
-                  <span className="zip__name" title={e.name}>{e.dir ? '📁 ' : ''}{e.name}</span>
-                  <span className="zip__size">{e.dir ? s.dir : fmtBytes(e.size)}</span>
-                  <span className="zip__meta">{e.date ? dateFmt.format(e.date) : ''}{e.method === 0 && !e.dir ? ` · ${s.stored}` : ''}</span>
+                <div key={i} className={`grid grid-cols-[1fr_auto_auto] gap-[0.8rem] items-center px-[0.8rem] py-[0.5rem] border-b border-[color:var(--line-soft)] last:border-b-0 text-[0.9rem] ${e.dir ? 'text-ink-soft' : ''}`}>
+                  <span className="font-mono overflow-hidden text-ellipsis whitespace-nowrap" title={e.name}>{e.dir ? '📁 ' : ''}{e.name}</span>
+                  <span className="[font-variant-numeric:tabular-nums] text-ink-soft">{e.dir ? s.dir : fmtBytes(e.size)}</span>
+                  <span className="text-[0.76rem] text-ink-faint whitespace-nowrap">{e.date ? dateFmt.format(e.date) : ''}{e.method === 0 && !e.dir ? ` · ${s.stored}` : ''}</span>
                 </div>
               ))}
             </div>

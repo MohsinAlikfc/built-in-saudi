@@ -76,14 +76,14 @@ export default function LoremTool() {
 
   return (
     <div className="stack" data-testid="lorem" dir={flavor === 'arabic' ? 'rtl' : 'ltr'}>
-      <div className="lorem__controls" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+      <div className="flex flex-wrap gap-[0.6rem] items-center" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
         <div className="seg" role="group" aria-label={s.amount}>
           {(['paragraphs', 'sentences', 'words'] as Unit[]).map((u) => (
             <button key={u} className={`seg__btn ${unit === u ? 'is-active' : ''}`} aria-pressed={unit === u}
               data-testid={`lorem-unit-${u}`} onClick={() => setUnit(u)}>{s[u]}</button>
           ))}
         </div>
-        <input className="input lorem__count" type="number" min={1} max={100} value={count}
+        <input className="input w-20 text-center" type="number" min={1} max={100} value={count}
           data-testid="lorem-count" aria-label={s.amount} onChange={(e) => setCount(Math.min(100, Math.max(1, Number(e.target.value))))} />
         <div className="seg" role="group" aria-label={s.flavor}>
           {(['latin', 'arabic'] as Flavor[]).map((f) => (
@@ -94,7 +94,7 @@ export default function LoremTool() {
       </div>
 
       {flavor === 'latin' && (
-        <label className="lorem__opt">
+        <label className="flex items-center gap-[0.5rem] text-[0.9rem] text-ink-soft">
           <input type="checkbox" className="pray__check" checked={startLorem} data-testid="lorem-start"
             onChange={(e) => setStartLorem(e.target.checked)} /> {s.startLorem}
         </label>
@@ -105,7 +105,7 @@ export default function LoremTool() {
         <button className="btn btn--primary" data-testid="lorem-copy" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</button>
       </div>
 
-      <div className="lorem__out" data-testid="lorem-out">
+      <div className="p-[1.1rem] border border-[color:var(--line-soft)] rounded-md bg-[var(--surface)] leading-[1.7] [&_p]:mb-[0.9rem] [&_p:last-child]:mb-0" data-testid="lorem-out">
         {text.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
       </div>
     </div>

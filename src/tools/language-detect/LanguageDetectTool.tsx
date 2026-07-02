@@ -99,20 +99,20 @@ export default function LanguageDetectTool() {
 
   return (
     <div className="stack" data-testid="langdetect">
-      <textarea className="input lang__input" data-testid="lang-input" rows={5}
+      <textarea className="input w-full resize-y min-h-[120px] text-[1rem]" data-testid="lang-input" rows={5}
         placeholder={s.placeholder} value={text} onChange={(e) => setText(e.target.value)} dir="auto" />
 
       {cands.length > 0 ? (
-        <div className="lang__result" data-testid="lang-result">
-          <div className="lang__top">
-            <span className="lang__name" data-testid="lang-name">{cands[0].lang}</span>
-            <span className="lang__native">{NATIVE[cands[0].lang] || ''}</span>
+        <div className="flex flex-col gap-[0.5rem] p-[1.1rem] border border-[color:var(--line-soft)] rounded-md bg-[var(--surface)]" data-testid="lang-result">
+          <div className="flex items-baseline gap-[0.6rem] flex-wrap">
+            <span className="text-[1.6rem] font-bold text-green-700" data-testid="lang-name">{cands[0].lang}</span>
+            <span className="text-ink-soft text-[1.1rem]">{NATIVE[cands[0].lang] || ''}</span>
           </div>
-          <div className="lang__bar"><span style={{ width: `${topPct}%` }} /></div>
-          <span className="lang__conf">{s.confidence}: {topPct}%</span>
+          <div className="h-[8px] rounded-full bg-sand-200 overflow-hidden [&_span]:block [&_span]:h-full [&_span]:bg-green-600 [&_span]:rounded-full [&_span]:transition-[width] [&_span]:duration-200"><span style={{ width: `${topPct}%` }} /></div>
+          <span className="text-[0.8rem] text-ink-faint font-body">{s.confidence}: {topPct}%</span>
           {cands.length > 1 && (
-            <div className="lang__alts">
-              <span className="lang__alts-label">{s.alternatives}</span>
+            <div className="flex flex-wrap gap-[0.4rem] items-center mt-[0.3rem]">
+              <span className="text-[0.76rem] text-ink-faint">{s.alternatives}</span>
               {cands.slice(1, 4).map((c) => (
                 <span key={c.lang} className="pill">{c.lang} · {NATIVE[c.lang] || ''}</span>
               ))}

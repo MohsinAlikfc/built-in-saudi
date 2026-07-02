@@ -100,44 +100,44 @@ export default function QiblaTool() {
   const needle = bearing == null ? 0 : heading == null ? bearing : (bearing - heading + 360) % 360
 
   return (
-    <div className="qibla" data-testid="qibla">
+    <div className="flex flex-col items-center gap-[1.2rem] pt-[0.5rem]" data-testid="qibla">
       {error && <p className="pray__geoerr" data-testid="qibla-error">{error}</p>}
       {locating && <p className="pray__locating">{s.locating}</p>}
 
-      <div className="qibla__dial" role="img"
+      <div className="relative w-[min(78vw,300px)] aspect-square rounded-full border-2 border-[color:var(--line)] bg-[var(--surface)] shadow-[var(--shadow-sm)]" role="img"
         aria-label={bearing != null ? `${s.bearing} ${Math.round(bearing)}° ${s.fromNorth}` : s.bearing}>
-        <div className="qibla__rose" style={{ transform: heading != null ? `rotate(${-heading}deg)` : undefined }}>
-          <span className="qibla__n">N</span><span className="qibla__e">E</span>
-          <span className="qibla__s">S</span><span className="qibla__w">W</span>
+        <div className="absolute inset-0 transition-transform duration-150" style={{ transform: heading != null ? `rotate(${-heading}deg)` : undefined }}>
+          <span className="absolute font-mono text-[0.8rem] font-bold top-[8px] left-1/2 -translate-x-1/2 text-green-600">N</span><span className="absolute font-mono text-[0.8rem] font-bold text-ink-faint right-[10px] top-1/2 -translate-y-1/2">E</span>
+          <span className="absolute font-mono text-[0.8rem] font-bold text-ink-faint bottom-[8px] left-1/2 -translate-x-1/2">S</span><span className="absolute font-mono text-[0.8rem] font-bold text-ink-faint left-[10px] top-1/2 -translate-y-1/2">W</span>
         </div>
-        <div className="qibla__needle" data-testid="qibla-needle" style={{ transform: `rotate(${needle}deg)` }}>
-          <span className="qibla__kaaba" aria-hidden="true">🕋</span>
+        <div className="absolute inset-0 transition-transform duration-150 before:content-[''] before:absolute before:top-[14%] before:left-1/2 before:w-[3px] before:h-[40%] before:bg-green-600 before:-translate-x-1/2 before:origin-bottom before:rounded-[3px]" data-testid="qibla-needle" style={{ transform: `rotate(${needle}deg)` }}>
+          <span className="absolute top-[5%] left-1/2 -translate-x-1/2 text-[1.7rem] leading-none" aria-hidden="true">🕋</span>
         </div>
       </div>
 
       {bearing != null && (
-        <div className="qibla__readout">
-          <div className="qibla__stat">
-            <span className="qibla__stat-num" data-testid="qibla-bearing">{Math.round(bearing)}°</span>
-            <span className="qibla__stat-label">{s.bearing} · {s.fromNorth}</span>
+        <div className="flex gap-[2.2rem]">
+          <div className="flex flex-col items-center">
+            <span className="font-mono text-[1.8rem] font-bold text-green-700" data-testid="qibla-bearing">{Math.round(bearing)}°</span>
+            <span className="text-[0.76rem] text-ink-faint text-center">{s.bearing} · {s.fromNorth}</span>
           </div>
-          <div className="qibla__stat">
-            <span className="qibla__stat-num" data-testid="qibla-distance">{Math.round(distance!).toLocaleString()}</span>
-            <span className="qibla__stat-label">{s.distance} ({s.km})</span>
+          <div className="flex flex-col items-center">
+            <span className="font-mono text-[1.8rem] font-bold text-green-700" data-testid="qibla-distance">{Math.round(distance!).toLocaleString()}</span>
+            <span className="text-[0.76rem] text-ink-faint text-center">{s.distance} ({s.km})</span>
           </div>
         </div>
       )}
-      {place && <p className="qibla__place" data-testid="qibla-place">{place}</p>}
+      {place && <p className="text-ink-soft text-[0.95rem]" data-testid="qibla-place">{place}</p>}
 
-      <div className="qibla__actions">
+      <div className="flex gap-[0.6rem] flex-wrap justify-center">
         {!compassOn ? (
           <button className="btn btn--primary" data-testid="qibla-compass" onClick={enableCompass}>{s.enableCompass}</button>
         ) : (
-          <span className="qibla__compass-on">{s.compassOn}</span>
+          <span className="inline-flex items-center px-[0.9rem] py-[0.5rem] text-green-700 font-semibold">{s.compassOn}</span>
         )}
         <button className="btn" data-testid="qibla-relocate" onClick={locate}>{s.locate}</button>
       </div>
-      <p className="qibla__hint">{compassOn ? s.hint : s.calibrate}</p>
+      <p className="text-[0.85rem] text-ink-faint text-center max-w-[32ch]">{compassOn ? s.hint : s.calibrate}</p>
     </div>
   )
 }

@@ -243,11 +243,11 @@ export default function MetadataTool() {
       </label>
 
       {groups && groups.map((grp, i) => (
-        <section key={i} className="meta__group">
-          <h3 className="meta__group-title">{grp.title}</h3>
-          <dl className="meta__list">
+        <section key={i} className="mb-[0.4rem]">
+          <h3 className="font-body text-[0.7rem] uppercase tracking-[0.07em] text-ink-faint mb-[0.4rem]">{grp.title}</h3>
+          <dl className="flex flex-col border border-[color:var(--line-soft)] rounded-md overflow-hidden">
             {grp.rows.map((r, j) => (
-              <div key={j} className="meta__row">
+              <div key={j} className="grid grid-cols-[minmax(0,38%)_1fr] gap-4 px-[0.85rem] py-[0.55rem] border-b border-[color:var(--line-soft)] last:border-b-0 text-[0.9rem] [&_dt]:text-ink-soft [&_dt]:m-0 [&_dd]:m-0 [&_dd]:font-mono [&_dd]:break-words">
                 <dt>{r.label}</dt>
                 <dd>{r.href ? <a href={r.href} target="_blank" rel="noreferrer noopener">{r.value}</a> : r.value}</dd>
               </div>
