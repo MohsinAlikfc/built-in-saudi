@@ -85,6 +85,11 @@ interface Loc { lat: number; lng: number; tz: string; label: string }
 
 // Remember the chosen location across visits.
 const LOC_KEY = 'bis-prayer-loc'
+
+// City name for the push body ("…لمدينة الرياض"): first segment of the localized
+// "City, Country" label, unless it's still the "my location" placeholder.
+const cityOf = (label: string, placeholder: string): string | undefined =>
+  label && label !== placeholder ? label.split(/[،,]/)[0].trim() : undefined
 type SavedLoc =
   | { mode: 'city'; cityId: string }
   | { mode: 'geo'; lat: number; lng: number; tz: string; label?: string }
@@ -308,7 +313,7 @@ export default function PrayerTimesTool() {
     setPushBusy(true)
     try {
       const r = await enablePush(
-        { lat: loc.lat, lng: loc.lng, tz: loc.tz }, locale,
+        { lat: loc.lat, lng: loc.lng, tz: loc.tz, place: cityOf(loc.label, STR[locale].myLocation) }, locale,
         { minutesBefore: prefs.minutesBefore, iqamaAlert: prefs.iqamaAlert, prayers: DAILY },
       )
       if (r.status === 'ok') setPushOn(true)
@@ -320,7 +325,7 @@ export default function PrayerTimesTool() {
     setPrefs(np); savePrefs(np)
     setPushBusy(true)
     try {
-      await enablePush({ lat: loc.lat, lng: loc.lng, tz: loc.tz }, locale,
+      await enablePush({ lat: loc.lat, lng: loc.lng, tz: loc.tz, place: cityOf(loc.label, STR[locale].myLocation) }, locale,
         { minutesBefore: np.minutesBefore, iqamaAlert: np.iqamaAlert, prayers: DAILY })
     } finally { setPushBusy(false) }
   }

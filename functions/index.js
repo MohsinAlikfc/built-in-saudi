@@ -19,13 +19,27 @@ const NAMES = {
   en: { fajr: 'Fajr', dhuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha' },
   ar: { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' },
 }
-const BODY = {
-  en: (p, m) => (m > 0 ? `${p} in ${m} min` : `It’s time for ${p}`),
-  ar: (p, m) => (m > 0 ? `${p} بعد ${m} د` : `حان وقت ${p}`),
-}
-const IQAMA_BODY = {
-  en: (p) => `Iqama — ${p}`,
-  ar: (p) => `الإقامة — ${p}`,
+// Notification wording, in the style of Saudi Quran Radio:
+//   title: "دخل وقت صلاة العشاء"  ·  body: "حسب التوقيت لمدينة الرياض"
+// `place` is the localized city name (may be absent → generic body).
+function compose(locale, prayer, kind, mins, place) {
+  const ar = locale === 'ar'
+  const byCity = ar
+    ? (place ? `حسب التوقيت لمدينة ${place}` : 'حسب توقيتك')
+    : (place ? `Based on ${place} timing` : 'Based on your location')
+  if (kind === 'iqama') {
+    return ar
+      ? { title: `إقامة صلاة ${prayer}`, body: byCity }
+      : { title: `Iqama · ${prayer}`, body: byCity }
+  }
+  if (mins > 0) {
+    return ar
+      ? { title: `صلاة ${prayer} بعد ${mins} دقيقة`, body: byCity }
+      : { title: `${prayer} in ${mins} min`, body: byCity }
+  }
+  return ar
+    ? { title: `دخل وقت صلاة ${prayer}`, body: byCity }
+    : { title: `It’s time for ${prayer}`, body: byCity }
 }
 // Iqama (congregation) minutes after the adhan, per common Saudi practice.
 const IQAMA_MIN = { fajr: 20, dhuhr: 15, asr: 15, maghrib: 10, isha: 15 }
@@ -84,7 +98,7 @@ http('subscribe', async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(204).send('')
   if (req.method !== 'POST') return res.status(405).send('POST only')
   try {
-    const { subscription, lat, lng, tz, locale, prefs } = req.body || {}
+    const { subscription, lat, lng, tz, place, locale, prefs } = req.body || {}
     if (!subscription || !subscription.endpoint) return res.status(400).json({ error: 'missing subscription' })
     const p = {
       minutesBefore: Number((prefs && prefs.minutesBefore) ?? 0),
@@ -97,6 +111,7 @@ http('subscribe', async (req, res) => {
       subscription,
       lat: Number(lat), lng: Number(lng),
       tz: tz || 'Asia/Riyadh',
+      place: typeof place === 'string' && place.trim() ? place.trim().slice(0, 60) : null,
       locale: locale === 'ar' ? 'ar' : 'en',
       prefs: p,
       enabled: true,
@@ -176,10 +191,10 @@ http('sendDue', async (req, res) => {
     const prayer = NAMES[locale][s.nextPrayer] || s.nextPrayer
     const kind = s.nextKind === 'iqama' ? 'iqama' : 'adhan'
     const mins = Number((s.prefs && s.prefs.minutesBefore) ?? 0)
-    const body = kind === 'iqama' ? IQAMA_BODY[locale](prayer) : BODY[locale](prayer, mins)
+    const { title, body } = compose(locale, prayer, kind, mins, s.place)
     try {
       await webpush.sendNotification(s.subscription, JSON.stringify({
-        title: prayer, body, tag: 'prayer',
+        title, body, tag: 'prayer',
         url: `${ORIGIN}/${locale}/tools/prayer-times`,
       }))
       sent++

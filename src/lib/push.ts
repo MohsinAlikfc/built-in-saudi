@@ -3,7 +3,7 @@ const VAPID_PUBLIC = 'BEaG67kHuMGzXfGGUGh7fmk-Bl-8icOr3UgKtxLnbfkPZjACFLVcZxAeLo
 const FN = 'https://us-central1-blitz-ksa.cloudfunctions.net'
 
 export interface PushPrefs { minutesBefore: number; prayers: string[]; iqamaAlert?: boolean }
-export interface PushLoc { lat: number; lng: number; tz: string }
+export interface PushLoc { lat: number; lng: number; tz: string; place?: string }
 
 function urlBase64ToUint8Array(base64: string): Uint8Array {
   const padding = '='.repeat((4 - (base64.length % 4)) % 4)
@@ -66,7 +66,7 @@ export async function enablePush(loc: PushLoc, locale: string, prefs: PushPrefs)
     const res = await fetch(`${FN}/subscribe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subscription: sub, lat: loc.lat, lng: loc.lng, tz: loc.tz, locale, prefs }),
+      body: JSON.stringify({ subscription: sub, lat: loc.lat, lng: loc.lng, tz: loc.tz, place: loc.place, locale, prefs }),
     })
     if (!res.ok) return { status: 'error', detail: `server HTTP ${res.status}` }
   } catch (e) {
