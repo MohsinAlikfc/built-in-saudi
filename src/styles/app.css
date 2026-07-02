@@ -531,3 +531,10 @@ html { -webkit-tap-highlight-color: transparent; }
 .notif-bell { transition: transform 0.28s ease, opacity 0.28s ease, box-shadow 0.2s ease; }
 .notif-bell.is-hidden { opacity: 0; transform: translateY(140%); pointer-events: none; }
 .notif-bell.is-revealed { opacity: 1; transform: none; }
+
+/* Prayer notifications opt-in (#27) */
+.pray__notify { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+.pray__notify-btn { display: inline-flex; align-items: center; gap: 0.5rem; align-self: flex-start; }
+.pray__notify-btn svg { width: 18px; height: 18px; }
+.pray__notify-btn.is-on { background: var(--green-600); color: var(--primary-ink); border-color: var(--green-700); }
+.pray__notify-note { font-size: 0.8rem; color: var(--ink-faint); max-width: 42ch; }

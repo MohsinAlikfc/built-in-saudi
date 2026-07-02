@@ -132,6 +132,12 @@ from the URL) to make that a config flip, not a rewrite. Trend home toward a
   Measurement ID **`G-BPWYMJ8D8R`** (in `index.html`). Timezone Asia/Riyadh, SAR.
 - **Search:** Google Search Console (domain property, DNS-verified) and Bing
   Webmaster Tools (DNS-verified); both have the sitemap submitted.
+- **Prayer alert backend** (`functions/`, our first backend): Cloud Functions gen2
+  (`subscribe`, `unsubscribe`, `send-due`) in `us-central1`, Firestore collection
+  `prayerSubs`, Cloud Scheduler job `prayer-send` (every minute). Web Push via VAPID
+  (`web-push`); server-side prayer times via `adhan` (**ESM only** — its CJS build is
+  broken). Public VAPID key lives in `src/lib/push.ts`; private key + `SENDER_SECRET`
+  are function env vars only (never committed). See [`functions/README.md`](./functions/README.md).
 
 ## Roadmap
 

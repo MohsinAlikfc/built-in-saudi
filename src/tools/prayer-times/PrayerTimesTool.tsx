@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Coordinates, CalculationMethod, PrayerTimes, Prayer } from 'adhan'
 import { useLocale } from '../../i18n'
+import { BellIcon } from '../../components/icons'
+import { pushSupported, currentSubscription, enablePush, disablePush } from '../../lib/push'
 import { CITIES, DEFAULT_CITY } from './cities'
 import {
   gregorianToHijri, hijriToGregorian, formatHijri, eventsForHijriYear,
@@ -30,6 +32,11 @@ const STR = {
     upcoming: 'Islamic dates',
     privacy: 'Computed locally — your location is never uploaded.',
     geoError: 'Couldn’t get your location — please pick a city instead.',
+    notify: 'Notify me before prayers', notifyOn: 'Notifications on',
+    notifyNote: 'To send alerts, your location is stored on our server. Turn off anytime.',
+    notifyDenied: 'Notifications are blocked — enable them in your browser settings.',
+    notifyUnsupported: 'Notifications aren’t supported on this browser.',
+    notifyIos: 'On iPhone: install the app first (Share → Add to Home Screen).',
     prayers: { fajr: 'Fajr', sunrise: 'Sunrise', dhuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha' },
     events: {
       ramadan: 'Ramadan', eidFitr: 'Eid al-Fitr', eidAdha: 'Eid al-Adha',
@@ -55,6 +62,11 @@ const STR = {
     upcoming: 'المناسبات الإسلامية',
     privacy: 'يُحسب محليًا — لا يُرفع موقعك أبدًا.',
     geoError: 'تعذّر تحديد موقعك — يرجى اختيار مدينة بدلاً من ذلك.',
+    notify: 'نبّهني قبل الصلوات', notifyOn: 'الإشعارات مفعّلة',
+    notifyNote: 'لإرسال التنبيهات يُحفظ موقعك على خادمنا. يمكنك الإيقاف في أي وقت.',
+    notifyDenied: 'الإشعارات محظورة — فعّلها من إعدادات المتصفح.',
+    notifyUnsupported: 'الإشعارات غير مدعومة في هذا المتصفح.',
+    notifyIos: 'على الآيفون: ثبّت التطبيق أولاً (مشاركة ← إضافة إلى الشاشة الرئيسية).',
     prayers: { fajr: 'الفجر', sunrise: 'الشروق', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' },
     events: {
       ramadan: 'رمضان', eidFitr: 'عيد الفطر', eidAdha: 'عيد الأضحى',
@@ -85,6 +97,9 @@ export default function PrayerTimesTool() {
   const [cityId, setCityId] = useState<string>(DEFAULT_CITY.id)
   const [geoError, setGeoError] = useState('')
   const [locating, setLocating] = useState(false)
+  const [pushOn, setPushOn] = useState<boolean | null>(null)
+  const [pushMsg, setPushMsg] = useState('')
+  const [pushBusy, setPushBusy] = useState(false)
   const [now, setNow] = useState(() => new Date())
 
   // Refresh "now" every 30s (not every second) for the countdown, and also when
@@ -176,6 +191,29 @@ export default function PrayerTimesTool() {
     saveLoc({ mode: 'city', cityId: id })
   }
 
+  // Reflect whether push is already subscribed on this device.
+  useEffect(() => { currentSubscription().then((sub) => setPushOn(!!sub)) }, [])
+
+  async function togglePush() {
+    setPushMsg('')
+    if (!pushSupported()) { setPushMsg(s.notifyUnsupported); return }
+    setPushBusy(true)
+    try {
+      if (pushOn) {
+        await disablePush()
+        setPushOn(false)
+      } else {
+        const r = await enablePush(
+          { lat: loc.lat, lng: loc.lng, tz: loc.tz }, locale,
+          { minutesBefore: 10, prayers: ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] },
+        )
+        if (r === 'ok') setPushOn(true)
+        else if (r === 'unsupported') setPushMsg(s.notifyUnsupported)
+        else setPushMsg(s.notifyDenied)
+      }
+    } finally { setPushBusy(false) }
+  }
+
   function useMyLocation() {
     setGeoError('')
     if (!navigator.geolocation) { setGeoError(s.geoError); return }
@@ -236,6 +274,16 @@ export default function PrayerTimesTool() {
         <button className="btn" onClick={useMyLocation}>{s.useMyLocation}</button>
       </div>
       {geoError && <p className="pray__geoerr">{geoError}</p>}
+
+      {/* Prayer notifications opt-in */}
+      <div className="pray__notify">
+        <button className={`btn pray__notify-btn ${pushOn ? 'is-on' : ''}`} data-testid="pray-notify"
+          disabled={pushBusy} aria-pressed={!!pushOn} onClick={togglePush}>
+          <BellIcon /> {pushOn ? s.notifyOn : s.notify}
+        </button>
+        <p className="pray__notify-note">{pushOn ? s.notifyNote : s.notifyIos}</p>
+      </div>
+      {pushMsg && <p className="pray__geoerr">{pushMsg}</p>}
 
       {/* Prayer times */}
       <section className="pray__card">
