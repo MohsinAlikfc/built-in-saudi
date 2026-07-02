@@ -26,7 +26,7 @@ const STR = {
     iqamaIn: (m: number) => `Iqama in ${m} min`,
     iqamaNow: 'Iqama now', iqamaAfter: (m: number) => `Iqama −${m} min`,
     calcFor: 'Calculated for', locating: 'Finding your location…',
-    today: 'Today', converter: 'Date converter',
+    today: 'Today', showMore: 'Show more', showLess: 'Show less', converter: 'Date converter',
     gregorian: 'Gregorian date', hijri: 'Hijri date',
     day: 'Day', month: 'Month', year: 'Year',
     prevDay: 'Previous day', nextDay: 'Next day',
@@ -57,7 +57,7 @@ const STR = {
     iqamaIn: (m: number) => `الإقامة بعد ${m} د`,
     iqamaNow: 'حان وقت الإقامة', iqamaAfter: (m: number) => `الإقامة −${m} د`,
     calcFor: 'محسوبة ليوم', locating: 'جارٍ تحديد موقعك…',
-    today: 'اليوم', converter: 'محوّل التاريخ',
+    today: 'اليوم', showMore: 'عرض المزيد', showLess: 'عرض أقل', converter: 'محوّل التاريخ',
     gregorian: 'التاريخ الميلادي', hijri: 'التاريخ الهجري',
     day: 'اليوم', month: 'الشهر', year: 'السنة',
     prevDay: 'اليوم السابق', nextDay: 'اليوم التالي',
@@ -128,6 +128,8 @@ export default function PrayerTimesTool() {
   })
   const [prefs, setPrefs] = useState<AlertPrefs>(() => readPrefs())
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [viewDateStr, setViewDateStr] = useState('') // '' = live (now-centric)
+  const [showMore, setShowMore] = useState(false)
   const [now, setNow] = useState(() => new Date())
 
   // Refresh "now" every 30s (not every second) for the countdown, and also when
@@ -246,21 +248,29 @@ export default function PrayerTimesTool() {
 
   // Circular window: the last-entered prayer, the upcoming one, then 3 more —
   // wrapping across midnight (a day separator marks the new day).
+  const isLive = !viewDateStr
   const timeline = useMemo(() => {
     const params = CalculationMethod.UmmAlQura()
     const coords = new Coordinates(loc.lat, loc.lng)
+    const base = viewDateStr ? new Date(`${viewDateStr}T12:00:00`) : now
     const inst: { key: IqamaKey; time: Date }[] = []
-    for (const offset of [-1, 0, 1]) {
-      const pt = new PrayerTimes(coords, new Date(now.getTime() + offset * 86400000), params)
+    for (const offset of [-1, 0, 1, 2, 3]) {
+      const pt = new PrayerTimes(coords, new Date(base.getTime() + offset * 86400000), params)
       for (const key of IQAMA_KEYS) inst.push({ key, time: pt[key] as Date })
     }
     inst.sort((a, b) => a.time.getTime() - b.time.getTime())
-    let lastIdx = 0
-    for (let i = 0; i < inst.length; i++) {
-      if (inst[i].time.getTime() <= now.getTime()) lastIdx = i; else break
+    let startIdx = 0
+    if (viewDateStr) {
+      const vd = new Date(`${viewDateStr}T00:00:00`).getTime()
+      const found = inst.findIndex((x) => x.time.getTime() >= vd)
+      startIdx = found < 0 ? 0 : found
+    } else {
+      for (let i = 0; i < inst.length; i++) {
+        if (inst[i].time.getTime() <= now.getTime()) startIdx = i; else break
+      }
     }
-    return inst.slice(lastIdx, lastIdx + 5)
-  }, [now, loc.lat, loc.lng])
+    return inst.slice(startIdx, startIdx + (showMore ? 10 : 5))
+  }, [now, loc.lat, loc.lng, viewDateStr, showMore])
 
   function pickCity(id: string) {
     const c = CITIES.find((x) => x.id === id)
@@ -375,7 +385,7 @@ export default function PrayerTimesTool() {
         {timeline.map((it, i) => {
           const prev = timeline[i - 1]
           const newDay = prev && it.time.toDateString() !== prev.time.toDateString()
-          const highlight = i === (active ? 0 : 1)
+          const highlight = isLive && i === (active ? 0 : 1)
           return (
             <Fragment key={i}>
               {newDay && (
@@ -392,6 +402,16 @@ export default function PrayerTimesTool() {
           )
         })}
       </ul>
+      <div className="pray__more">
+        <button className="btn" data-testid="pray-more" onClick={() => setShowMore((v) => !v)}>
+          {showMore ? s.showLess : s.showMore}
+        </button>
+        <input className="input pray__more-date" type="date" value={viewDateStr} data-testid="pray-date"
+          onChange={(e) => setViewDateStr(e.target.value)} />
+        {viewDateStr && (
+          <button className="btn" data-testid="pray-today" onClick={() => setViewDateStr('')}>{s.today}</button>
+        )}
+      </div>
       <p className="pray__method-note">{s.method}</p>
 
       {helpOpen && (

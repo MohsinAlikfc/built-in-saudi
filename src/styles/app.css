@@ -654,3 +654,8 @@ html { -webkit-tap-highlight-color: transparent; }
 /* Password: regenerate + copy side by side */
 .pw__actions { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
 .pw__actions .btn { flex: 1; justify-content: center; }
+
+/* Prayer list: show-more + date selector row */
+.pray__more { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.8rem; }
+.pray__more .btn { flex: none; }
+.pray__more-date { flex: 1; min-width: 0; }
