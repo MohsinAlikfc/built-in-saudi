@@ -5,6 +5,7 @@ import { passwordGeneratorTool } from './password-generator/meta'
 import { uuidGeneratorTool } from './uuid-generator/meta'
 import { wordCounterTool } from './word-counter/meta'
 import { base64Tool } from './base64/meta'
+import { dateDiffTool } from './date-diff/meta'
 import { ImageIcon, PaletteIcon, RulerIcon, BracesIcon } from '../components/icons'
 
 /**
@@ -20,6 +21,7 @@ export const tools: Tool[] = [
   uuidGeneratorTool,
   wordCounterTool,
   base64Tool,
+  dateDiffTool,
 
   // ── Roadmap ──────────────────────────────────────────────
   {

@@ -170,6 +170,16 @@ export function BoltIcon({ className }: P) {
   )
 }
 
+export function CalendarIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <rect x="3" y="4.5" width="18" height="16" rx="2" />
+      <path d="M3 9h18M8 3v3M16 3v3" />
+      <path d="M7.5 13h3M13.5 13h3M7.5 16.5h3" />
+    </svg>
+  )
+}
+
 export function BellIcon({ className }: P) {
   return (
     <svg {...base} className={className} aria-hidden="true">
