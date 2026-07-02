@@ -70,7 +70,7 @@ optional [backend worker](./BACKEND.md).
 ## PDF (client-side)
 | Tool | Slug | Runs | Priority | Status |
 |------|------|------|----------|--------|
-| [Images → PDF](./tools/images-to-pdf.md) | `/tools/images-to-pdf` | client | T1 | 📝 |
+| [Images → PDF](./tools/images-to-pdf.md) | `/tools/images-to-pdf` | client | T1 | ✅ live |
 | [Merge PDF](./tools/pdf-merge.md) | `/tools/pdf-merge` | client | T1 | 📝 |
 | [Split PDF](./tools/pdf-split.md) | `/tools/pdf-split` | client | T1 | 📝 |
 | PDF → images | `/tools/pdf-to-images` | client | T2 | 🧭 |

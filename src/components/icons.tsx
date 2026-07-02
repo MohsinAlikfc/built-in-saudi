@@ -190,6 +190,14 @@ export function GridIcon({ className }: P) {
   )
 }
 
+export function FileIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <path d="M14 2.5H7A2 2 0 0 0 5 4.5v15a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7.5z" /><path d="M14 2.5V7.5h5" />
+    </svg>
+  )
+}
+
 export function CardIcon({ className }: P) {
   return (
     <svg {...base} className={className} aria-hidden="true">

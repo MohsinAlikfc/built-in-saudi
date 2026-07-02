@@ -2,6 +2,7 @@ import type { Tool } from './types'
 import { imageCompressorTool } from './image-compressor/meta'
 import { imageFormatConverterTool } from './image-format-converter/meta'
 import { imageCropperTool } from './image-cropper/meta'
+import { imagesToPdfTool } from './images-to-pdf/meta'
 import { qrCodeTool } from './qr-code/meta'
 import { prayerTimesTool } from './prayer-times/meta'
 import { hijriCalendarTool } from './hijri-calendar/meta'
@@ -40,6 +41,7 @@ export const tools: Tool[] = [
   imageCompressorTool,
   imageFormatConverterTool,
   imageCropperTool,
+  imagesToPdfTool,
   prayerTimesTool,
   islamicCalendarTool,
   adhkarTool,

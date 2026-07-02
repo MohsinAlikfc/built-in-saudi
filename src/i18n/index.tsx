@@ -73,6 +73,7 @@ const CATEGORY_LABELS: Record<string, Record<Locale, string>> = {
   Developer: { en: 'Developer', ar: 'أدوات المطوّرين' },
   Text: { en: 'Text', ar: 'نصوص' },
   Calculators: { en: 'Calculators', ar: 'حاسبات' },
+  PDF: { en: 'PDF', ar: 'PDF' },
   Business: { en: 'Business', ar: 'أعمال' },
   'Saudi / Local': { en: 'Saudi / Local', ar: 'أدوات سعودية' },
 }

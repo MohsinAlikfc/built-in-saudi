@@ -25,6 +25,11 @@ export interface ToolSeo {
 /** Live (routable) tools only — used to prerender /<locale>/tools/<id>/. */
 export const liveToolSeo: ToolSeo[] = [
   {
+    id: 'images-to-pdf',
+    en: { name: 'Images to PDF', description: 'Combine JPG/PNG images into a single PDF, one per page — reorder, fit-to-image or A4/Letter with a margin. Built in your browser; never uploaded.' },
+    ar: { name: 'الصور إلى PDF', description: 'ادمج صور JPG/PNG في PDF واحد، صورة لكل صفحة — إعادة ترتيب، وملاءمة الصورة أو A4/Letter بهامش. داخل متصفحك؛ لا تُرفع أبدًا.' },
+  },
+  {
     id: 'image-cropper',
     en: { name: 'Image Cropper', description: 'Crop an image in your browser — drag/resize the crop box, lock to 1:1/4:3/16:9 or free, full-resolution output, download as PNG/JPG/WebP. Never uploaded.' },
     ar: { name: 'أداة قص الصور', description: 'اقتصّ الصورة داخل متصفحك — اسحب مربّع القص، ثبّته على 1:1 أو 4:3 أو 16:9 أو حر، ناتج بالدقة الكاملة، نزّله PNG/JPG/WebP. لا تُرفع أبدًا.' },
