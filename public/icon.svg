@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Built in Saudi">
+  <rect width="512" height="512" fill="#0b3d2e"/>
+  <path d="M256 132 L360 316 L152 316 Z" fill="none" stroke="#d6a33f" stroke-width="20" stroke-linejoin="round"/>
+  <path d="M256 200 L312 300 L200 300 Z" fill="#f4ecdd"/>
+  <rect x="152" y="342" width="208" height="22" rx="4" fill="#127a54"/>
+  <g fill="#d6a33f">
+    <circle cx="186" cy="392" r="15"/>
+    <circle cx="256" cy="392" r="15"/>
+    <circle cx="326" cy="392" r="15"/>
+  </g>
+</svg>

@@ -51,12 +51,8 @@ export function NotificationBell() {
         <strong className="notif__title">{n.title}</strong>
         <p className="notif__msg">{n.message}</p>
       </div>
-      <div className="notif__actions">
-        <button className="notif__btn" aria-label={n.minimize} title={n.minimize}
-          data-testid="notif-minimize" onClick={() => setOpen(false)}>–</button>
-        <button className="notif__btn" aria-label={n.dismiss} title={n.dismiss}
-          data-testid="notif-dismiss" onClick={dismiss}>✕</button>
-      </div>
+      <button className="notif__btn" aria-label={n.dismiss} title={n.dismiss}
+        data-testid="notif-dismiss" onClick={dismiss}>✕</button>
     </div>
   )
 }

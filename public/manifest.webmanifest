@@ -1,0 +1,17 @@
+{
+  "name": "Built in Saudi — Tools",
+  "short_name": "Built in Saudi",
+  "description": "Free, privacy-first online tools. Everything runs in your browser. Built in Saudi Arabia.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#faf7f0",
+  "theme_color": "#0b3d2e",
+  "lang": "en",
+  "dir": "auto",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

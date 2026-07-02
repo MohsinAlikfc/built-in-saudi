@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useLocale, localePath, swapLocaleInPath, setStoredLocale } from '../i18n'
+import { AppLauncher } from './AppLauncher'
 
 export function Header() {
   const { locale, t } = useLocale()
@@ -34,15 +35,7 @@ export function Header() {
         </Link>
 
         <nav className="site-nav" aria-label="Primary">
-          <Link to={home} className="site-nav__link">{t.nav.tools}</Link>
-          <a
-            className="site-nav__link"
-            href="https://github.com/bjorn-ali-goransson/built-in-saudi"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            {t.nav.source}
-          </a>
+          <AppLauncher />
           <Link
             to={swapLocaleInPath(location.pathname, other)}
             className="site-nav__link lang-toggle"

@@ -180,6 +180,16 @@ export function CalendarIcon({ className }: P) {
   )
 }
 
+export function GridIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      {[5, 12, 19].flatMap((cy) => [5, 12, 19].map((cx) => (
+        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="1.6" fill="currentColor" stroke="none" />
+      )))}
+    </svg>
+  )
+}
+
 export function BellIcon({ className }: P) {
   return (
     <svg {...base} className={className} aria-hidden="true">
