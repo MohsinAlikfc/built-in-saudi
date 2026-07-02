@@ -190,6 +190,15 @@ export function GridIcon({ className }: P) {
   )
 }
 
+export function CompassStarIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7.5l1.6 3.2 3.4.4-2.5 2.3.7 3.4-3.2-1.7-3.2 1.7.7-3.4-2.5-2.3 3.4-.4z" />
+    </svg>
+  )
+}
+
 export function ParagraphIcon({ className }: P) {
   return (
     <svg {...base} className={className} aria-hidden="true">

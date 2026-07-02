@@ -86,6 +86,12 @@ test.describe('tools', () => {
     await page.getByTestId('lorem-flavor-arabic').click()
     await expect(page.getByTestId('lorem-out')).toContainText(/[؀-ۿ]/)
   })
+
+  test('istikhara: shows the du‘a and its source', async ({ page }) => {
+    await page.goto('/en/tools/istikhara')
+    await expect(page.getByTestId('istikhara-dua')).toContainText('اللَّهُمَّ')
+    await expect(page.getByText(/al-Bukhārī/)).toBeVisible()
+  })
 })
 
 test.describe('shell', () => {

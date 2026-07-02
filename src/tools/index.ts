@@ -3,6 +3,7 @@ import { qrCodeTool } from './qr-code/meta'
 import { prayerTimesTool } from './prayer-times/meta'
 import { hijriCalendarTool } from './hijri-calendar/meta'
 import { islamicCalendarTool } from './islamic-calendar/meta'
+import { istikharaTool } from './istikhara/meta'
 import { qiblaTool } from './qibla/meta'
 import { passwordGeneratorTool } from './password-generator/meta'
 import { uuidGeneratorTool } from './uuid-generator/meta'
@@ -25,6 +26,7 @@ export const tools: Tool[] = [
   qrCodeTool,
   prayerTimesTool,
   islamicCalendarTool,
+  istikharaTool,
   hijriCalendarTool,
   qiblaTool,
   passwordGeneratorTool,
