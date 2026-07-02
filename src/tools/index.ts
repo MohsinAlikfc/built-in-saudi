@@ -9,6 +9,7 @@ import { wordCounterTool } from './word-counter/meta'
 import { base64Tool } from './base64/meta'
 import { dateDiffTool } from './date-diff/meta'
 import { zipInspectorTool } from './zip-inspector/meta'
+import { metadataTool } from './metadata/meta'
 import { ImageIcon, PaletteIcon, RulerIcon, BracesIcon } from '../components/icons'
 
 /**
@@ -28,6 +29,7 @@ export const tools: Tool[] = [
   base64Tool,
   dateDiffTool,
   zipInspectorTool,
+  metadataTool,
 
   // ── Roadmap ──────────────────────────────────────────────
   {

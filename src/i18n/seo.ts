@@ -114,4 +114,9 @@ export const liveToolSeo: ToolSeo[] = [
     en: { name: 'Archive Inspector', description: 'Peek inside a .zip and other archives in your browser — detect the format and list every entry with sizes and dates, without extracting or uploading.' },
     ar: { name: 'فاحص الأرشيف', description: 'اطّلع على محتوى ملفات .zip وغيرها داخل متصفحك — تعرّف على الصيغة واعرض كل عنصر بحجمه وتاريخه دون فكّ أو رفع.' },
   },
+  {
+    id: 'file-metadata',
+    en: { name: 'File Metadata', description: 'Reveal a file’s metadata in your browser — size, image dimensions, camera EXIF with GPS, PNG text, PDF info and media tags. Nothing is uploaded.' },
+    ar: { name: 'بيانات الملف', description: 'اكشف البيانات الوصفية لملفٍ داخل متصفحك — الحجم وأبعاد الصورة وبيانات EXIF مع GPS ونصوص PNG ومعلومات PDF ووسوم الوسائط. دون رفع أي شيء.' },
+  },
 ]

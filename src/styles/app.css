@@ -728,3 +728,13 @@ html { -webkit-tap-highlight-color: transparent; }
 .pray__viewdate { font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-faint); margin-inline-end: 0.2rem; }
 [dir='rtl'] .pray__viewdate { font-family: var(--font-ar); }
 .pray__date-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: 0; padding: 0; margin: 0; }
+
+/* File metadata groups */
+.meta__group { margin-bottom: 0.4rem; }
+.meta__group-title { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 0.4rem; }
+[dir='rtl'] .meta__group-title { font-family: var(--font-ar); letter-spacing: 0; }
+.meta__list { display: flex; flex-direction: column; border: 1px solid var(--line-soft); border-radius: var(--r-md); overflow: hidden; }
+.meta__row { display: grid; grid-template-columns: minmax(0, 38%) 1fr; gap: 1rem; padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--line-soft); font-size: 0.9rem; }
+.meta__row:last-child { border-bottom: none; }
+.meta__row dt { color: var(--ink-soft); margin: 0; }
+.meta__row dd { margin: 0; font-family: var(--font-mono); word-break: break-word; }
