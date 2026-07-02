@@ -2,10 +2,10 @@ import type { Tool } from './types'
 import { qrCodeTool } from './qr-code/meta'
 import { prayerTimesTool } from './prayer-times/meta'
 import { passwordGeneratorTool } from './password-generator/meta'
-import {
-  ImageIcon, PaletteIcon, RulerIcon,
-  BracesIcon, HashIcon, TextIcon, CodeIcon,
-} from '../components/icons'
+import { uuidGeneratorTool } from './uuid-generator/meta'
+import { wordCounterTool } from './word-counter/meta'
+import { base64Tool } from './base64/meta'
+import { ImageIcon, PaletteIcon, RulerIcon, BracesIcon } from '../components/icons'
 
 /**
  * The tool catalog. Stable/beta tools render inside the app at /tools/:id.
@@ -17,6 +17,9 @@ export const tools: Tool[] = [
   qrCodeTool,
   prayerTimesTool,
   passwordGeneratorTool,
+  uuidGeneratorTool,
+  wordCounterTool,
+  base64Tool,
 
   // ── Roadmap ──────────────────────────────────────────────
   {
@@ -77,51 +80,6 @@ export const tools: Tool[] = [
       name: 'مُنسّق JSON',
       tagline: 'نسّق JSON وتحقّق منه واختصره فورًا.',
       description: 'نسّق JSON وتحقّق من صحته واختصره مع إبلاغ واضح عن الأخطاء.',
-    },
-  },
-  {
-    id: 'uuid-generator',
-    name: 'UUID Generator',
-    tagline: 'Generate v4 UUIDs in bulk.',
-    description: 'Generate one or many RFC-4122 UUIDs with a click.',
-    category: 'Developer',
-    keywords: ['uuid', 'guid', 'id', 'random'],
-    status: 'coming-soon',
-    Icon: HashIcon,
-    ar: {
-      name: 'مولّد UUID',
-      tagline: 'أنشئ معرّفات UUID (v4) بالجملة.',
-      description: 'أنشئ معرّفًا واحدًا أو عدة معرّفات UUID بنقرة واحدة.',
-    },
-  },
-  {
-    id: 'text-counter',
-    name: 'Word & Character Counter',
-    tagline: 'Live word, character, sentence & reading-time counts.',
-    description: 'Count words, characters and sentences with live reading-time estimates.',
-    category: 'Text',
-    keywords: ['word', 'character', 'count', 'text', 'reading time'],
-    status: 'coming-soon',
-    Icon: TextIcon,
-    ar: {
-      name: 'عدّاد الكلمات والحروف',
-      tagline: 'عدّ الكلمات والحروف والجُمل ووقت القراءة مباشرةً.',
-      description: 'عُدّ الكلمات والحروف والجُمل مع تقدير فوري لوقت القراءة.',
-    },
-  },
-  {
-    id: 'base64',
-    name: 'Base64 Encoder / Decoder',
-    tagline: 'Encode and decode Base64 text and files.',
-    description: 'Encode or decode Base64 for text and small files, locally.',
-    category: 'Developer',
-    keywords: ['base64', 'encode', 'decode', 'data uri'],
-    status: 'coming-soon',
-    Icon: CodeIcon,
-    ar: {
-      name: 'ترميز وفكّ Base64',
-      tagline: 'رمّز وفكّ نصوص وملفات Base64.',
-      description: 'رمّز أو فكّ ترميز Base64 للنصوص والملفات الصغيرة محليًا.',
     },
   },
 ]

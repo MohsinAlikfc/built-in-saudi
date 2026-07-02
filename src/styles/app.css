@@ -424,3 +424,22 @@ html { -webkit-tap-highlight-color: transparent; }
 .pray__conv-controls { display: flex; gap: 0.5rem; align-items: center; margin: 0.6rem 0; flex-wrap: wrap; }
 .pray__conv-controls .btn { padding: 0.5rem 0.85rem; min-width: 2.6rem; justify-content: center; }
 .pray__countdown { font-size: 0.85rem; font-weight: 600; color: var(--green-600); margin-inline-start: auto; }
+
+/* ======================================================================
+   Shared simple-tool layout (UUID, Word Counter, Base64, …)
+   ====================================================================== */
+.stack { display: flex; flex-direction: column; gap: 1.1rem; }
+.stack__actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.panel { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); padding: 1.3rem; display: grid; gap: 1.1rem; }
+.code-out { font-family: var(--font-mono); font-size: 0.9rem; }
+
+/* Word counter stat cards */
+.wc__stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.8rem; }
+.wc__stat { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-md); box-shadow: var(--shadow-sm); padding: 0.9rem 1rem; text-align: center; }
+.wc__stat-num { display: block; font-family: var(--font-display); font-size: 1.7rem; color: var(--green-700); line-height: 1; }
+[dir='rtl'] .wc__stat-num { font-family: var(--font-ar); }
+.wc__stat-label { display: block; margin-top: 0.35rem; font-size: 0.78rem; color: var(--ink-faint); }
+
+/* Base64 bar + error */
+.b64__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.b64__error { padding: 0.8rem 0.9rem; background: color-mix(in srgb, var(--danger) 10%, transparent); border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent); border-radius: var(--r-sm); color: var(--danger); font-weight: 600; }
