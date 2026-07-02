@@ -1,4 +1,5 @@
 import type { Tool } from './types'
+import { imageCompressorTool } from './image-compressor/meta'
 import { qrCodeTool } from './qr-code/meta'
 import { prayerTimesTool } from './prayer-times/meta'
 import { hijriCalendarTool } from './hijri-calendar/meta'
@@ -34,6 +35,7 @@ import { ImageIcon, PaletteIcon, RulerIcon, BracesIcon } from '../components/ico
  */
 export const tools: Tool[] = [
   qrCodeTool,
+  imageCompressorTool,
   prayerTimesTool,
   islamicCalendarTool,
   adhkarTool,

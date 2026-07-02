@@ -61,7 +61,7 @@ optional [backend worker](./BACKEND.md).
 ## Images (client-side)
 | Tool | Slug | Runs | Priority | Status |
 |------|------|------|----------|--------|
-| [Image compressor & resizer](./tools/image-compressor.md) | `/tools/image-compressor` | client | T1 | 📝 |
+| [Image compressor & resizer](./tools/image-compressor.md) | `/tools/image-compressor` | client | T1 | ✅ live |
 | [Image format converter](./tools/image-format-converter.md) | `/tools/image-format-converter` | client | T1 | 📝 |
 | [Image cropper](./tools/image-cropper.md) | `/tools/image-cropper` | client | T2 | 📝 |
 | Background remover | `/tools/background-remover` | queue/wasm | T4 | 🧭 |

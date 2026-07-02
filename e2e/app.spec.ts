@@ -116,6 +116,13 @@ test.describe('tools', () => {
     await expect(page.getByTestId('case-snake')).toHaveText('hello_world')
   })
 
+  test('image compressor: renders the dropzone', async ({ page }) => {
+    await page.goto('/en/tools/image-compressor')
+    await expect(page.getByTestId('image-compressor')).toBeVisible()
+    await expect(page.getByTestId('imgcomp-drop')).toBeVisible()
+    await expect(page.getByText(/never uploaded|never leaves/i)).toBeVisible()
+  })
+
   test('hash generator: SHA-256 of "abc" matches the known vector', async ({ page }) => {
     await page.goto('/en/tools/hash-generator')
     await page.getByTestId('hash-algo-SHA-256').click()
