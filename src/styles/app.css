@@ -626,3 +626,16 @@ html { -webkit-tap-highlight-color: transparent; }
 
 /* Update toast: white border so the dark green doesn't blend into the page */
 .updated-toast { border: 1.5px solid rgba(255, 255, 255, 0.9); }
+
+/* Hero pill icons should be white (were low-contrast on green) */
+.pray__hero-pill svg, .pray__hero-pill .pray__loc-caret { color: #fff; opacity: 1; }
+
+/* Hero time is a 12/24h toggle button */
+.pray__hero-time { -webkit-appearance: none; appearance: none; background: none; border: none; color: inherit; cursor: pointer; padding: 0; font-family: inherit; }
+.pray__hero-time:hover { opacity: 0.85; }
+
+/* Gentle day separator in the circular prayer list */
+.pray__daysep { display: flex; align-items: center; gap: 0.7rem; padding: 0.2rem 0.2rem; margin: 0.1rem 0; }
+.pray__daysep::before, .pray__daysep::after { content: ''; flex: 1; height: 1px; background: var(--line-soft); }
+.pray__daysep span { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); }
+[dir='rtl'] .pray__daysep span { font-family: var(--font-ar); letter-spacing: 0; }

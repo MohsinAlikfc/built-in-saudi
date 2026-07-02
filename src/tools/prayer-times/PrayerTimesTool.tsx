@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Coordinates, CalculationMethod, PrayerTimes, Prayer } from 'adhan'
 import { useLocale } from '../../i18n'
@@ -9,7 +9,6 @@ import { reverseGeocode } from './geo'
 import { CITIES, DEFAULT_CITY } from './cities'
 
 type PrayerKey = 'fajr' | 'sunrise' | 'dhuhr' | 'asr' | 'maghrib' | 'isha'
-const PRAYER_ORDER: PrayerKey[] = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha']
 
 // Iqama (congregation) periods after the adhan, per common Saudi practice.
 type IqamaKey = 'fajr' | 'dhuhr' | 'asr' | 'maghrib' | 'isha'
@@ -106,6 +105,9 @@ export default function PrayerTimesTool() {
   const [pushBusy, setPushBusy] = useState(false)
   const [showLocPicker, setShowLocPicker] = useState(false)
   const [pendingCity, setPendingCity] = useState<string>(DEFAULT_CITY.id)
+  const [clock24, setClock24] = useState(() => {
+    try { return localStorage.getItem('bis-prayer-24h') === '1' } catch { return false }
+  })
   const [now, setNow] = useState(() => new Date())
 
   // Refresh "now" every 30s (not every second) for the countdown, and also when
@@ -151,7 +153,20 @@ export default function PrayerTimesTool() {
   }, [])
 
   const timeFmt = useMemo(
-    () => new Intl.DateTimeFormat(intlLoc, { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: loc.tz }),
+    () => new Intl.DateTimeFormat(intlLoc, { hour: 'numeric', minute: '2-digit', hour12: !clock24, timeZone: loc.tz }),
+    [intlLoc, loc.tz, clock24],
+  )
+  // Format a time, dropping the space before AM/PM (e.g. "3:20PM").
+  const fmtTime = (d: Date) => timeFmt.format(d).replace(/\s/g, '')
+  function toggleClock() {
+    setClock24((v) => {
+      const nv = !v
+      try { localStorage.setItem('bis-prayer-24h', nv ? '1' : '0') } catch { /* ignore */ }
+      return nv
+    })
+  }
+  const weekdayFmt = useMemo(
+    () => new Intl.DateTimeFormat(intlLoc, { weekday: 'long', timeZone: loc.tz }),
     [intlLoc, loc.tz],
   )
 
@@ -162,10 +177,6 @@ export default function PrayerTimesTool() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loc.lat, loc.lng, dayKey])
 
-  const times: Record<PrayerKey, Date> = {
-    fajr: prayerTimes.fajr, sunrise: prayerTimes.sunrise, dhuhr: prayerTimes.dhuhr,
-    asr: prayerTimes.asr, maghrib: prayerTimes.maghrib, isha: prayerTimes.isha,
-  }
 
   // Next prayer + countdown.
   const nextInfo = useMemo(() => {
@@ -213,7 +224,23 @@ export default function PrayerTimesTool() {
     return diff > 0 ? s.iqamaIn(mins) : s.iqamaAfter(mins)
   }, [active, now, s])
 
-  const highlightKey: PrayerKey = active ? active.key : nextInfo.key
+  // Circular window: the last-entered prayer, the upcoming one, then 3 more —
+  // wrapping across midnight (a day separator marks the new day).
+  const timeline = useMemo(() => {
+    const params = CalculationMethod.UmmAlQura()
+    const coords = new Coordinates(loc.lat, loc.lng)
+    const inst: { key: IqamaKey; time: Date }[] = []
+    for (const offset of [-1, 0, 1]) {
+      const pt = new PrayerTimes(coords, new Date(now.getTime() + offset * 86400000), params)
+      for (const key of IQAMA_KEYS) inst.push({ key, time: pt[key] as Date })
+    }
+    inst.sort((a, b) => a.time.getTime() - b.time.getTime())
+    let lastIdx = 0
+    for (let i = 0; i < inst.length; i++) {
+      if (inst[i].time.getTime() <= now.getTime()) lastIdx = i; else break
+    }
+    return inst.slice(lastIdx, lastIdx + 5)
+  }, [now, loc.lat, loc.lng])
 
   function pickCity(id: string) {
     const c = CITIES.find((x) => x.id === id)
@@ -278,7 +305,10 @@ export default function PrayerTimesTool() {
       <section className={`pray__hero ${active ? 'is-active' : ''}`} data-testid="next-prayer">
         <span className="pray__hero-label">{active ? s.timeForPrayer : s.next}</span>
         <span className="pray__hero-name">{s.prayers[active ? active.key : nextInfo.key]}</span>
-        <span className="pray__hero-time">{timeFmt.format(active ? active.adhan : nextInfo.time)}</span>
+        <button className="pray__hero-time" data-testid="hero-time" onClick={toggleClock}
+          title={clock24 ? '12-hour' : '24-hour'} aria-label="Toggle 12 or 24 hour clock">
+          {fmtTime(active ? active.adhan : nextInfo.time)}
+        </button>
         <span className="pray__hero-count" data-testid="hero-count">
           {active ? iqamaText : s.inTime(countdown.h, countdown.m)}
         </span>
@@ -298,17 +328,24 @@ export default function PrayerTimesTool() {
 
       {/* Prayer times — flush, no card/well (nativization) */}
       {locating && <p className="pray__locating" data-testid="pray-locating">{s.locating}</p>}
-      <ul className={`pray__times ${locating ? 'is-locating' : ''}`}>
-        {PRAYER_ORDER.map((k) => {
-          const isNext = k === highlightKey
+      <ul className={`pray__times ${locating ? 'is-locating' : ''}`} data-testid="prayer-list">
+        {timeline.map((it, i) => {
+          const prev = timeline[i - 1]
+          const newDay = prev && it.time.toDateString() !== prev.time.toDateString()
+          const highlight = i === (active ? 0 : 1)
           return (
-            <li key={k} className={`pray__row ${isNext ? 'is-next' : ''}`}>
-              <span className="pray__name">{s.prayers[k]}</span>
-              <span className="pray__time">{timeFmt.format(times[k])}</span>
-              {isNext && (
-                <span className="pray__next">{s.next} · {s.inTime(countdown.h, countdown.m)}</span>
+            <Fragment key={i}>
+              {newDay && (
+                <li className="pray__daysep" aria-hidden="true"><span>{weekdayFmt.format(it.time)}</span></li>
               )}
-            </li>
+              <li className={`pray__row ${highlight ? 'is-next' : ''}`} data-testid={`prow-${it.key}`}>
+                <span className="pray__name">{s.prayers[it.key]}</span>
+                <span className="pray__time">{fmtTime(it.time)}</span>
+                {highlight && !active && (
+                  <span className="pray__next">{s.next} · {s.inTime(countdown.h, countdown.m)}</span>
+                )}
+              </li>
+            </Fragment>
           )
         })}
       </ul>
