@@ -20,7 +20,34 @@ optional [backend worker](./BACKEND.md).
 ✅ live · 📝 spec ready · 🧭 idea (spec TBD)
 
 ## Curation notes (Claude)
-**New ideas worth adding** (on-brand: privacy-first, Saudi wedge, client-side):
+
+**✅ Spec pipeline complete (14/14).** Every tool that had a `docs/tools/<id>.md`
+spec is now live: json/css/xml formatter, hash generator, case converter, unit
+converter, VAT calculator, IBAN validator, tafqeet, image compressor / format
+converter / cropper, images→PDF, PDF merge, PDF split, invoice generator — plus
+the off-spec **Arabic poetry meters** tool and the mobile-overflow + header/
+launcher UX fixes. 17 tools live overall; e2e suite at 30 specs, all green. The
+image/PDF/invoice tools are 100% client-side (the "never uploaded" wedge), and
+pdf-lib is the only runtime dep, lazy-loaded per PDF tool.
+
+**Strongest next bets (ranked):**
+1. **EXIF / metadata stripper** (T1) — the natural actionable counterpart to the
+   metadata viewer; strong privacy wedge, pairs with the now-complete image suite.
+2. **QR / barcode reader** (T2) — camera + image scan (BarcodeDetector, jsQR
+   fallback); closes the loop with the QR generator. High search intent.
+3. **Iqama / ID / Istiqdam expiry countdown** (T3) — paste a Hijri/Gregorian
+   expiry → days left; genuinely Saudi-local, high intent, tiny to build.
+4. **Arabic ↔ Western numeral converter** (٠١٢٣ ↔ 0123) (T3) — trivial, on-brand,
+   good SEO for a common Saudi need.
+5. **PDF compress / PDF→images / PDF rotate** — round out the PDF suite now that
+   the plumbing (pdf-lib + dropzone + zip helper) exists; each is a short lap.
+
+**Pushback (still recommend cutting):** YouTube thumbnail downloader (off-brand,
+no privacy wedge), typing speed tester (filler), TTS (Web Speech Arabic quality
+is unreliable). ZATCA/Fatoora e-invoicing is high-value but needs a backend +
+crypto stamp — park in BACKEND.md, don't attempt client-side.
+
+**Older idea list (kept for reference):**
 - **EXIF / metadata stripper** — remove GPS + camera metadata from photos before
   sharing. Strong privacy wedge; we already have a metadata *viewer*, this is the
   actionable counterpart. `client`, T1.
