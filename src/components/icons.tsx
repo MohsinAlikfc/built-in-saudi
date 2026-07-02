@@ -190,6 +190,15 @@ export function GridIcon({ className }: P) {
   )
 }
 
+export function RefreshIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+      <path d="M21 3v6h-6" />
+    </svg>
+  )
+}
+
 export function CogIcon({ className }: P) {
   return (
     <svg {...base} className={className} aria-hidden="true">

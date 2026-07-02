@@ -650,3 +650,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .pray__set-label { display: flex; flex-direction: column; }
 .pray__set-label small { color: var(--ink-faint); font-size: 0.78rem; margin-top: 0.1rem; }
 .pray__check { width: 22px; height: 22px; accent-color: var(--green-600); flex: none; }
+
+/* Password: regenerate + copy side by side */
+.pw__actions { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
+.pw__actions .btn { flex: 1; justify-content: center; }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocale } from '../../i18n'
-import { CopyIcon, DownloadIcon } from '../../components/icons'
+import { CopyIcon, RefreshIcon } from '../../components/icons'
 import {
   generatePassword, generatePassphrase, passwordEntropy, phraseEntropy,
   strength, type Strength,
@@ -96,9 +96,11 @@ export default function PasswordGeneratorTool() {
           <output id="pw-output" className="pw__value" data-testid="pw-output" dir="ltr">
             {noSet ? <span className="pw__empty">{s.empty}</span> : value}
           </output>
+        </div>
+        <div className="pw__actions">
           <button className="btn pw__regen" onClick={regenerate} disabled={noSet}
             aria-label={s.regenerateAria} title={s.regenerate} data-testid="pw-regenerate">
-            <DownloadIcon className="pw__regen-icon" />
+            <RefreshIcon /> {s.regenerate}
           </button>
           <button className="btn btn--primary" onClick={copy} disabled={noSet || !value}
             aria-label={s.copy} data-testid="pw-copy">

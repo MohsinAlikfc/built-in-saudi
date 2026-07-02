@@ -33,7 +33,7 @@ export const en = {
     ethos:
       'Free & open. Your data never leaves your device — every tool runs entirely in your browser.',
     made: 'Made with care in the Kingdom of Saudi Arabia',
-    allTools: 'All tools',
+    allTools: 'All apps',
     github: 'GitHub',
     reportIssue: 'Report an issue',
   },
