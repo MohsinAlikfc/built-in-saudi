@@ -63,7 +63,7 @@ optional [backend worker](./BACKEND.md).
 |------|------|------|----------|--------|
 | [Image compressor & resizer](./tools/image-compressor.md) | `/tools/image-compressor` | client | T1 | ✅ live |
 | [Image format converter](./tools/image-format-converter.md) | `/tools/image-format-converter` | client | T1 | ✅ live |
-| [Image cropper](./tools/image-cropper.md) | `/tools/image-cropper` | client | T2 | 📝 |
+| [Image cropper](./tools/image-cropper.md) | `/tools/image-cropper` | client | T2 | ✅ live |
 | Background remover | `/tools/background-remover` | queue/wasm | T4 | 🧭 |
 | Image upscaler | `/tools/image-upscaler` | queue/wasm | T4 | 🧭 |
 
