@@ -144,6 +144,13 @@ test.describe('tools', () => {
     await expect(page.getByText(/never uploaded|never leaves/i)).toBeVisible()
   })
 
+  test('pdf merge: renders the dropzone', async ({ page }) => {
+    await page.goto('/en/tools/pdf-merge')
+    await expect(page.getByTestId('pdf-merge')).toBeVisible()
+    await expect(page.getByTestId('pm-drop')).toBeVisible()
+    await expect(page.getByText(/never uploaded|never leaves/i)).toBeVisible()
+  })
+
   test('hash generator: SHA-256 of "abc" matches the known vector', async ({ page }) => {
     await page.goto('/en/tools/hash-generator')
     await page.getByTestId('hash-algo-SHA-256').click()

@@ -25,6 +25,11 @@ export interface ToolSeo {
 /** Live (routable) tools only — used to prerender /<locale>/tools/<id>/. */
 export const liveToolSeo: ToolSeo[] = [
   {
+    id: 'pdf-merge',
+    en: { name: 'Merge PDF', description: 'Merge several PDFs into one in the order you choose — reorder, remove, see the page count. Runs in your browser; your documents are never uploaded.' },
+    ar: { name: 'دمج PDF', description: 'ادمج عدة ملفات PDF في ملف واحد بالترتيب — إعادة ترتيب وحذف وعدد صفحات. يعمل داخل متصفحك؛ لا تُرفع مستنداتك أبدًا.' },
+  },
+  {
     id: 'images-to-pdf',
     en: { name: 'Images to PDF', description: 'Combine JPG/PNG images into a single PDF, one per page — reorder, fit-to-image or A4/Letter with a margin. Built in your browser; never uploaded.' },
     ar: { name: 'الصور إلى PDF', description: 'ادمج صور JPG/PNG في PDF واحد، صورة لكل صفحة — إعادة ترتيب، وملاءمة الصورة أو A4/Letter بهامش. داخل متصفحك؛ لا تُرفع أبدًا.' },
