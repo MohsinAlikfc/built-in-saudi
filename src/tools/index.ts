@@ -7,6 +7,7 @@ import { istikharaTool } from './istikhara/meta'
 import { adhkarTool } from './adhkar/meta'
 import { hisnAlMuslimTool } from './hisn-al-muslim/meta'
 import { ibanValidatorTool } from './iban-validator/meta'
+import { tafqeetTool } from './tafqeet/meta'
 import { qiblaTool } from './qibla/meta'
 import { passwordGeneratorTool } from './password-generator/meta'
 import { uuidGeneratorTool } from './uuid-generator/meta'
@@ -40,6 +41,7 @@ export const tools: Tool[] = [
   istikharaTool,
   hijriCalendarTool,
   ibanValidatorTool,
+  tafqeetTool,
   qiblaTool,
   passwordGeneratorTool,
   uuidGeneratorTool,

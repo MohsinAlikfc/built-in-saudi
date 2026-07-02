@@ -72,6 +72,15 @@ test.describe('tools', () => {
     await expect(page.getByTestId('unit-result')).toContainText('212')
   })
 
+  test('tafqeet: spells an amount in Arabic', async ({ page }) => {
+    await page.goto('/en/tools/tafqeet')
+    await page.getByTestId('tafqeet-input').fill('1500')
+    await expect(page.getByTestId('tafqeet-output')).toContainText('ألف وخمسمئة')
+    await expect(page.getByTestId('tafqeet-output')).toContainText('ريال')
+    await page.getByTestId('tafqeet-mode-plain').click()
+    await expect(page.getByTestId('tafqeet-output')).toHaveText('ألف وخمسمئة')
+  })
+
   test('iban validator: valid SA IBAN, bank, and checksum failure', async ({ page }) => {
     await page.goto('/en/tools/iban-validator')
     await page.getByTestId('iban-input').fill('SA0380000000608010167519')

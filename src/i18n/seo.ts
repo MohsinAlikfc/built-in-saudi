@@ -77,6 +77,11 @@ export const liveToolSeo: ToolSeo[] = [
     },
   },
   {
+    id: 'tafqeet',
+    en: { name: 'Tafqeet (Number to Words)', description: 'Spell any number or amount in Arabic words (tafqeet) — Saudi Riyals with halalas or a plain number, with correct Arabic grammar. For cheques, invoices and contracts.' },
+    ar: { name: 'التفقيط', description: 'اكتب أي رقم أو مبلغ بالأحرف العربية (تفقيط) — بالريال مع الهللات أو رقمًا مجرّدًا، بالقواعد الصحيحة. للشيكات والفواتير والعقود.' },
+  },
+  {
     id: 'iban-validator',
     en: { name: 'IBAN Validator', description: 'Validate an IBAN (ISO 7064 mod-97), enforce the Saudi SA + 22-digit format, group it in fours and identify the bank — in your browser, never sent anywhere.' },
     ar: { name: 'مدقّق الآيبان', description: 'تحقّق من الآيبان عبر mod-97، وتأكّد من صيغة السعودية (SA + ٢٢ رقمًا)، واعرضه بمجموعات من أربعة وتعرّف على البنك — داخل متصفحك دون إرسال.' },
