@@ -190,6 +190,15 @@ export function GridIcon({ className }: P) {
   )
 }
 
+export function GlobeIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M2 12h20" /><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z" />
+    </svg>
+  )
+}
+
 export function InfoIcon({ className }: P) {
   return (
     <svg {...base} className={className} aria-hidden="true">

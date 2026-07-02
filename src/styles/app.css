@@ -738,3 +738,15 @@ html { -webkit-tap-highlight-color: transparent; }
 .meta__row:last-child { border-bottom: none; }
 .meta__row dt { color: var(--ink-soft); margin: 0; }
 .meta__row dd { margin: 0; font-family: var(--font-mono); word-break: break-word; }
+
+/* Language detector */
+.lang__input { width: 100%; resize: vertical; min-height: 120px; font-size: 1rem; }
+.lang__result { display: flex; flex-direction: column; gap: 0.5rem; padding: 1.1rem; border: 1px solid var(--line-soft); border-radius: var(--r-md); background: var(--surface); }
+.lang__top { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+.lang__name { font-size: 1.6rem; font-weight: 700; color: var(--green-700); }
+.lang__native { color: var(--ink-soft); font-size: 1.1rem; }
+.lang__bar { height: 8px; border-radius: 999px; background: var(--sand-200); overflow: hidden; }
+.lang__bar span { display: block; height: 100%; background: var(--green-600); border-radius: 999px; transition: width 0.2s; }
+.lang__conf { font-size: 0.8rem; color: var(--ink-faint); font-family: var(--font-mono); }
+.lang__alts { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-top: 0.3rem; }
+.lang__alts-label { font-size: 0.76rem; color: var(--ink-faint); }
