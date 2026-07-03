@@ -71,8 +71,8 @@ export function AppLauncher() {
                     data-testid={`launcher-${tool.id}`}
                     onClick={() => setOpen(false)}
                   >
-                    <span className="grid place-items-center w-12 h-12 rounded-[14px] bg-[color-mix(in_srgb,var(--green-400)_14%,transparent)] text-green-600 [&_svg]:size-6" aria-hidden="true"><Icon /></span>
-                    <span className="text-[0.72rem] leading-tight break-words w-full">{l.name}</span>
+                    <span className="grid place-items-center w-[58px] h-[58px] rounded-2xl bg-green-600 text-sand-100 shadow-[var(--shadow-sm)] [&_svg]:size-7" aria-hidden="true"><Icon /></span>
+                    <span className="text-[0.72rem] font-medium leading-tight break-words w-full">{l.name}</span>
                   </Link>
                 )
               })}

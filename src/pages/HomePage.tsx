@@ -59,7 +59,7 @@ export function HomePage() {
     <section className="wrap pt-[clamp(1.2rem,4vw,2rem)] pb-[clamp(3rem,8vw,5.5rem)]" aria-labelledby="catalog-title">
       <h1 id="catalog-title" className="sr-only">{t.hero.title1} {t.hero.title2}</h1>
 
-      <div className="tool-search relative flex items-center gap-[0.6rem] mb-[1.5rem] py-[0.15rem] px-[0.9rem] bg-[var(--surface)] border border-[color:var(--line)] rounded-full shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 focus-within:border-green-500 focus-within:shadow-[0_0_0_3px_color-mix(in_srgb,var(--green-500)_18%,transparent)]" role="search">
+      <div className="tool-search relative flex items-center gap-[0.6rem] mb-[clamp(2.2rem,7vw,3.2rem)] py-[0.15rem] px-[0.9rem] bg-[var(--surface)] border border-[color:var(--line)] rounded-full shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 focus-within:border-green-500 focus-within:shadow-[0_0_0_3px_color-mix(in_srgb,var(--green-500)_18%,transparent)]" role="search">
         <SearchIcon className="w-5 h-5 text-ink-faint flex-none" />
         <input
           ref={inputRef}
@@ -93,8 +93,11 @@ export function HomePage() {
         )
       ) : (
         sections.map((sec) => (
-          <div key={sec.key} className="mb-[2.2rem]">
-            <h2 className="font-display text-[1.05rem] sm:text-[1.2rem] font-semibold text-green-800 mb-[0.9rem] px-1">{sec.title}</h2>
+          <div key={sec.key} className="mb-[2.6rem]">
+            <div className="flex items-center gap-3 mb-[1.1rem]">
+              <h2 className="text-[0.8rem] font-medium tracking-[0.04em] text-ink-faint whitespace-nowrap rtl:tracking-normal">{sec.title}</h2>
+              <span className="flex-1 h-px bg-[color:var(--line-soft)]" aria-hidden="true" />
+            </div>
             <div className={GRID}>
               {sec.tools.map((tool) => <ToolCard key={tool.id} tool={tool} index={indexOf.get(tool.id) ?? 0} />)}
             </div>
