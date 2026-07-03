@@ -170,6 +170,13 @@ test.describe('tools', () => {
     await expect(page.getByTestId('inv-subtotal')).toContainText('250')
     await expect(page.getByTestId('inv-vat')).toContainText('37.5')
     await expect(page.getByTestId('inv-total')).toContainText('287.5')
+    // share button + zoomable preview modal
+    await expect(page.getByTestId('inv-share')).toBeVisible()
+    await page.getByTestId('inv-preview').click()
+    await expect(page.getByTestId('inv-modal')).toBeVisible()
+    await expect(page.getByTestId('inv-modal').getByText('287.5', { exact: false })).toBeVisible()
+    await page.getByTestId('inv-modal-close').click()
+    await expect(page.getByTestId('inv-modal')).toHaveCount(0)
   })
 
   test('qr studio: renders a code + customization controls', async ({ page }) => {
