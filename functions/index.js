@@ -19,9 +19,10 @@ const NAMES = {
   en: { fajr: 'Fajr', dhuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha' },
   ar: { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' },
 }
-// Notification wording, in the style of Saudi Quran Radio:
-//   title: "دخل وقت صلاة العشاء"  ·  body: "حسب التوقيت لمدينة الرياض"
-// `place` is the localized city name (may be absent → generic body).
+// Notification wording, in the style of Saudi Quran Radio, kept terse:
+//   title: "دخل المغرب"  ·  body: "حسب توقيت: الرياض"
+// `place` is the localized city name (device locations are reverse-geocoded on
+// the client, so it should be present; may be absent → generic body).
 function compose(locale, prayer, kind, mins, place) {
   const ar = locale === 'ar'
   // "حسب توقيت: <place>" — a colon avoids Arabic grammar/agreement and reads fine
@@ -40,7 +41,7 @@ function compose(locale, prayer, kind, mins, place) {
       : { title: `${prayer} in ${mins} min`, body: byCity }
   }
   return ar
-    ? { title: `دخل وقت صلاة ${prayer}`, body: byCity }
+    ? { title: `دخل ${prayer}`, body: byCity }
     : { title: `It’s time for ${prayer}`, body: byCity }
 }
 // Iqama (congregation) minutes after the adhan, per common Saudi practice.

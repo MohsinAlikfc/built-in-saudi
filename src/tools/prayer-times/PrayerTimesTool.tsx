@@ -313,7 +313,7 @@ export default function PrayerTimesTool() {
     setPushBusy(true)
     try {
       const r = await enablePush(
-        { lat: loc.lat, lng: loc.lng, tz: loc.tz, place: cityOf(loc.label, STR[locale].myLocation) }, locale,
+        { lat: loc.lat, lng: loc.lng, tz: loc.tz, place: await resolvePlace() }, locale,
         { minutesBefore: prefs.minutesBefore, iqamaAlert: prefs.iqamaAlert, prayers: DAILY },
       )
       if (r.status === 'ok') setPushOn(true)
@@ -325,7 +325,7 @@ export default function PrayerTimesTool() {
     setPrefs(np); savePrefs(np)
     setPushBusy(true)
     try {
-      await enablePush({ lat: loc.lat, lng: loc.lng, tz: loc.tz, place: cityOf(loc.label, STR[locale].myLocation) }, locale,
+      await enablePush({ lat: loc.lat, lng: loc.lng, tz: loc.tz, place: await resolvePlace() }, locale,
         { minutesBefore: np.minutesBefore, iqamaAlert: np.iqamaAlert, prayers: DAILY })
     } finally { setPushBusy(false) }
   }
@@ -343,6 +343,18 @@ export default function PrayerTimesTool() {
       setLoc((prev) => ({ ...prev, label: name }))
       saveLoc({ mode: 'geo', lat, lng, tz, label: name })
     })
+  }
+
+  // The city name to put in the push body ("حسب توقيت: <city>"). Prefer the
+  // already-resolved label; for a device location whose label hasn't resolved
+  // yet, reverse-geocode on demand so we still send a real place, not "توقيتك".
+  async function resolvePlace(): Promise<string | undefined> {
+    const fromLabel = cityOf(loc.label, STR[locale].myLocation)
+    if (fromLabel) return fromLabel
+    try {
+      const name = await reverseGeocode(loc.lat, loc.lng, locale)
+      return name ? name.split(/[،,]/)[0].trim() : undefined
+    } catch { return undefined }
   }
 
   function useMyLocation() {
