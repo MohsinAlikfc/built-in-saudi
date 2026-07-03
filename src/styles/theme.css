@@ -291,6 +291,44 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 .pray__viewdate { font-family: var(--font-body); font-size: 0.8rem; color: var(--ink-faint); margin-inline-end: 0.2rem; }
 [dir='rtl'] .pray__viewdate { font-family: var(--font-ar); }
 .pray__date-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: 0; padding: 0; margin: 0; }
+/* Hijri-calendar "today" box: edge-docked, full-bleed — app-like, no margin
+   (same treatment as the prayer-times hero). */
+.pray__today {
+  margin-inline: calc(50% - 50vw); width: 100vw; max-width: 100vw; border-radius: 0;
+  margin-top: calc(clamp(1.5rem, 4vw, 2.5rem) * -1); /* cancel .tool-page top padding */
+  padding-block: 1.4rem;
+}
+
+/* Dual month-view calendars in the date converter */
+.cal2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+.cal { display: flex; flex-direction: column; gap: 0.6rem; min-width: 0; }
+.cal__head { display: flex; align-items: center; gap: 0.5rem; }
+.cal__titlebox { flex: 1; text-align: center; display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.cal__label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); }
+[dir='rtl'] .cal__label { letter-spacing: 0; }
+.cal__title { font-family: var(--font-display); font-size: 1.02rem; color: var(--green-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[dir='rtl'] .cal__title { font-family: var(--font-ar); }
+.cal__nav {
+  flex: none; width: 2rem; height: 2rem; display: grid; place-items: center;
+  border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface);
+  color: var(--green-700); font-size: 1.1rem; line-height: 1; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.cal__nav:hover { border-color: color-mix(in srgb, var(--green-500) 40%, transparent); background: color-mix(in srgb, var(--green-400) 8%, transparent); }
+.cal__dow, .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal__dow { color: var(--ink-faint); font-size: 0.66rem; text-align: center; }
+.cal__dow span { padding: 0.2rem 0; overflow: hidden; text-overflow: ellipsis; }
+.cal__cell {
+  aspect-ratio: 1; display: grid; place-items: center; border: 1px solid transparent;
+  border-radius: var(--r-sm); background: color-mix(in srgb, var(--sand-100) 55%, var(--surface));
+  color: var(--ink); font-size: 0.9rem; font-variant-numeric: tabular-nums; cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+.cal__cell:hover { border-color: color-mix(in srgb, var(--green-500) 45%, transparent); }
+.cal__cell.is-sel { background: var(--green-600); color: var(--sand-100); font-weight: 700; }
+.cal__cell--empty { background: none; border: none; cursor: default; }
+.cal__num { width: 100%; font-family: var(--font-mono); text-align: center; letter-spacing: 0.04em; }
+.cal__cap { font-size: 0.82rem; color: var(--ink-soft); text-align: center; }
+
 @media (max-width: 720px) { .pray__grid { grid-template-columns: 1fr; } }
 @media (max-width: 560px) {
   .pray__grid { grid-template-columns: 1fr; }
@@ -299,6 +337,8 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
   .pray__next { display: none; }
   .pray__hero { padding: 1.1rem 1rem; }
   .pray__hero-name { font-size: 1.8rem; }
+  .cal2 { grid-template-columns: 1fr; gap: 1.4rem; }
+  .cal__cell { font-size: 0.95rem; }
 }
 
 
@@ -587,7 +627,7 @@ html { -webkit-tap-highlight-color: transparent; }
   .tool-card__icon { margin: 0 auto; width: 58px; height: 58px; border-radius: 16px; background: var(--green-600); color: var(--sand-100); box-shadow: var(--shadow-sm); }
   .tool-card__icon svg { width: 28px; height: 28px; }
   .tool-card:hover .tool-card__icon { background: var(--green-600); color: var(--sand-100); }
-  .tool-card__name { font-size: 0.72rem; font-weight: 500; margin: 0; line-height: 1.2; }
+  .tool-card__name { font-family: var(--font-body); font-size: 0.72rem; font-weight: 500; margin: 0; line-height: 1.2; }
   .tool-card[aria-disabled='true'], .tool-card.is-soon { opacity: 0.55; }
 }
 

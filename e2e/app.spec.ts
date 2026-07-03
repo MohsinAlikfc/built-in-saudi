@@ -27,7 +27,7 @@ test.describe('home', () => {
     await page.getByTestId('app-launcher').click()
     await expect(page.getByTestId('app-launcher-panel')).toBeVisible()
     await page.getByTestId('launcher-search').fill('uuid')
-    await page.getByTestId('launcher-uuid-generator').click()
+    await page.getByTestId('tool-uuid-generator').click()
     await expect(page).toHaveURL(/\/tools\/uuid-generator$/)
   })
 })
@@ -86,8 +86,13 @@ test.describe('tools', () => {
     await page.getByTestId('iban-input').fill('SA0380000000608010167519')
     await expect(page.getByTestId('iban-status')).toContainText('Valid')
     await expect(page.getByTestId('iban-bank')).toContainText('Al Rajhi')
+    // Share card: holder name + a generated, shareable image.
+    await page.getByTestId('iban-name').fill('Mohammed Al-Otaibi')
+    await expect(page.getByTestId('iban-card')).toBeVisible()
+    await expect(page.getByTestId('iban-share')).toBeVisible()
     await page.getByTestId('iban-input').fill('SA0380000000608010167518')
     await expect(page.getByTestId('iban-status')).toContainText('Invalid')
+    await expect(page.getByTestId('iban-card')).toHaveCount(0)
   })
 
   test('vat calculator: add and remove 15%', async ({ page }) => {
@@ -240,6 +245,20 @@ test.describe('tools', () => {
     // toggling to Gregorian keeps the grid populated
     await page.getByTestId('cal-mode-greg').click()
     expect(await page.locator('.cal2__cell:not(.is-blank)').count()).toBeGreaterThan(27)
+  })
+
+  test('hijri calendar: dual month calendars convert both ways, no BC bug', async ({ page }) => {
+    await page.goto('/en/tools/hijri-calendar')
+    await expect(page.getByTestId('cal-greg-title')).toBeVisible()
+    await expect(page.getByTestId('cal-hijri-title')).toBeVisible()
+    // Set a known Gregorian date; the Hijri calendar must follow.
+    await page.getByTestId('cal-greg-num').fill('03/07/2026')
+    await expect(page.getByTestId('cal-hijri-num')).toHaveValue('18/01/1448')
+    await expect(page.getByTestId('cal-hijri-title')).toContainText('Muharram 1448')
+    // The hero shows the Hijri date with a real era (AH), never a Gregorian "BC".
+    const hero = page.locator('.pray__today-hijri')
+    await expect(hero).toContainText('AH')
+    await expect(hero).not.toContainText('BC')
   })
 
   test('lorem: generates and switches to Arabic', async ({ page }) => {

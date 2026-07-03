@@ -34,12 +34,29 @@ export function hijriToGregorian(y: number, m: number, d: number): Date {
   return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
 }
 
-/** Localised Hijri string, e.g. "12 Ramadan 1447 AH" / "١٢ رمضان ١٤٤٧ هـ". */
+const WEEKDAY_FMT: Record<'en' | 'ar', Intl.DateTimeFormat> = {
+  en: new Intl.DateTimeFormat('en-US', { weekday: 'long' }),
+  ar: new Intl.DateTimeFormat('ar-SA', { weekday: 'long' }),
+}
+const AR_DIGITS = new Intl.NumberFormat('ar-SA-u-nu-arab', { useGrouping: false })
+const localizeNum = (n: number, locale: 'en' | 'ar') => (locale === 'ar' ? AR_DIGITS.format(n) : String(n))
+
+/**
+ * Localised Hijri string, e.g. "Friday, Ramadan 12, 1447 AH" / "الجمعة، ١٢ رمضان
+ * ١٤٤٧ هـ". Built from our own month table + weekday rather than Intl's Islamic
+ * `month: 'long'`/era — some browsers (notably several Android WebViews) have
+ * incomplete `islamic-umalqura` data and render Gregorian month names + a "BC"
+ * era, which is how "Muharram 18, 1448 AH" turned into "January 18, 1448 BC".
+ */
 export function formatHijri(date: Date, locale: 'en' | 'ar'): string {
-  const cal = locale === 'ar' ? 'ar-SA-u-ca-islamic-umalqura' : 'en-u-ca-islamic-umalqura'
-  return new Intl.DateTimeFormat(cal, {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-  }).format(date)
+  const h = gregorianToHijri(date)
+  const weekday = WEEKDAY_FMT[locale].format(date)
+  const month = HIJRI_MONTHS[locale][h.m - 1]
+  const d = localizeNum(h.d, locale)
+  const y = localizeNum(h.y, locale)
+  return locale === 'ar'
+    ? `${weekday}، ${d} ${month} ${y} هـ`
+    : `${weekday}, ${month} ${d}, ${y} AH`
 }
 
 /** Number of days (29 or 30) in an Umm al-Qura Hijri month. */
