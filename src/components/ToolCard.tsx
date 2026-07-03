@@ -56,7 +56,7 @@ export function ToolCard({ tool, index }: Props) {
 
   if (comingSoon) {
     return (
-      <div className={`${base} tool-card--soon bg-[color-mix(in_srgb,var(--sand-100)_60%,var(--surface))] border border-dashed border-[color:var(--line)] cursor-default`} aria-disabled="true">
+      <div className={`${base} tool-card--soon bg-[color-mix(in_srgb,var(--sand-100)_60%,var(--surface))] border border-dashed border-[color:var(--line)] cursor-default`} aria-disabled="true" data-testid={`tool-${tool.id}`}>
         {inner}
       </div>
     )
@@ -67,14 +67,14 @@ export function ToolCard({ tool, index }: Props) {
 
   if (tool.href) {
     return (
-      <a className={live} href={tool.href} target="_blank" rel="noreferrer noopener">
+      <a className={live} href={tool.href} target="_blank" rel="noreferrer noopener" data-testid={`tool-${tool.id}`}>
         {inner}
       </a>
     )
   }
 
   return (
-    <Link className={live} to={localePath(locale, `/tools/${tool.id}`)}>
+    <Link className={live} to={localePath(locale, `/tools/${tool.id}`)} data-testid={`tool-${tool.id}`}>
       {inner}
     </Link>
   )
