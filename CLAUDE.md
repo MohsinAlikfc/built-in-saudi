@@ -78,21 +78,26 @@ Warm Najdi-craft editorial aesthetic. Tokens in `src/styles/theme.css`
 - **Personalisation over preferences** — remember choices in `localStorage` (e.g. prayer location `bis-prayer-loc`, seen-tools) rather than settings pages.
 - Tools may **diverge in look/personality**; the shared chassis (Layout, tokens, registry) stays modular.
 
-**Tailwind (migration complete, #33):** Tailwind v4 (`@tailwindcss/vite`,
+**Tailwind (fully migrated):** Tailwind v4 (`@tailwindcss/vite`,
 **utilities-only, no preflight**) with the brand tokens mapped in
 `src/styles/tailwind.css` — so `bg-green-600`, `text-ink-faint`, `rounded-md`,
-`font-display`/`font-ar` etc. use the design system. **`app.css` has been
-retired.** Every tool, the shell and the home are authored in Tailwind
-utilities (arbitrary values like `bg-[color-mix(...)]` + `before:`/`group-hover:`/
-`rtl:`/`aria-*`/`[&_…]:` variants where needed). What stays as CSS lives in
-`src/styles/theme.css`: design tokens, base element styles, the shared base
-**primitives** (`.btn`/`.pill`/`.seg`/`.input`/`.field`/`.check`/`.stack`/
-`.panel`/`.code-out`), the **shared prayer/date-tool UI** (`.pray__*`, reused
-across ~8 tools), and app-chrome (notifications, update toast, bottom sheets,
-language-suggestion, dropzone, the mobile app-grid `@media`). **New tools:
-author in utilities**; only add to `theme.css` for a genuinely shared primitive.
-Keep the e2e suite green (13 specs); grep `dist/assets/*.css` to confirm a
-utility generated (the PWA service worker caches CSS, so the live preview lies).
+`font-display`/`font-ar` etc. use the design system. **All component styling is
+inline Tailwind utilities inside React components** (arbitrary values like
+`bg-[color-mix(...)]` + `before:`/`group-hover:`/`rtl:`/`max-[560px]:`/`aria-*`/
+`[&_…]:` variants). **Anything reused is a component in `src/components/ui/`**
+(`Button`, `Pill`, `Input`/`Textarea`/`Select`, `Field`, `Check`, `Stack`,
+`Panel`, `CodeOut`, `Seg`/`SegButton`, `StatusBadge`, `Sheet`) — add a new one
+there rather than a CSS class. **`src/styles/theme.css` holds ONLY**: design
+tokens (`:root`), the RTL font-token swap, **element resets in `@layer base`**
+(so utility classes on components always win — see below), the `.wrap` layout
+container, `@keyframes`, and the invoice `@media print` block. `tailwind.css`
+declares `@layer theme, base, utilities`.
+- **Cascade-layer trap (important):** base element rules (`button`, `h1–h4`, `a`)
+  MUST stay inside `@layer base`. If unlayered, they beat `@layer utilities`
+  regardless of specificity — which silently made buttons borderless and headings
+  serif. Utilities on components only win because base is layered below them.
+- Keep the e2e suite green; grep `dist/assets/*.css` to confirm a utility
+  generated (the PWA service worker caches CSS, so the live preview lies).
 
 ## Conventions
 
