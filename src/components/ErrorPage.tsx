@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { Link, useRouteError } from 'react-router-dom'
+import { useRouteError } from 'react-router-dom'
+import { Button } from './ui'
 import { useLocale, localePath } from '../i18n'
 
 const T = {
@@ -41,9 +42,9 @@ export function ErrorPage() {
       <h1 className="text-[clamp(2rem,6vw,3rem)] mt-[0.5rem]">{t.title}</h1>
       <p className="text-ink-soft mx-auto mt-4 mb-8 text-[1.05rem]">{t.body}</p>
       <div className="flex gap-[0.7rem] justify-center flex-wrap">
-        <button className="btn btn--primary" data-testid="error-reload"
-          onClick={() => window.location.reload()}>{t.reload}</button>
-        <Link to={localePath(locale)} className="btn">{t.home}</Link>
+        <Button variant="primary" data-testid="error-reload"
+          onClick={() => window.location.reload()}>{t.reload}</Button>
+        <Button to={localePath(locale)}>{t.home}</Button>
       </div>
     </div>
   )

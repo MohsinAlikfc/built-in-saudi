@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
+import { Stack, Field, Textarea } from '../../components/ui'
 
 const STR = {
   en: {
@@ -58,7 +59,7 @@ export default function WordCounterTool() {
   ]
 
   return (
-    <div className="stack" data-testid="word-counter">
+    <Stack data-testid="word-counter">
       <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-[0.8rem]" data-testid="wc-stats">
         {cards.map(([label, val]) => (
           <div className="bg-[var(--surface)] border border-[color:var(--line-soft)] rounded-md px-4 py-[0.9rem] text-center" key={label}>
@@ -67,12 +68,11 @@ export default function WordCounterTool() {
           </div>
         ))}
       </div>
-      <label className="field">
-        <span className="field__label">{s.label}</span>
-        <textarea className="input input--area" rows={10} placeholder={s.placeholder}
+      <Field label={s.label}>
+        <Textarea rows={10} placeholder={s.placeholder}
           data-testid="wc-input" aria-label={s.label}
           value={text} onChange={(e) => setText(e.target.value)} />
-      </label>
-    </div>
+      </Field>
+    </Stack>
   )
 }

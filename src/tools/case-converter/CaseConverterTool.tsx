@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { CopyIcon } from '../../components/icons'
+import { Button, Textarea, Stack } from '../../components/ui'
 
 const cap = (w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
 const words = (s: string) =>
@@ -54,8 +55,8 @@ export default function CaseConverterTool() {
   }
 
   return (
-    <div className="stack" data-testid="case-converter">
-      <textarea className="input input--area min-h-[6rem]" data-testid="case-input"
+    <Stack data-testid="case-converter">
+      <Textarea className="min-h-[6rem]" data-testid="case-input"
         placeholder={s.placeholder} value={text} onChange={(e) => setText(e.target.value)} />
       <p className="text-[0.82rem] text-ink-faint font-mono">{s.stats(wordCount, text.length)}</p>
 
@@ -67,15 +68,15 @@ export default function CaseConverterTool() {
                 <span className="font-body text-[0.68rem] uppercase tracking-[0.06em] text-ink-faint">{s.labels[id]}</span>
                 <span className="text-ink break-words" data-testid={`case-${id}`}>{val}</span>
               </div>
-              <button className="btn flex-none px-3" onClick={() => copy(id, val)} aria-label={s.copy} data-testid={`case-copy-${id}`}>
+              <Button className="flex-none px-3" onClick={() => copy(id, val)} aria-label={s.copy} data-testid={`case-copy-${id}`}>
                 <CopyIcon /> {copied === id ? s.copied : s.copy}
-              </button>
+              </Button>
             </div>
           ))}
         </div>
       ) : (
         <p className="text-ink-faint text-[0.95rem]">{s.empty}</p>
       )}
-    </div>
+    </Stack>
   )
 }

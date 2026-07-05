@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Coordinates, CalculationMethod, PrayerTimes, Prayer } from 'adhan'
 import { useLocale } from '../../i18n'
 import { BellIcon, CogIcon } from '../../components/icons'
+import { Button, Pill, Select } from '../../components/ui'
 import { pushSupported, currentSubscription, enablePush, disablePush, touchSubscription } from '../../lib/push'
 import { alertsHelp } from './alertsHelp'
 import { reverseGeocode } from './geo'
@@ -450,9 +451,9 @@ export default function PrayerTimesTool() {
         {!isLive && (
           <span className="pray__viewdate" data-testid="pray-viewdate">{weekdayFmt.format(new Date(`${viewDateStr}T12:00:00`))}</span>
         )}
-        <button className="pill" data-testid="pray-more" onClick={() => setShowMore((v) => !v)}>{showMore ? s.showLess : s.showMore}</button>
-        <button className="pill" data-testid="pray-choose" onClick={openChoose}>{s.choose}</button>
-        {!isLive && <button className="pill pill--accent" data-testid="pray-today" onClick={() => setViewDateStr('')}>{s.today}</button>}
+        <Pill data-testid="pray-more" onClick={() => setShowMore((v) => !v)}>{showMore ? s.showLess : s.showMore}</Pill>
+        <Pill data-testid="pray-choose" onClick={openChoose}>{s.choose}</Pill>
+        {!isLive && <Pill variant="accent" data-testid="pray-today" onClick={() => setViewDateStr('')}>{s.today}</Pill>}
         <input ref={dateRef} type="date" className="pray__date-hidden" value={viewDateStr} data-testid="pray-date"
           aria-hidden="true" tabIndex={-1} onChange={(e) => setViewDateStr(e.target.value)} />
       </div>
@@ -490,13 +491,13 @@ function AlertSettings({ s, prefs, busy, onApply, onDisable, onClose }: {
 
         <div className="pray__set-row">
           <span>{s.beforeLabel}</span>
-          <select className="input" value={prefs.minutesBefore} disabled={busy} data-testid="set-before"
+          <Select value={prefs.minutesBefore} disabled={busy} data-testid="set-before"
             onChange={(e) => onApply({ ...prefs, minutesBefore: Number(e.target.value) })}>
             <option value={0}>{s.atAdhan}</option>
             <option value={5}>{s.minShort(5)}</option>
             <option value={10}>{s.minShort(10)}</option>
             <option value={15}>{s.minShort(15)}</option>
-          </select>
+          </Select>
         </div>
 
         <label className="pray__set-row">
@@ -512,8 +513,8 @@ function AlertSettings({ s, prefs, busy, onApply, onDisable, onClose }: {
         </label>
 
         <div className="sheet__actions">
-          <button className="btn" data-testid="set-disable" disabled={busy} onClick={onDisable}>{s.turnOff}</button>
-          <button className="btn btn--primary" data-testid="set-done" onClick={onClose}>{s.done}</button>
+          <Button data-testid="set-disable" disabled={busy} onClick={onDisable}>{s.turnOff}</Button>
+          <Button variant="primary" data-testid="set-done" onClick={onClose}>{s.done}</Button>
         </div>
       </div>
     </div>,
@@ -557,8 +558,8 @@ function LocationSheet({ locale, s, pending, onPick, onUseLocation, onCancel, on
         </ul>
 
         <div className="sheet__actions">
-          <button className="btn" data-testid="loc-cancel" onClick={onCancel}>{s.cancel}</button>
-          <button className="btn btn--primary" data-testid="loc-save" onClick={onSave}>{s.save}</button>
+          <Button data-testid="loc-cancel" onClick={onCancel}>{s.cancel}</Button>
+          <Button variant="primary" data-testid="loc-save" onClick={onSave}>{s.save}</Button>
         </div>
       </div>
     </div>,
@@ -580,7 +581,7 @@ function AlertsHelpDialog({ failedMsg, help, detail, closeLabel, onClose }: {
         <ol className="pray__help-steps">
           {help.steps.map((step, i) => <li key={i}>{step}</li>)}
         </ol>
-        <button className="btn btn--primary" data-testid="alerts-help-close" onClick={onClose}>{closeLabel}</button>
+        <Button variant="primary" data-testid="alerts-help-close" onClick={onClose}>{closeLabel}</Button>
       </div>
     </div>,
     document.body,

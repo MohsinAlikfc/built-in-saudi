@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { UploadIcon, DownloadIcon } from '../../components/icons'
+import { Stack, Button } from '../../components/ui'
 
 interface Item { id: string; file: File; pages: number | null; error?: boolean }
 
@@ -72,7 +73,7 @@ export default function PdfMergeTool() {
   }
 
   return (
-    <div className="stack" data-testid="pdf-merge">
+    <Stack data-testid="pdf-merge">
       <button className="dropzone" data-testid="pm-drop" onClick={() => fileRef.current?.click()}
         onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); addFiles(e.dataTransfer.files) }}>
         <UploadIcon /><span>{items.length ? s.add : s.drop}</span>
@@ -91,9 +92,9 @@ export default function PdfMergeTool() {
                     {it.error ? s.locked : it.pages === null ? '…' : `${it.pages} ${s.pages}`}
                   </div>
                 </div>
-                <button className="btn px-2 min-w-[2rem] justify-center" aria-label={s.up} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-                <button className="btn px-2 min-w-[2rem] justify-center" aria-label={s.down} disabled={i === items.length - 1} onClick={() => move(i, 1)}>↓</button>
-                <button className="btn px-2 min-w-[2rem] justify-center" aria-label={s.remove} data-testid={`pm-remove-${i}`} onClick={() => remove(it.id)}>✕</button>
+                <Button className="px-2 min-w-[2rem] justify-center" aria-label={s.up} disabled={i === 0} onClick={() => move(i, -1)}>↑</Button>
+                <Button className="px-2 min-w-[2rem] justify-center" aria-label={s.down} disabled={i === items.length - 1} onClick={() => move(i, 1)}>↓</Button>
+                <Button className="px-2 min-w-[2rem] justify-center" aria-label={s.remove} data-testid={`pm-remove-${i}`} onClick={() => remove(it.id)}>✕</Button>
               </li>
             ))}
           </ul>
@@ -103,16 +104,16 @@ export default function PdfMergeTool() {
 
           <div className="flex gap-2 items-center">
             {!out ? (
-              <button className="btn btn--primary" data-testid="pm-merge" disabled={busy || anyLocked || items.length < 1} onClick={merge}>{busy ? s.merging : s.merge}</button>
+              <Button variant="primary" data-testid="pm-merge" disabled={busy || anyLocked || items.length < 1} onClick={merge}>{busy ? s.merging : s.merge}</Button>
             ) : (
-              <a className="btn btn--primary" href={out.url} download="merged.pdf" data-testid="pm-download"><DownloadIcon /> {s.download} · {(out.size / 1024).toFixed(0)} KB</a>
+              <Button variant="primary" href={out.url} download="merged.pdf" data-testid="pm-download"><DownloadIcon /> {s.download} · {(out.size / 1024).toFixed(0)} KB</Button>
             )}
-            <button className="btn" onClick={() => { setItems([]); setOut(null) }}>{s.clear}</button>
+            <Button onClick={() => { setItems([]); setOut(null) }}>{s.clear}</Button>
           </div>
         </>
       )}
 
       <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
-    </div>
+    </Stack>
   )
 }

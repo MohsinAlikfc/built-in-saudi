@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { reverseGeocode } from '../prayer-times/geo'
+import { Button } from '../../components/ui'
 
 // The Kaaba, Makkah.
 const KAABA = { lat: 21.4224779, lng: 39.8251832 }
@@ -131,11 +132,11 @@ export default function QiblaTool() {
 
       <div className="flex gap-[0.6rem] flex-wrap justify-center">
         {!compassOn ? (
-          <button className="btn btn--primary" data-testid="qibla-compass" onClick={enableCompass}>{s.enableCompass}</button>
+          <Button variant="primary" data-testid="qibla-compass" onClick={enableCompass}>{s.enableCompass}</Button>
         ) : (
           <span className="inline-flex items-center px-[0.9rem] py-[0.5rem] text-green-700 font-semibold">{s.compassOn}</span>
         )}
-        <button className="btn" data-testid="qibla-relocate" onClick={locate}>{s.locate}</button>
+        <Button data-testid="qibla-relocate" onClick={locate}>{s.locate}</Button>
       </div>
       <p className="text-[0.85rem] text-ink-faint text-center max-w-[32ch]">{compassOn ? s.hint : s.calibrate}</p>
     </div>

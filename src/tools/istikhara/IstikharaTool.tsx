@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocale } from '../../i18n'
 import { CopyIcon } from '../../components/icons'
+import { Pill } from '../../components/ui'
 
 // The du'ā of Ṣalāt al-Istikhāra — narrated by Jābir ibn ʿAbdillāh, recorded by
 // al-Bukhārī. The Arabic is the public-domain prophetic text; the transliteration
@@ -78,7 +79,7 @@ export default function IstikharaTool() {
       <section className="border border-[color:var(--line-soft)] rounded-md bg-[var(--surface)] overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[color:var(--line-soft)]">
           <h2 className="font-display text-[1.1rem] text-green-700">{s.duaTitle}</h2>
-          <button className="pill" data-testid="istikhara-copy" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</button>
+          <Pill data-testid="istikhara-copy" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</Pill>
         </div>
 
         <p dir="rtl" lang="ar" className="font-ar text-[1.6rem] leading-[2.15] text-ink px-5 py-5" data-testid="istikhara-dua">{DUA_AR}</p>

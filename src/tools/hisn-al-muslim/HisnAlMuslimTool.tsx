@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { SearchIcon } from '../../components/icons'
+import { Pill } from '../../components/ui'
 import { HISN } from './data'
 
 const STR = {
@@ -43,7 +44,7 @@ export default function HisnAlMuslimTool() {
   if (selected) {
     return (
       <div className="flex flex-col gap-4 max-w-[46rem] mx-auto" data-testid="hisn">
-        <button className="pill self-start" data-testid="hisn-back" onClick={() => setSelId(null)}>‹ {s.back}</button>
+        <Pill className="self-start" data-testid="hisn-back" onClick={() => setSelId(null)}>‹ {s.back}</Pill>
         <h2 dir="rtl" lang="ar" className="font-ar text-[1.5rem] font-bold text-green-700 text-center leading-snug">{selected.title}</h2>
         <ol className="flex flex-col gap-3">
           {selected.entries.map((e, i) => (

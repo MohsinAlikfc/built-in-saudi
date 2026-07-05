@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { CopyIcon, RefreshIcon } from '../../components/icons'
+import { Stack, Seg, SegButton, Input, Button } from '../../components/ui'
 
 type Unit = 'paragraphs' | 'sentences' | 'words'
 type Flavor = 'latin' | 'arabic'
@@ -75,22 +76,22 @@ export default function LoremTool() {
   }
 
   return (
-    <div className="stack" data-testid="lorem" dir={flavor === 'arabic' ? 'rtl' : 'ltr'}>
+    <Stack data-testid="lorem" dir={flavor === 'arabic' ? 'rtl' : 'ltr'}>
       <div className="flex flex-wrap gap-[0.6rem] items-center" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-        <div className="seg" role="group" aria-label={s.amount}>
+        <Seg role="group" aria-label={s.amount}>
           {(['paragraphs', 'sentences', 'words'] as Unit[]).map((u) => (
-            <button key={u} className={`seg__btn ${unit === u ? 'is-active' : ''}`} aria-pressed={unit === u}
-              data-testid={`lorem-unit-${u}`} onClick={() => setUnit(u)}>{s[u]}</button>
+            <SegButton key={u} active={unit === u} aria-pressed={unit === u}
+              data-testid={`lorem-unit-${u}`} onClick={() => setUnit(u)}>{s[u]}</SegButton>
           ))}
-        </div>
-        <input className="input w-20 text-center" type="number" min={1} max={100} value={count}
+        </Seg>
+        <Input className="w-20 text-center" type="number" min={1} max={100} value={count}
           data-testid="lorem-count" aria-label={s.amount} onChange={(e) => setCount(Math.min(100, Math.max(1, Number(e.target.value))))} />
-        <div className="seg" role="group" aria-label={s.flavor}>
+        <Seg role="group" aria-label={s.flavor}>
           {(['latin', 'arabic'] as Flavor[]).map((f) => (
-            <button key={f} className={`seg__btn ${flavor === f ? 'is-active' : ''}`} aria-pressed={flavor === f}
-              data-testid={`lorem-flavor-${f}`} onClick={() => setFlavor(f)}>{s[f]}</button>
+            <SegButton key={f} active={flavor === f} aria-pressed={flavor === f}
+              data-testid={`lorem-flavor-${f}`} onClick={() => setFlavor(f)}>{s[f]}</SegButton>
           ))}
-        </div>
+        </Seg>
       </div>
 
       {flavor === 'latin' && (
@@ -100,14 +101,14 @@ export default function LoremTool() {
         </label>
       )}
 
-      <div className="flex gap-[0.6rem] mt-[0.6rem] [&>.btn]:flex-1 [&>.btn]:justify-center">
-        <button className="btn" data-testid="lorem-regen" onClick={() => setSeed((v) => v + 1)}><RefreshIcon /> {s.regenerate}</button>
-        <button className="btn btn--primary" data-testid="lorem-copy" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</button>
+      <div className="flex gap-[0.6rem] mt-[0.6rem] [&>button]:flex-1 [&>button]:justify-center">
+        <Button data-testid="lorem-regen" onClick={() => setSeed((v) => v + 1)}><RefreshIcon /> {s.regenerate}</Button>
+        <Button variant="primary" data-testid="lorem-copy" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</Button>
       </div>
 
       <div className="p-[1.1rem] border border-[color:var(--line-soft)] rounded-md bg-[var(--surface)] leading-[1.7] [&_p]:mb-[0.9rem] [&_p:last-child]:mb-0" data-testid="lorem-out">
         {text.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
       </div>
-    </div>
+    </Stack>
   )
 }

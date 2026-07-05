@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Button } from './ui'
 import {
   useLocale, detectLocale, dicts, isHintDismissed, dismissHint,
   setStoredLocale, swapLocaleInPath,
@@ -35,9 +36,9 @@ export function LanguageSuggestion() {
     <div className="lang-hint" dir={dir} lang={target} role="dialog" aria-live="polite">
       <p className="lang-hint__msg">{s.message}</p>
       <div className="lang-hint__actions">
-        <button className="btn btn--primary lang-hint__switch" onClick={switchLang}>
+        <Button variant="primary" className="lang-hint__switch" onClick={switchLang}>
           {s.switch}
-        </button>
+        </Button>
         <button className="lang-hint__dismiss" onClick={dismiss}>{s.dismiss}</button>
       </div>
     </div>

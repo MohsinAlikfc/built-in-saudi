@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
 import type { Tool } from '../tools/types'
+import { Button } from '../components/ui'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import { useLocale, localePath, localizeTool } from '../i18n'
 
@@ -21,7 +21,7 @@ export function NotFoundPage({ kind = 'not-found', tool }: Props) {
         {soon ? t.notFound.soonTitle(toolName) : t.notFound.title}
       </h1>
       <p className="text-ink-soft mx-auto mt-4 mb-8 text-[1.05rem]">{soon ? t.notFound.soonBody : t.notFound.body}</p>
-      <Link to={localePath(locale)} className="btn btn--primary">{t.notFound.back}</Link>
+      <Button to={localePath(locale)} variant="primary">{t.notFound.back}</Button>
     </div>
   )
 }

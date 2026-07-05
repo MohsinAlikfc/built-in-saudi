@@ -4,6 +4,7 @@ import { useLocale } from '../../i18n'
 import { pushSupported, enablePush } from '../../lib/push'
 import { savedPrayerLocation, geolocate, FALLBACK_LOC } from '../../lib/prayerLocation'
 import { BellIcon, CogIcon } from '../../components/icons'
+import { Button, Pill, Seg, SegButton } from '../../components/ui'
 import { ADHKAR, type When } from './data'
 
 const STR = {
@@ -125,21 +126,21 @@ export default function AdhkarTool() {
   return (
     <div className="flex flex-col gap-5 max-w-[46rem] mx-auto pb-16" data-testid="adhkar">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="seg" role="group" aria-label="time">
+        <Seg role="group" aria-label="time">
           {(['morning', 'evening', 'sleep'] as ('morning' | 'evening' | 'sleep')[]).map((w) => (
-            <button key={w} className={`seg__btn ${when === w ? 'is-active' : ''}`} aria-pressed={when === w}
-              data-testid={`adhkar-${w}`} onClick={() => switchWhen(w)}>{s[w]}</button>
+            <SegButton key={w} active={when === w} aria-pressed={when === w}
+              data-testid={`adhkar-${w}`} onClick={() => switchWhen(w)}>{s[w]}</SegButton>
           ))}
-        </div>
+        </Seg>
         <div className="flex items-center gap-2">
           {pushSupported() && (
-            <button className={`pill ${remindOn ? 'pill--accent' : ''}`} data-testid="adhkar-remind"
+            <Pill variant={remindOn ? 'accent' : 'default'} data-testid="adhkar-remind"
               disabled={remindBusy} aria-pressed={remindOn}
               onClick={() => (remindOn ? setRemindSettings(true) : applyRemind({ morning: true, evening: true }))}>
               {remindOn ? <CogIcon /> : <BellIcon />} {remindOn ? s.remindOn : s.remind}
-            </button>
+            </Pill>
           )}
-          <button className="pill" data-testid="adhkar-reset" onClick={resetAll}>{s.reset}</button>
+          <Pill data-testid="adhkar-reset" onClick={resetAll}>{s.reset}</Pill>
         </div>
       </div>
       {remindErr && <p className="text-[0.8rem] text-[color:var(--danger)]">{remindErr}</p>}
@@ -178,15 +179,16 @@ export default function AdhkarTool() {
                     Count is the accent pill; Done just drops its background/border
                     (kept transparent, so the border width is preserved) and mutes
                     the text — so a completed dhikr reads as flat, not a button. */}
-                <button
+                <Pill
                   onClick={() => tap(d.id, d.count)}
                   data-testid={`dhikr-${d.id}`}
                   aria-label={`${s.count} — ${s.progress(cur, d.count)}`}
-                  className={`pill self-center mt-1 ${done ? '' : 'pill--accent'}`}
+                  variant={done ? 'default' : 'accent'}
+                  className="self-center mt-1"
                   style={done ? { background: 'transparent', borderColor: 'transparent', color: 'var(--ink-faint)' } : undefined}
                 >
                   {done ? s.done : s.count}
-                </button>
+                </Pill>
               </div>
             </li>
           )
@@ -217,9 +219,9 @@ export default function AdhkarTool() {
             {remindErr && <p className="text-[0.8rem] text-[color:var(--danger)]">{remindErr}</p>}
 
             <div className="sheet__actions">
-              <button className="btn" data-testid="adhkar-set-off" disabled={remindBusy}
-                onClick={() => { applyRemind({ morning: false, evening: false }); setRemindSettings(false) }}>{s.turnOff}</button>
-              <button className="btn btn--primary" data-testid="adhkar-set-done" onClick={() => setRemindSettings(false)}>{s.done}</button>
+              <Button data-testid="adhkar-set-off" disabled={remindBusy}
+                onClick={() => { applyRemind({ morning: false, evening: false }); setRemindSettings(false) }}>{s.turnOff}</Button>
+              <Button variant="primary" data-testid="adhkar-set-done" onClick={() => setRemindSettings(false)}>{s.done}</Button>
             </div>
           </div>
         </div>,

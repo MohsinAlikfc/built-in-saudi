@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { UploadIcon, DownloadIcon } from '../../components/icons'
+import { Button, Input, Field, Stack, Seg, SegButton } from '../../components/ui'
 
 type Fmt = 'image/jpeg' | 'image/webp' | 'image/png'
 
@@ -57,7 +58,7 @@ export default function ImageCompressorTool() {
   const savedPct = src && out ? Math.round((1 - out.size / src.size) * 100) : 0
 
   return (
-    <div className="stack" data-testid="image-compressor">
+    <Stack data-testid="image-compressor">
       {!src ? (
         <button className="dropzone" data-testid="imgcomp-drop" onClick={() => fileRef.current?.click()}
           onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); onFile(e.dataTransfer.files[0]) }}>
@@ -67,23 +68,20 @@ export default function ImageCompressorTool() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <label className="field">
-              <span className="field__label">{s.format}</span>
-              <div className="seg" role="group">
+            <Field label={s.format}>
+              <Seg role="group">
                 {([['image/jpeg', 'JPEG'], ['image/webp', 'WebP'], ['image/png', 'PNG']] as [Fmt, string][]).map(([f, l]) => (
-                  <button key={f} className={`seg__btn ${format === f ? 'is-active' : ''}`} data-testid={`imgcomp-fmt-${l}`} onClick={() => setFormat(f)}>{l}</button>
+                  <SegButton key={f} active={format === f} data-testid={`imgcomp-fmt-${l}`} onClick={() => setFormat(f)}>{l}</SegButton>
                 ))}
-              </div>
-            </label>
-            <label className="field">
-              <span className="field__label">{s.quality} · {Math.round(quality * 100)}%</span>
+              </Seg>
+            </Field>
+            <Field label={`${s.quality} · ${Math.round(quality * 100)}%`}>
               <input type="range" min={0.1} max={1} step={0.05} value={quality} data-testid="imgcomp-quality"
                 disabled={format === 'image/png'} onChange={(e) => setQuality(+e.target.value)} />
-            </label>
-            <label className="field">
-              <span className="field__label">{s.maxW}</span>
-              <input className="input font-mono" type="number" min={1} placeholder={String(src.bitmap.width)} value={maxW} data-testid="imgcomp-maxw" onChange={(e) => setMaxW(e.target.value)} />
-            </label>
+            </Field>
+            <Field label={s.maxW}>
+              <Input className="font-mono" type="number" min={1} placeholder={String(src.bitmap.width)} value={maxW} data-testid="imgcomp-maxw" onChange={(e) => setMaxW(e.target.value)} />
+            </Field>
           </div>
 
           {out && (
@@ -98,14 +96,14 @@ export default function ImageCompressorTool() {
           )}
 
           <div className="flex gap-2">
-            <a className="btn btn--primary" href={out?.url} download={`${src.name}-compressed.${ext}`} data-testid="imgcomp-download"><DownloadIcon /> {s.download}</a>
-            <button className="btn" onClick={() => { setSrc(null); setOut(null) }}>{s.drop}</button>
+            <Button variant="primary" href={out?.url ?? ''} download={`${src.name}-compressed.${ext}`} data-testid="imgcomp-download"><DownloadIcon /> {s.download}</Button>
+            <Button onClick={() => { setSrc(null); setOut(null) }}>{s.drop}</Button>
           </div>
           {busy && <p className="text-ink-faint text-[0.9rem]">{s.working}</p>}
         </>
       )}
 
       <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
-    </div>
+    </Stack>
   )
 }

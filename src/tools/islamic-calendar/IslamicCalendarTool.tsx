@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { useLocale } from '../../i18n'
+import { Pill, Seg, SegButton } from '../../components/ui'
 import {
   gregorianToHijri, hijriToGregorian, daysInHijriMonth, HIJRI_MONTHS, type IslamicEventKey,
 } from '../prayer-times/islamic'
@@ -101,13 +102,13 @@ export default function IslamicCalendarTool() {
   return (
     <div className="flex flex-col gap-[0.9rem]" data-testid="islamic-calendar">
       <div className="flex justify-between items-center gap-[0.6rem]">
-        <div className="seg" role="group">
+        <Seg role="group">
           {(['hijri', 'greg'] as Mode[]).map((m) => (
-            <button key={m} className={`seg__btn ${mode === m ? 'is-active' : ''}`} aria-pressed={mode === m}
-              data-testid={`cal-mode-${m}`} onClick={() => { setMode(m); setSel(null) }}>{m === 'hijri' ? s.hijri : s.gregorian}</button>
+            <SegButton key={m} active={mode === m} aria-pressed={mode === m}
+              data-testid={`cal-mode-${m}`} onClick={() => { setMode(m); setSel(null) }}>{m === 'hijri' ? s.hijri : s.gregorian}</SegButton>
           ))}
-        </div>
-        <button className="pill" data-testid="cal-today" onClick={goToday}>{s.today}</button>
+        </Seg>
+        <Pill data-testid="cal-today" onClick={goToday}>{s.today}</Pill>
       </div>
 
       <div className="flex items-center justify-between gap-[0.6rem]" ref={topRef}>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { Tool } from '../tools/types'
 import { ArrowIcon } from './icons'
+import { StatusBadge } from './ui'
 import { useLocale, localePath, localizeTool } from '../i18n'
 
 interface Props {
@@ -20,9 +21,9 @@ export function ToolCard({ tool, index }: Props) {
       <div className="tool-card__top flex items-center justify-between">
         <span className="font-mono text-[0.8rem] font-bold text-[color-mix(in_srgb,var(--color-ink)_30%,transparent)] tracking-[0.05em]">{num}</span>
         {tool.status !== 'stable' && (
-          <span className={`pill pill--${tool.status}`}>
+          <StatusBadge status={tool.status}>
             {comingSoon ? t.card.comingSoon : t.card.beta}
-          </span>
+          </StatusBadge>
         )}
       </div>
 

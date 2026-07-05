@@ -5,6 +5,7 @@ import {
   gregorianToHijri, hijriToGregorian, formatHijri,
   daysInHijriMonth, HIJRI_MONTHS, type IslamicEventKey,
 } from '../prayer-times/islamic'
+import { Button, Input } from '../../components/ui'
 
 const WEEKDAYS = {
   en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -138,7 +139,7 @@ function Converter({ locale, s, dateFmt, intlLoc }: {
     <section className="pray__card" data-testid="converter">
       <div className="pray__card-head">
         <h2>{s.converter}</h2>
-        <button className="btn" data-testid="conv-today" onClick={() => select(new Date())}>{s.today}</button>
+        <Button data-testid="conv-today" onClick={() => select(new Date())}>{s.today}</Button>
       </div>
 
       <div className="cal2">
@@ -239,8 +240,8 @@ function MonthCalendar(p: MonthCalendarProps) {
           ))}
       </div>
 
-      <input
-        className="input cal__num" inputMode="numeric" dir="ltr" data-testid={`${p.testid}-num`}
+      <Input
+        className="cal__num" inputMode="numeric" dir="ltr" data-testid={`${p.testid}-num`}
         value={text} onChange={(e) => onChange(e.target.value)} aria-label={p.label}
         spellCheck={false} autoComplete="off"
       />

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { UploadIcon, DownloadIcon } from '../../components/icons'
+import { Button, Field, Stack, Seg, SegButton } from '../../components/ui'
 
 type Size = 'fit' | 'a4' | 'letter'
 interface Item { id: string; file: File; url: string }
@@ -85,7 +86,7 @@ export default function ImagesToPdfTool() {
   }
 
   return (
-    <div className="stack" data-testid="images-to-pdf">
+    <Stack data-testid="images-to-pdf">
       <button className="dropzone" data-testid="i2p-drop" onClick={() => fileRef.current?.click()}
         onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); addFiles(e.dataTransfer.files) }}>
         <UploadIcon /><span>{items.length ? s.add : s.drop}</span>
@@ -100,39 +101,39 @@ export default function ImagesToPdfTool() {
                 <span className="font-mono text-ink-faint text-[0.8rem] w-6 text-center flex-none">{i + 1}</span>
                 <img src={it.url} alt="" className="w-12 h-12 object-cover rounded bg-sand-100 flex-none" />
                 <span className="flex-1 min-w-0 truncate text-[0.9rem]">{it.file.name}</span>
-                <button className="btn px-2 min-w-[2rem] justify-center" aria-label={s.up} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-                <button className="btn px-2 min-w-[2rem] justify-center" aria-label={s.down} disabled={i === items.length - 1} onClick={() => move(i, 1)}>↓</button>
-                <button className="btn px-2 min-w-[2rem] justify-center" aria-label={s.remove} data-testid={`i2p-remove-${i}`} onClick={() => remove(it.id)}>✕</button>
+                <Button className="px-2 min-w-[2rem] justify-center" aria-label={s.up} disabled={i === 0} onClick={() => move(i, -1)}>↑</Button>
+                <Button className="px-2 min-w-[2rem] justify-center" aria-label={s.down} disabled={i === items.length - 1} onClick={() => move(i, 1)}>↓</Button>
+                <Button className="px-2 min-w-[2rem] justify-center" aria-label={s.remove} data-testid={`i2p-remove-${i}`} onClick={() => remove(it.id)}>✕</Button>
               </li>
             ))}
           </ul>
 
           <div className="flex flex-wrap gap-3 items-end">
-            <label className="field"><span className="field__label">{s.size}</span>
-              <div className="seg" role="group">
+            <Field label={s.size}>
+              <Seg role="group">
                 {([['fit', s.fit], ['a4', 'A4'], ['letter', 'Letter']] as [Size, string][]).map(([v, l]) => (
-                  <button key={v} className={`seg__btn ${size === v ? 'is-active' : ''}`} data-testid={`i2p-size-${v}`} onClick={() => { setSize(v); setPdf(null) }}>{l}</button>
+                  <SegButton key={v} active={size === v} data-testid={`i2p-size-${v}`} onClick={() => { setSize(v); setPdf(null) }}>{l}</SegButton>
                 ))}
-              </div>
-            </label>
+              </Seg>
+            </Field>
             {size !== 'fit' && (
-              <label className="field"><span className="field__label">{s.margin} · {margin}pt</span>
-                <input type="range" min={0} max={72} step={4} value={margin} onChange={(e) => { setMargin(+e.target.value); setPdf(null) }} /></label>
+              <Field label={`${s.margin} · ${margin}pt`}>
+                <input type="range" min={0} max={72} step={4} value={margin} onChange={(e) => { setMargin(+e.target.value); setPdf(null) }} /></Field>
             )}
           </div>
 
           <div className="flex gap-2 items-center">
             {!pdf ? (
-              <button className="btn btn--primary" data-testid="i2p-create" disabled={busy} onClick={create}>{busy ? s.creating : `${s.create} · ${items.length} ${s.pages}`}</button>
+              <Button variant="primary" data-testid="i2p-create" disabled={busy} onClick={create}>{busy ? s.creating : `${s.create} · ${items.length} ${s.pages}`}</Button>
             ) : (
-              <a className="btn btn--primary" href={pdf.url} download="images.pdf" data-testid="i2p-download"><DownloadIcon /> {s.download} · {(pdf.size / 1024).toFixed(0)} KB</a>
+              <Button variant="primary" href={pdf.url} download="images.pdf" data-testid="i2p-download"><DownloadIcon /> {s.download} · {(pdf.size / 1024).toFixed(0)} KB</Button>
             )}
-            <button className="btn" onClick={() => { setItems([]); setPdf(null) }}>{s.clear}</button>
+            <Button onClick={() => { setItems([]); setPdf(null) }}>{s.clear}</Button>
           </div>
         </>
       )}
 
       <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
-    </div>
+    </Stack>
   )
 }

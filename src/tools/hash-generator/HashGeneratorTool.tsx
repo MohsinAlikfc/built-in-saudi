@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { CopyIcon, UploadIcon } from '../../components/icons'
+import { Button, Textarea, Stack, Seg, SegButton } from '../../components/ui'
 
 type Algo = 'SHA-1' | 'SHA-256' | 'SHA-384' | 'SHA-512'
 const ALGOS: Algo[] = ['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512']
@@ -65,24 +66,24 @@ export default function HashGeneratorTool() {
   const has = hex && !busy
 
   return (
-    <div className="stack" data-testid="hash-generator">
+    <Stack data-testid="hash-generator">
       <div className="flex flex-wrap items-center gap-[0.6rem] justify-between">
-        <div className="seg" role="group" aria-label="source">
+        <Seg role="group" aria-label="source">
           {(['text', 'file'] as const).map((m) => (
-            <button key={m} className={`seg__btn ${mode === m ? 'is-active' : ''}`} aria-pressed={mode === m}
-              data-testid={`hash-mode-${m}`} onClick={() => setMode(m)}>{s[m]}</button>
+            <SegButton key={m} active={mode === m} aria-pressed={mode === m}
+              data-testid={`hash-mode-${m}`} onClick={() => setMode(m)}>{s[m]}</SegButton>
           ))}
-        </div>
-        <div className="seg" role="group" aria-label="algorithm">
+        </Seg>
+        <Seg role="group" aria-label="algorithm">
           {ALGOS.map((a) => (
-            <button key={a} className={`seg__btn ${algo === a ? 'is-active' : ''}`} aria-pressed={algo === a}
-              data-testid={`hash-algo-${a}`} onClick={() => setAlgo(a)}>{a.replace('SHA-', '')}</button>
+            <SegButton key={a} active={algo === a} aria-pressed={algo === a}
+              data-testid={`hash-algo-${a}`} onClick={() => setAlgo(a)}>{a.replace('SHA-', '')}</SegButton>
           ))}
-        </div>
+        </Seg>
       </div>
 
       {mode === 'text' ? (
-        <textarea className="input input--area min-h-[7rem]" data-testid="hash-text"
+        <Textarea className="min-h-[7rem]" data-testid="hash-text"
           placeholder={s.placeholder} value={text} onChange={(e) => setText(e.target.value)} />
       ) : (
         <button className="dropzone" onClick={() => fileRef.current?.click()} data-testid="hash-drop"
@@ -103,7 +104,7 @@ export default function HashGeneratorTool() {
               <span className="font-body text-[0.72rem] uppercase tracking-[0.06em] text-ink-faint">{label}</span>
               <div className="flex items-center gap-2">
                 <code className="flex-1 font-mono text-[0.85rem] break-all bg-sand-100 border border-[color:var(--line-soft)] rounded-[5px] px-3 py-2 text-green-700" data-testid={`hash-${key}`}>{val}</code>
-                <button className="btn flex-none px-3" onClick={() => copy(val, key)} aria-label={s.copy}><CopyIcon /> {copied === key ? s.copied : s.copy}</button>
+                <Button className="flex-none px-3" onClick={() => copy(val, key)} aria-label={s.copy}><CopyIcon /> {copied === key ? s.copied : s.copy}</Button>
               </div>
             </div>
           ))}
@@ -113,6 +114,6 @@ export default function HashGeneratorTool() {
       )}
 
       <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
-    </div>
+    </Stack>
   )
 }

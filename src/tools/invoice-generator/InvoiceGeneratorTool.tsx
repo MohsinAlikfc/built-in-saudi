@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useLocale } from '../../i18n'
 import { DownloadIcon, ShareIcon, ExpandIcon } from '../../components/icons'
 import { tafqeetSAR } from '../tafqeet/tafqeet'
+import { Stack, Button } from '../../components/ui'
 
 interface Row { id: string; desc: string; qty: string; price: string }
 let uid = 0
@@ -116,7 +117,7 @@ export default function InvoiceGeneratorTool() {
             </tbody>
           </table>
         </div>
-        {!ro && <button className="btn self-start print-hide" data-testid="inv-add-row" onClick={addRow}>+ {s.addRow}</button>}
+        {!ro && <Button className="self-start print-hide" data-testid="inv-add-row" onClick={addRow}>+ {s.addRow}</Button>}
         <div className="flex flex-col gap-1 items-end rtl:items-start ms-auto rtl:ms-0 rtl:me-auto w-full sm:w-72">
           <div className="flex justify-between w-full text-ink-soft"><span>{s.subtotal}</span><span className="font-mono" data-testid={ro ? undefined : 'inv-subtotal'}>{money.format(subtotal)}</span></div>
           <div className="flex justify-between w-full text-ink-soft">
@@ -133,7 +134,7 @@ export default function InvoiceGeneratorTool() {
   }
 
   return (
-    <div className="stack" data-testid="invoice-generator">
+    <Stack data-testid="invoice-generator">
       <div className="flex flex-col sm:flex-row gap-4 items-start">
         <div className="flex-1 min-w-0 w-full">{Doc({ ro: false })}</div>
 
@@ -147,8 +148,8 @@ export default function InvoiceGeneratorTool() {
       </div>
 
       <div className="flex gap-2 print-hide">
-        <button className="btn btn--primary" data-testid="inv-print" onClick={() => window.print()}><DownloadIcon /> {s.print}</button>
-        <button className="btn" data-testid="inv-share" onClick={share}><ShareIcon /> {s.share}</button>
+        <Button variant="primary" data-testid="inv-print" onClick={() => window.print()}><DownloadIcon /> {s.print}</Button>
+        <Button data-testid="inv-share" onClick={share}><ShareIcon /> {s.share}</Button>
       </div>
       <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem] print-hide"><span aria-hidden="true">🔒</span> {s.privacy}</p>
 
@@ -156,15 +157,15 @@ export default function InvoiceGeneratorTool() {
         <div className="fixed inset-0 z-[100] bg-[color-mix(in_srgb,var(--ink)_55%,transparent)] flex flex-col p-3 sm:p-6 overflow-y-auto" data-testid="inv-modal" onClick={() => setZoom(false)}>
           <div className="mx-auto w-full max-w-2xl my-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-end gap-2 mb-2">
-              <button className="btn btn--primary" onClick={() => window.print()}><DownloadIcon /> {s.print}</button>
-              <button className="btn" onClick={share}><ShareIcon /> {s.share}</button>
-              <button className="btn" data-testid="inv-modal-close" onClick={() => setZoom(false)}>✕ {s.close}</button>
+              <Button variant="primary" onClick={() => window.print()}><DownloadIcon /> {s.print}</Button>
+              <Button onClick={share}><ShareIcon /> {s.share}</Button>
+              <Button data-testid="inv-modal-close" onClick={() => setZoom(false)}>✕ {s.close}</Button>
             </div>
             <div className="shadow-[var(--shadow-md)] rounded-md">{Doc({ ro: true })}</div>
           </div>
         </div>,
         document.body,
       )}
-    </div>
+    </Stack>
   )
 }

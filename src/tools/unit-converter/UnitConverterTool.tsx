@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { RefreshIcon, CopyIcon } from '../../components/icons'
+import { Button, Input, Select, Field, Stack } from '../../components/ui'
 
 // Ratio categories: factor = base units per 1 of this unit. Temperature is
 // handled separately (offsets, not ratios).
@@ -95,38 +96,35 @@ export default function UnitConverterTool() {
   }
 
   return (
-    <div className="stack" data-testid="unit-converter">
-      <label className="field">
-        <span className="field__label">{locale === 'ar' ? 'الفئة' : 'Category'}</span>
-        <select className="input" value={catId} data-testid="unit-category" onChange={(e) => pickCat(e.target.value)}>
+    <Stack data-testid="unit-converter">
+      <Field label={locale === 'ar' ? 'الفئة' : 'Category'}>
+        <Select value={catId} data-testid="unit-category" onChange={(e) => pickCat(e.target.value)}>
           {CATS.map((c) => <option key={c.id} value={c.id}>{locale === 'ar' ? c.ar : c.en}</option>)}
-        </select>
-      </label>
+        </Select>
+      </Field>
 
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 items-end">
-        <label className="field">
-          <span className="field__label">{s.from}</span>
-          <input className="input font-mono" type="number" inputMode="decimal" value={value} data-testid="unit-value" onChange={(e) => setValue(e.target.value)} />
-          <select className="input mt-2" value={from} data-testid="unit-from" onChange={(e) => setFrom(e.target.value)}>
+        <Field label={s.from}>
+          <Input className="font-mono" type="number" inputMode="decimal" value={value} data-testid="unit-value" onChange={(e) => setValue(e.target.value)} />
+          <Select className="mt-2" value={from} data-testid="unit-from" onChange={(e) => setFrom(e.target.value)}>
             {cat.units.map((u) => <option key={u.id} value={u.id}>{u.label}</option>)}
-          </select>
-        </label>
+          </Select>
+        </Field>
 
-        <button className="btn self-center sm:mb-[0.1rem] px-3" data-testid="unit-swap" aria-label={s.swap} title={s.swap}
-          onClick={() => { setFrom(to); setTo(from) }}><RefreshIcon /></button>
+        <Button className="self-center sm:mb-[0.1rem] px-3" data-testid="unit-swap" aria-label={s.swap} title={s.swap}
+          onClick={() => { setFrom(to); setTo(from) }}><RefreshIcon /></Button>
 
-        <label className="field">
-          <span className="field__label">{s.to}</span>
-          <div className="input font-mono flex items-center justify-between gap-2" data-testid="unit-result">
+        <Field label={s.to}>
+          <div className="w-full px-[0.85rem] py-[0.7rem] text-ink bg-[var(--surface)] border border-[color:var(--line)] rounded-sm shadow-[inset_0_1px_2px_rgba(18,33,27,0.04)] font-mono flex items-center justify-between gap-2" data-testid="unit-result">
             <span className="break-all">{result || '—'}</span>
           </div>
-          <select className="input mt-2" value={to} data-testid="unit-to" onChange={(e) => setTo(e.target.value)}>
+          <Select className="mt-2" value={to} data-testid="unit-to" onChange={(e) => setTo(e.target.value)}>
             {cat.units.map((u) => <option key={u.id} value={u.id}>{u.label}</option>)}
-          </select>
-        </label>
+          </Select>
+        </Field>
       </div>
 
-      <button className="btn self-start" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</button>
-    </div>
+      <Button className="self-start" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</Button>
+    </Stack>
   )
 }

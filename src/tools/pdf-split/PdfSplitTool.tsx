@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { UploadIcon, DownloadIcon } from '../../components/icons'
 import { zipStore } from '../../lib/zip'
+import { Button, Field, Input, Stack, Seg, SegButton } from '../../components/ui'
 
 const STR = {
   en: {
@@ -96,7 +97,7 @@ export default function PdfSplitTool() {
   }
 
   return (
-    <div className="stack" data-testid="pdf-split">
+    <Stack data-testid="pdf-split">
       {!src ? (
         <button className="dropzone" data-testid="ps-drop" onClick={() => fileRef.current?.click()}
           onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); onFile(e.dataTransfer.files[0]) }}>
@@ -107,33 +108,33 @@ export default function PdfSplitTool() {
         <>
           <p className="text-ink-soft" data-testid="ps-count"><span className="font-semibold">{src.name}</span> · {src.pages} {s.pages}</p>
 
-          <div className="seg self-start" role="group">
+          <Seg className="self-start" role="group">
             {(['range', 'burst'] as const).map((m) => (
-              <button key={m} className={`seg__btn ${mode === m ? 'is-active' : ''}`} data-testid={`ps-mode-${m}`} onClick={() => { setMode(m); setErr('') }}>{s[m]}</button>
+              <SegButton key={m} active={mode === m} data-testid={`ps-mode-${m}`} onClick={() => { setMode(m); setErr('') }}>{s[m]}</SegButton>
             ))}
-          </div>
+          </Seg>
 
           {mode === 'range' ? (
             <>
-              <label className="field max-w-md"><span className="field__label">{s.rangeLabel}</span>
-                <input className="input font-mono" data-testid="ps-range" placeholder="1-3, 5" value={range} onChange={(e) => { setRange(e.target.value); setExtractOut(null) }} /></label>
+              <Field label={s.rangeLabel} className="max-w-md">
+                <Input className="font-mono" data-testid="ps-range" placeholder="1-3, 5" value={range} onChange={(e) => { setRange(e.target.value); setExtractOut(null) }} /></Field>
               <div className="flex gap-2 items-center">
                 {!extractOut ? (
-                  <button className="btn btn--primary" data-testid="ps-extract" disabled={busy} onClick={extract}>{busy ? s.extracting : s.extract}</button>
+                  <Button variant="primary" data-testid="ps-extract" disabled={busy} onClick={extract}>{busy ? s.extracting : s.extract}</Button>
                 ) : (
-                  <a className="btn btn--primary" href={extractOut.url} download={`${src.name}-extract.pdf`} data-testid="ps-download"><DownloadIcon /> {s.download} · {extractOut.count} {s.pages}</a>
+                  <Button variant="primary" href={extractOut.url} download={`${src.name}-extract.pdf`} data-testid="ps-download"><DownloadIcon /> {s.download} · {extractOut.count} {s.pages}</Button>
                 )}
               </div>
             </>
           ) : (
             <>
-              <button className="btn btn--primary self-start" data-testid="ps-split" disabled={busy} onClick={burst}>{busy ? s.splitting : `${s.split} (${src.pages})`}</button>
+              <Button variant="primary" className="self-start" data-testid="ps-split" disabled={busy} onClick={burst}>{busy ? s.splitting : `${s.split} (${src.pages})`}</Button>
               {pages.length > 0 && (
                 <>
-                  <a className="btn self-start" href={zipUrl} download={`${src.name}-pages.zip`} data-testid="ps-zip"><DownloadIcon /> {s.dlAll}</a>
+                  <Button href={zipUrl} download={`${src.name}-pages.zip`} className="self-start" data-testid="ps-zip"><DownloadIcon /> {s.dlAll}</Button>
                   <div className="flex flex-wrap gap-2">
                     {pages.map((p, i) => (
-                      <a key={i} className="btn px-3 text-[0.85rem]" href={p.url} download={p.name} data-testid={`ps-page-${i}`}>{s.page} {i + 1}</a>
+                      <Button key={i} href={p.url} download={p.name} className="px-3 text-[0.85rem]" data-testid={`ps-page-${i}`}>{s.page} {i + 1}</Button>
                     ))}
                   </div>
                 </>
@@ -141,12 +142,12 @@ export default function PdfSplitTool() {
             </>
           )}
 
-          <button className="btn self-start" onClick={() => { setSrc(null); reset() }}>{s.another}</button>
+          <Button className="self-start" onClick={() => { setSrc(null); reset() }}>{s.another}</Button>
         </>
       )}
 
       {err && <p className="text-[color:var(--danger)] text-[0.9rem]" data-testid="ps-error">{err}</p>}
       <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
-    </div>
+    </Stack>
   )
 }

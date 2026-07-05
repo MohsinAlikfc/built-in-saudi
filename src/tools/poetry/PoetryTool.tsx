@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { CopyIcon } from '../../components/icons'
 import { BUHUR } from './data'
+import { Button, Textarea, Stack, Seg, SegButton } from '../../components/ui'
 
 const STR = {
   en: {
@@ -60,13 +61,13 @@ export default function PoetryTool() {
   }
 
   return (
-    <div className="stack" data-testid="poetry">
-      <div className="seg self-start" role="group">
+    <Stack data-testid="poetry">
+      <Seg className="self-start" role="group">
         {(['meters', 'format'] as const).map((tb) => (
-          <button key={tb} className={`seg__btn ${tab === tb ? 'is-active' : ''}`} aria-pressed={tab === tb}
-            data-testid={`poetry-tab-${tb}`} onClick={() => setTab(tb)}>{s[tb]}</button>
+          <SegButton key={tb} active={tab === tb} aria-pressed={tab === tb}
+            data-testid={`poetry-tab-${tb}`} onClick={() => setTab(tb)}>{s[tb]}</SegButton>
         ))}
-      </div>
+      </Seg>
 
       {tab === 'meters' ? (
         <div className="flex flex-col gap-3">
@@ -87,20 +88,20 @@ export default function PoetryTool() {
       ) : (
         <div className="flex flex-col gap-3">
           <p className="text-[0.95rem] text-ink-soft leading-relaxed">{s.formatLede}</p>
-          <textarea className="input input--area font-ar text-[1.1rem] min-h-[8rem]" dir="rtl" data-testid="poetry-input"
+          <Textarea className="font-ar text-[1.1rem] min-h-[8rem]" dir="rtl" data-testid="poetry-input"
             placeholder={s.placeholder} value={text} onChange={(e) => setText(e.target.value)} />
           {abyat.length ? (
             <>
               <div className="border border-[color:var(--line-soft)] rounded-md bg-[var(--surface)] p-4 sm:p-6 flex flex-col gap-4" data-testid="poetry-output">
                 {abyat.map((b, i) => <Bayt key={i} sadr={b.sadr} ajz={b.ajz} />)}
               </div>
-              <button className="btn self-start" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</button>
+              <Button className="self-start" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</Button>
             </>
           ) : (
             <p className="text-ink-faint text-[0.95rem]">{s.empty}</p>
           )}
         </div>
       )}
-    </div>
+    </Stack>
   )
 }

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { CopyIcon } from '../../components/icons'
 import { tafqeetInt, tafqeetSAR } from './tafqeet'
+import { Button, Field, Input, Stack, Seg, SegButton } from '../../components/ui'
 
 const STR = {
   en: {
@@ -36,29 +37,28 @@ export default function TafqeetTool() {
   }
 
   return (
-    <div className="stack" data-testid="tafqeet">
-      <div className="seg self-start" role="group">
+    <Stack data-testid="tafqeet">
+      <Seg className="self-start" role="group">
         {(['sar', 'plain'] as const).map((m) => (
-          <button key={m} className={`seg__btn ${mode === m ? 'is-active' : ''}`} aria-pressed={mode === m}
-            data-testid={`tafqeet-mode-${m}`} onClick={() => setMode(m)}>{s[m]}</button>
+          <SegButton key={m} active={mode === m} aria-pressed={mode === m}
+            data-testid={`tafqeet-mode-${m}`} onClick={() => setMode(m)}>{s[m]}</SegButton>
         ))}
-      </div>
+      </Seg>
 
-      <label className="field">
-        <span className="field__label">{s.amount}</span>
-        <input className="input font-mono text-[1.1rem]" type="number" inputMode="decimal" min="0" step={mode === 'sar' ? '0.01' : '1'}
+      <Field label={s.amount}>
+        <Input className="font-mono text-[1.1rem]" type="number" inputMode="decimal" min="0" step={mode === 'sar' ? '0.01' : '1'}
           value={value} data-testid="tafqeet-input" onChange={(e) => setValue(e.target.value)} />
-      </label>
+      </Field>
 
       {words ? (
         <div className="flex flex-col gap-2">
           <span className="font-body text-[0.72rem] uppercase tracking-[0.06em] text-ink-faint">{s.result}</span>
           <div dir="rtl" lang="ar" className="font-ar text-[1.4rem] leading-[1.9] text-ink border border-[color:var(--line-soft)] rounded-md bg-[var(--surface)] px-4 py-4" data-testid="tafqeet-output">{words}</div>
-          <button className="btn self-start" data-testid="tafqeet-copy" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</button>
+          <Button className="self-start" data-testid="tafqeet-copy" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</Button>
         </div>
       ) : (
         <p className="text-ink-faint text-[0.95rem]">{s.empty}</p>
       )}
-    </div>
+    </Stack>
   )
 }

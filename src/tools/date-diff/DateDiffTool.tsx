@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
+import { Button, Input, Select, Field, Stack, Seg, SegButton } from '../../components/ui'
 // Shared Umm al-Qura helpers (live under the prayer-times tool).
 import {
   gregorianToHijri, hijriToGregorian, daysInHijriMonth, HIJRI_MONTHS, type Hijri,
@@ -90,33 +91,31 @@ export default function DateDiffTool() {
   }
 
   return (
-    <div className="stack" data-testid="date-diff">
-      <div className="seg" role="group" aria-label="Calendar">
+    <Stack data-testid="date-diff">
+      <Seg role="group" aria-label="Calendar">
         {(['greg', 'hijri'] as Mode[]).map((m) => (
-          <button key={m} className={`seg__btn ${mode === m ? 'is-active' : ''}`}
+          <SegButton key={m} active={mode === m}
             aria-pressed={mode === m} data-testid={`dd-cal-${m}`} onClick={() => setMode(m)}>
             {m === 'greg' ? s.gregorianCal : s.hijriCal}
-          </button>
+          </SegButton>
         ))}
-      </div>
+      </Seg>
 
       <div className="bg-[var(--surface)] border border-[color:var(--line-soft)] rounded-lg shadow-[var(--shadow-sm)] p-[1.3rem] grid grid-cols-[1fr_auto_1fr] gap-[0.8rem] items-end max-[560px]:grid-cols-1">
         {mode === 'greg' ? (
-          <label className="field">
-            <span className="field__label">{s.from}</span>
-            <input className="input" type="date" value={gFrom} data-testid="dd-from" onChange={(e) => setGFrom(e.target.value)} />
-          </label>
+          <Field label={s.from}>
+            <Input type="date" value={gFrom} data-testid="dd-from" onChange={(e) => setGFrom(e.target.value)} />
+          </Field>
         ) : (
           <HijriInput label={s.from} value={hFrom} onChange={setHFrom} s={s} months={HIJRI_MONTHS[locale]} testid="from" />
         )}
 
-        <button className="btn self-end px-[0.9rem] py-[0.7rem] text-[1.1rem] max-[560px]:justify-self-center" data-testid="dd-swap" aria-label={s.swap} title={s.swap} onClick={swap}>⇅</button>
+        <Button className="self-end px-[0.9rem] py-[0.7rem] text-[1.1rem] max-[560px]:justify-self-center" data-testid="dd-swap" aria-label={s.swap} title={s.swap} onClick={swap}>⇅</Button>
 
         {mode === 'greg' ? (
-          <label className="field">
-            <span className="field__label">{s.to}</span>
-            <input className="input" type="date" value={gTo} data-testid="dd-to" onChange={(e) => setGTo(e.target.value)} />
-          </label>
+          <Field label={s.to}>
+            <Input type="date" value={gTo} data-testid="dd-to" onChange={(e) => setGTo(e.target.value)} />
+          </Field>
         ) : (
           <HijriInput label={s.to} value={hTo} onChange={setHTo} s={s} months={HIJRI_MONTHS[locale]} testid="to" />
         )}
@@ -131,7 +130,7 @@ export default function DateDiffTool() {
           </div>
         </>
       )}
-    </div>
+    </Stack>
   )
 }
 
@@ -141,19 +140,19 @@ function HijriInput({ label, value, onChange, s, months, testid }: {
 }) {
   return (
     <fieldset className="dd__hijri">
-      <legend className="field__label">{label}</legend>
+      <legend className="text-[0.82rem] font-semibold text-ink-soft tracking-[0.01em]">{label}</legend>
       <div className="pray__hijri-inputs">
-        <label className="field"><span className="field__label">{s.fieldDay}</span>
-          <input className="input" type="number" min={1} max={30} value={value.d} data-testid={`dd-${testid}-day`}
-            onChange={(e) => onChange({ ...value, d: Math.min(30, Math.max(1, Number(e.target.value))) })} /></label>
-        <label className="field pray__month"><span className="field__label">{s.fieldMonth}</span>
-          <select className="input" value={value.m} data-testid={`dd-${testid}-month`}
+        <Field label={s.fieldDay}>
+          <Input type="number" min={1} max={30} value={value.d} data-testid={`dd-${testid}-day`}
+            onChange={(e) => onChange({ ...value, d: Math.min(30, Math.max(1, Number(e.target.value))) })} /></Field>
+        <Field label={s.fieldMonth} className="pray__month">
+          <Select value={value.m} data-testid={`dd-${testid}-month`}
             onChange={(e) => onChange({ ...value, m: Number(e.target.value) })}>
             {months.map((name, i) => <option key={i} value={i + 1}>{name}</option>)}
-          </select></label>
-        <label className="field"><span className="field__label">{s.fieldYear}</span>
-          <input className="input" type="number" min={1} max={2000} value={value.y} data-testid={`dd-${testid}-year`}
-            onChange={(e) => onChange({ ...value, y: Math.max(1, Number(e.target.value)) })} /></label>
+          </Select></Field>
+        <Field label={s.fieldYear}>
+          <Input type="number" min={1} max={2000} value={value.y} data-testid={`dd-${testid}-year`}
+            onChange={(e) => onChange({ ...value, y: Math.max(1, Number(e.target.value)) })} /></Field>
       </div>
     </fieldset>
   )

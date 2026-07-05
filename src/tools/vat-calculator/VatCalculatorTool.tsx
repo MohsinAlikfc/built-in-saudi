@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { CopyIcon } from '../../components/icons'
+import { Button, Input, Field, Stack, Seg, SegButton } from '../../components/ui'
 
 const STR = {
   en: {
@@ -43,31 +44,29 @@ export default function VatCalculatorTool() {
   const ROWS: [string, number, boolean][] = [[s.net, net, false], [`${s.vat} (${rate || 0}%)`, vat, false], [s.gross, gross, true]]
 
   return (
-    <div className="stack" data-testid="vat-calculator">
-      <div className="seg self-start" role="group">
+    <Stack data-testid="vat-calculator">
+      <Seg className="self-start" role="group">
         {(['add', 'remove'] as const).map((m) => (
-          <button key={m} className={`seg__btn ${mode === m ? 'is-active' : ''}`} aria-pressed={mode === m}
-            data-testid={`vat-mode-${m}`} onClick={() => setMode(m)}>{s[m]}</button>
+          <SegButton key={m} active={mode === m} aria-pressed={mode === m}
+            data-testid={`vat-mode-${m}`} onClick={() => setMode(m)}>{s[m]}</SegButton>
         ))}
-      </div>
+      </Seg>
       <p className="text-[0.9rem] text-ink-faint">{mode === 'add' ? s.addHint : s.removeHint}</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <label className="field">
-          <span className="field__label">{s.amount}</span>
-          <input className="input font-mono" type="number" inputMode="decimal" min="0" value={amount} data-testid="vat-amount" onChange={(e) => setAmount(e.target.value)} />
-        </label>
-        <label className="field">
-          <span className="field__label">{s.rate} %</span>
+        <Field label={s.amount}>
+          <Input className="font-mono" type="number" inputMode="decimal" min="0" value={amount} data-testid="vat-amount" onChange={(e) => setAmount(e.target.value)} />
+        </Field>
+        <Field label={`${s.rate} %`}>
           <div className="flex gap-2">
-            <input className="input font-mono min-w-0" type="number" inputMode="decimal" min="0" value={rate} data-testid="vat-rate" onChange={(e) => setRate(e.target.value)} />
-            <div className="seg flex-none" role="group">
+            <Input className="font-mono min-w-0" type="number" inputMode="decimal" min="0" value={rate} data-testid="vat-rate" onChange={(e) => setRate(e.target.value)} />
+            <Seg className="flex-none" role="group">
               {['15', '5', '0'].map((p) => (
-                <button key={p} className={`seg__btn ${rate === p ? 'is-active' : ''}`} onClick={() => setRate(p)}>{p}</button>
+                <SegButton key={p} active={rate === p} onClick={() => setRate(p)}>{p}</SegButton>
               ))}
-            </div>
+            </Seg>
           </div>
-        </label>
+        </Field>
       </div>
 
       <div className="flex flex-col border border-[color:var(--line-soft)] rounded-md overflow-hidden" data-testid="vat-result">
@@ -79,7 +78,7 @@ export default function VatCalculatorTool() {
         ))}
       </div>
 
-      <button className="btn self-start" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</button>
-    </div>
+      <Button className="self-start" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</Button>
+    </Stack>
   )
 }

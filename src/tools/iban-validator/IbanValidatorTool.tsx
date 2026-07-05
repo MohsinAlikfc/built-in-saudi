@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { CopyIcon, ShareIcon, DownloadIcon } from '../../components/icons'
+import { Button, Input, Field, Stack } from '../../components/ui'
 import { buildIbanCard, canvasToBlob, type CardData } from './shareCard'
 
 // Saudi bank identifiers (the 2-digit bank code in the IBAN, positions 5–6).
@@ -133,12 +134,11 @@ export default function IbanValidatorTool() {
   }
 
   return (
-    <div className="stack" data-testid="iban-validator">
-      <label className="field">
-        <span className="field__label">{s.label}</span>
-        <input className="input font-mono text-[1.05rem] tracking-wide" dir="ltr" data-testid="iban-input"
+    <Stack data-testid="iban-validator">
+      <Field label={s.label}>
+        <Input className="font-mono text-[1.05rem] tracking-wide" dir="ltr" data-testid="iban-input"
           placeholder={s.placeholder} value={raw} spellCheck={false} onChange={(e) => setRaw(e.target.value)} autoComplete="off" />
-      </label>
+      </Field>
 
       {res && (
         <div className="flex flex-col gap-3">
@@ -156,22 +156,21 @@ export default function IbanValidatorTool() {
                 </p>
               )}
 
-              <button className="btn self-start" data-testid="iban-copy" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</button>
+              <Button className="self-start" data-testid="iban-copy" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</Button>
 
-              <label className="field">
-                <span className="field__label">{s.nameLabel}</span>
-                <input className="input" data-testid="iban-name" placeholder={s.namePlaceholder}
+              <Field label={s.nameLabel}>
+                <Input data-testid="iban-name" placeholder={s.namePlaceholder}
                   value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" maxLength={60} />
                 <span className="text-[0.8rem] text-ink-faint">{s.nameHint}</span>
-              </label>
+              </Field>
 
               {cardUrl && (
                 <div className="flex flex-col items-center gap-3">
                   <img src={cardUrl} alt={s.cardTitle} data-testid="iban-card"
                     className="w-full max-w-[300px] rounded-lg shadow-[var(--shadow-md)]" />
                   <div className="flex flex-wrap justify-center gap-2">
-                    <button className="btn btn--primary" data-testid="iban-share" onClick={share}><ShareIcon /> {s.share}</button>
-                    <button className="btn" data-testid="iban-download" onClick={download}><DownloadIcon /> {s.download}</button>
+                    <Button variant="primary" data-testid="iban-share" onClick={share}><ShareIcon /> {s.share}</Button>
+                    <Button data-testid="iban-download" onClick={download}><DownloadIcon /> {s.download}</Button>
                   </div>
                 </div>
               )}
@@ -183,6 +182,6 @@ export default function IbanValidatorTool() {
       )}
 
       <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
-    </div>
+    </Stack>
   )
 }

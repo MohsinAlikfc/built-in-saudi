@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { UploadIcon, DownloadIcon } from '../../components/icons'
+import { Button, Field, Stack, Seg, SegButton } from '../../components/ui'
 
 type Fmt = 'image/png' | 'image/jpeg' | 'image/webp'
 type Handle = 'nw' | 'ne' | 'sw' | 'se'
@@ -102,7 +103,7 @@ export default function ImageCropperTool() {
   const hpos: Record<Handle, string> = { nw: 'top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize', ne: 'top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-nesw-resize', sw: 'bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-nesw-resize', se: 'bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-nwse-resize' }
 
   return (
-    <div className="stack" data-testid="image-cropper">
+    <Stack data-testid="image-cropper">
       {!src ? (
         <button className="dropzone" data-testid="crop-drop" onClick={() => fileRef.current?.click()}
           onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); onFile(e.dataTransfer.files[0]) }}>
@@ -112,20 +113,20 @@ export default function ImageCropperTool() {
       ) : (
         <>
           <div className="flex flex-wrap gap-3 items-end">
-            <label className="field"><span className="field__label">{s.ratio}</span>
-              <div className="seg" role="group">
+            <Field label={s.ratio}>
+              <Seg role="group">
                 {([[null, s.free], [1, '1:1'], [4 / 3, '4:3'], [16 / 9, '16:9']] as [number | null, string][]).map(([rat, l]) => (
-                  <button key={l} className={`seg__btn ${ratio === rat ? 'is-active' : ''}`} data-testid={`crop-ratio-${l}`} onClick={() => pickRatio(rat)}>{l}</button>
+                  <SegButton key={l} active={ratio === rat} data-testid={`crop-ratio-${l}`} onClick={() => pickRatio(rat)}>{l}</SegButton>
                 ))}
-              </div>
-            </label>
-            <label className="field"><span className="field__label">{s.format}</span>
-              <div className="seg" role="group">
+              </Seg>
+            </Field>
+            <Field label={s.format}>
+              <Seg role="group">
                 {(['image/png', 'image/jpeg', 'image/webp'] as Fmt[]).map((f) => (
-                  <button key={f} className={`seg__btn ${format === f ? 'is-active' : ''}`} data-testid={`crop-fmt-${LABEL[f]}`} onClick={() => setFormat(f)}>{LABEL[f]}</button>
+                  <SegButton key={f} active={format === f} data-testid={`crop-fmt-${LABEL[f]}`} onClick={() => setFormat(f)}>{LABEL[f]}</SegButton>
                 ))}
-              </div>
-            </label>
+              </Seg>
+            </Field>
           </div>
 
           <div ref={wrapRef} className="relative touch-none select-none inline-block bg-sand-100 rounded-md overflow-hidden" style={{ width: src.dw, height: src.dh }}
@@ -152,18 +153,18 @@ export default function ImageCropperTool() {
           )}
 
           {format !== 'image/png' && (
-            <label className="field max-w-xs"><span className="field__label">{s.quality} · {Math.round(quality * 100)}%</span>
-              <input type="range" min={0.1} max={1} step={0.02} value={quality} onChange={(e) => setQuality(+e.target.value)} /></label>
+            <Field label={`${s.quality} · ${Math.round(quality * 100)}%`} className="max-w-xs">
+              <input type="range" min={0.1} max={1} step={0.02} value={quality} onChange={(e) => setQuality(+e.target.value)} /></Field>
           )}
 
           <div className="flex gap-2">
-            <a className="btn btn--primary" href={out?.url} download={`${src.name}-crop.${EXT[format]}`} data-testid="crop-download"><DownloadIcon /> {s.download}</a>
-            <button className="btn" onClick={() => { setSrc(null); setOut(null) }}>{s.another}</button>
+            <Button variant="primary" href={out?.url ?? ''} download={`${src.name}-crop.${EXT[format]}`} data-testid="crop-download"><DownloadIcon /> {s.download}</Button>
+            <Button onClick={() => { setSrc(null); setOut(null) }}>{s.another}</Button>
           </div>
         </>
       )}
 
       <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
-    </div>
+    </Stack>
   )
 }

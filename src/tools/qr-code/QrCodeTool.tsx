@@ -3,6 +3,7 @@ import { LinkIcon, TextIcon, WifiIcon, MailIcon, PhoneIcon, DownloadIcon, ShareI
 import { useLocale } from '../../i18n'
 import { type QrContentType, type WifiFields, type EmailFields, normalizeUrl, buildWifi, buildEmail, buildPhone } from './build'
 import { renderQR, type DotStyle, type Frame, DOT_STYLES } from './qrRender'
+import { Button, Input, Textarea, Select, Field, FieldLabel, Check, Stack, Seg, SegButton } from '../../components/ui'
 
 const TYPE_DEFS: { id: QrContentType; Icon: typeof LinkIcon }[] = [
   { id: 'link', Icon: LinkIcon }, { id: 'text', Icon: TextIcon }, { id: 'wifi', Icon: WifiIcon },
@@ -113,15 +114,12 @@ export default function QrCodeTool() {
     })
   }
 
-  const seg = (active: boolean) => `seg__btn ${active ? 'is-active' : ''}`
-
   return (
-    <div className="stack max-w-xl mx-auto" data-testid="qr-code">
-      <label className="field">
-        <span className="field__label">{q.fieldUrl}</span>
-        <input className="input" type="url" inputMode="url" placeholder={q.placeholderUrl} data-testid="qr-url"
+    <Stack className="max-w-xl mx-auto" data-testid="qr-code">
+      <Field label={q.fieldUrl}>
+        <Input type="url" inputMode="url" placeholder={q.placeholderUrl} data-testid="qr-url"
           value={link} autoComplete="off" onChange={(e) => { setLink(e.target.value); setType('link') }} />
-      </label>
+      </Field>
 
       <div className="grid place-items-center p-4 rounded-md border border-[color:var(--line)] bg-sand-100 min-h-[200px]">
         {hasCode
@@ -130,13 +128,13 @@ export default function QrCodeTool() {
       </div>
 
       <div className="flex gap-2">
-        <button className="btn btn--primary flex-1 justify-center" data-testid="qr-share" onClick={share} disabled={!hasCode}><ShareIcon /> {copied ? q.copied : q.share}</button>
-        <button className="btn flex-1 justify-center" onClick={downloadPng} disabled={!hasCode}><DownloadIcon /> {q.download}</button>
+        <Button variant="primary" className="flex-1 justify-center" data-testid="qr-share" onClick={share} disabled={!hasCode}><ShareIcon /> {copied ? q.copied : q.share}</Button>
+        <Button className="flex-1 justify-center" onClick={downloadPng} disabled={!hasCode}><DownloadIcon /> {q.download}</Button>
       </div>
 
       {/* Preset thumbnail strip */}
       <div className="flex flex-col gap-2">
-        <span className="field__label">{q.style}</span>
+        <FieldLabel>{q.style}</FieldLabel>
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
           {PRESETS.map((p, i) => (
             <button key={i} className="flex-none rounded-md border-2 border-[color:var(--line-soft)] hover:border-green-500 aria-[current=true]:border-green-600 p-1 bg-white"
@@ -149,7 +147,7 @@ export default function QrCodeTool() {
 
       {/* Pattern (dot style) with live examples */}
       <div className="flex flex-col gap-2">
-        <span className="field__label">{q.dotStyle}</span>
+        <FieldLabel>{q.dotStyle}</FieldLabel>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {DOT_STYLES.map((d) => (
             <button key={d} className={`flex flex-col items-center gap-1 rounded-md border-2 p-1.5 ${dot === d ? 'border-green-600 bg-[color-mix(in_srgb,var(--green-400)_12%,transparent)]' : 'border-[color:var(--line-soft)] hover:border-green-500'}`}
@@ -161,8 +159,8 @@ export default function QrCodeTool() {
         </div>
         {dot === 'emoji' && (
           <div className="flex flex-wrap items-center gap-2">
-            <input className="input w-16 text-center text-[1.2rem]" value={emoji} maxLength={4} data-testid="qr-emoji" onChange={(e) => setEmoji(e.target.value || '⭐')} aria-label={q.dots.emoji} />
-            <button className="btn px-3" data-testid="qr-emoji-random" onClick={() => setEmoji(EMOJIS[Math.floor(Math.random() * EMOJIS.length)])}>🎲 {q.randomTheme}</button>
+            <Input className="w-16 text-center text-[1.2rem]" value={emoji} maxLength={4} data-testid="qr-emoji" onChange={(e) => setEmoji(e.target.value || '⭐')} aria-label={q.dots.emoji} />
+            <Button className="px-3" data-testid="qr-emoji-random" onClick={() => setEmoji(EMOJIS[Math.floor(Math.random() * EMOJIS.length)])}>🎲 {q.randomTheme}</Button>
             <div className="flex flex-wrap gap-1">
               {EMOJIS.slice(0, 10).map((em) => (
                 <button key={em} className="w-8 h-8 rounded-md border border-[color:var(--line-soft)] hover:border-green-500 text-[1.1rem] leading-none" onClick={() => setEmoji(em)} aria-label={em}>{em}</button>
@@ -174,7 +172,7 @@ export default function QrCodeTool() {
 
       {/* Theme */}
       <div className="flex flex-col gap-2">
-        <span className="field__label">{q.theme}</span>
+        <FieldLabel>{q.theme}</FieldLabel>
         <div className="flex flex-wrap items-center gap-2">
           {THEMES.map(([f, b], i) => (
             <button key={i} className="w-8 h-8 rounded-full border border-[color:var(--line)] grid place-items-center aria-[current=true]:ring-2 aria-[current=true]:ring-green-600 aria-[current=true]:ring-offset-1"
@@ -182,7 +180,7 @@ export default function QrCodeTool() {
               <span className="w-4 h-4 rounded-full" style={{ background: f }} />
             </button>
           ))}
-          <button className="btn px-3" data-testid="qr-random" onClick={randomTheme}>🎲 {q.randomTheme}</button>
+          <Button className="px-3" data-testid="qr-random" onClick={randomTheme}>🎲 {q.randomTheme}</Button>
           <label className="inline-flex items-center gap-1 ms-1"><input type="color" value={fg} onChange={(e) => setFg(e.target.value)} className="w-8 h-8 rounded border border-[color:var(--line)] p-0 bg-transparent cursor-pointer" aria-label={q.foreground} /></label>
           <label className="inline-flex items-center gap-1"><input type="color" value={bg} onChange={(e) => setBg(e.target.value)} className="w-8 h-8 rounded border border-[color:var(--line)] p-0 bg-transparent cursor-pointer" aria-label={q.background} /></label>
         </div>
@@ -190,19 +188,19 @@ export default function QrCodeTool() {
 
       {/* Frame + label + logo */}
       <div className="flex flex-col gap-2">
-        <span className="field__label">{q.frame}</span>
+        <FieldLabel>{q.frame}</FieldLabel>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="seg" role="group">
+          <Seg role="group">
             {(['none', 'card', 'circle'] as Frame[]).map((f) => (
-              <button key={f} className={seg(frame === f)} data-testid={`qr-frame-${f}`} onClick={() => setFrame(f)}>{f === 'none' ? '—' : f === 'card' ? '▢' : '◯'}</button>
+              <SegButton key={f} active={frame === f} data-testid={`qr-frame-${f}`} onClick={() => setFrame(f)}>{f === 'none' ? '—' : f === 'card' ? '▢' : '◯'}</SegButton>
             ))}
-          </div>
+          </Seg>
           {frame !== 'none' && (
-            <input className="input flex-1 min-w-[8rem] max-w-[12rem]" value={label} maxLength={16} placeholder="SCAN ME" data-testid="qr-label" onChange={(e) => setLabel(e.target.value)} />
+            <Input className="flex-1 min-w-[8rem] max-w-[12rem]" value={label} maxLength={16} placeholder="SCAN ME" data-testid="qr-label" onChange={(e) => setLabel(e.target.value)} />
           )}
           {logo
-            ? <button className="btn px-3" onClick={() => { setLogo(null); setLogoName('') }}>✕ {q.removeLogo} · {logoName.slice(0, 10)}</button>
-            : <button className="btn px-3" data-testid="qr-add-logo" onClick={() => logoInput.current?.click()}>＋ {q.addLogo}</button>}
+            ? <Button className="px-3" onClick={() => { setLogo(null); setLogoName('') }}>✕ {q.removeLogo} · {logoName.slice(0, 10)}</Button>
+            : <Button className="px-3" data-testid="qr-add-logo" onClick={() => logoInput.current?.click()}>＋ {q.addLogo}</Button>}
           <input ref={logoInput} type="file" accept="image/*" className="hidden" onChange={(e) => { onLogo(e.target.files?.[0]); e.target.value = '' }} />
         </div>
       </div>
@@ -210,53 +208,53 @@ export default function QrCodeTool() {
       {/* Advanced */}
       <details className="border-t border-[color:var(--line-soft)] pt-3">
         <summary className="cursor-pointer font-semibold text-ink-soft text-[0.9rem] select-none">{q.advanced}</summary>
-        <div className="stack pt-3">
-          <div className="field">
-            <span className="field__label">{q.type}</span>
-            <div className="seg flex-wrap" role="group">
+        <Stack className="pt-3">
+          <div className="flex flex-col gap-[0.4rem]">
+            <FieldLabel>{q.type}</FieldLabel>
+            <Seg className="flex-wrap" role="group">
               {TYPE_DEFS.map((d) => (
-                <button key={d.id} className={`${seg(type === d.id)} [&_svg]:size-[15px] inline-flex items-center gap-1`} onClick={() => setType(d.id)}><d.Icon /> {q.types[d.id]}</button>
+                <SegButton key={d.id} active={type === d.id} className="[&_svg]:size-[15px] inline-flex items-center gap-1" onClick={() => setType(d.id)}><d.Icon /> {q.types[d.id]}</SegButton>
               ))}
-            </div>
+            </Seg>
           </div>
 
-          {type === 'text' && <label className="field"><span className="field__label">{q.fieldText}</span><textarea className="input input--area" rows={3} value={text} placeholder={q.placeholderText} onChange={(e) => setText(e.target.value)} /></label>}
+          {type === 'text' && <Field label={q.fieldText}><Textarea rows={3} value={text} placeholder={q.placeholderText} onChange={(e) => setText(e.target.value)} /></Field>}
           {type === 'wifi' && (
             <div className="grid gap-3">
-              <label className="field"><span className="field__label">{q.fieldSsid}</span><input className="input" value={wifi.ssid} placeholder={q.placeholderSsid} onChange={(e) => setWifi({ ...wifi, ssid: e.target.value })} /></label>
-              <label className="field"><span className="field__label">{q.fieldPassword}</span><input className="input" value={wifi.password} disabled={wifi.encryption === 'nopass'} onChange={(e) => setWifi({ ...wifi, password: e.target.value })} /></label>
-              <label className="field"><span className="field__label">{q.fieldSecurity}</span>
-                <select className="input" value={wifi.encryption} onChange={(e) => setWifi({ ...wifi, encryption: e.target.value as WifiFields['encryption'] })}>
+              <Field label={q.fieldSsid}><Input value={wifi.ssid} placeholder={q.placeholderSsid} onChange={(e) => setWifi({ ...wifi, ssid: e.target.value })} /></Field>
+              <Field label={q.fieldPassword}><Input value={wifi.password} disabled={wifi.encryption === 'nopass'} onChange={(e) => setWifi({ ...wifi, password: e.target.value })} /></Field>
+              <Field label={q.fieldSecurity}>
+                <Select value={wifi.encryption} onChange={(e) => setWifi({ ...wifi, encryption: e.target.value as WifiFields['encryption'] })}>
                   <option value="WPA">{q.secWpa}</option><option value="WEP">{q.secWep}</option><option value="nopass">{q.secNone}</option>
-                </select></label>
-              <label className="check"><input type="checkbox" checked={wifi.hidden} onChange={(e) => setWifi({ ...wifi, hidden: e.target.checked })} />{q.hidden}</label>
+                </Select></Field>
+              <Check><input type="checkbox" checked={wifi.hidden} onChange={(e) => setWifi({ ...wifi, hidden: e.target.checked })} />{q.hidden}</Check>
             </div>
           )}
           {type === 'email' && (
             <div className="grid gap-3">
-              <label className="field"><span className="field__label">{q.fieldTo}</span><input className="input" type="email" value={email.to} placeholder={q.placeholderEmail} onChange={(e) => setEmail({ ...email, to: e.target.value })} /></label>
-              <label className="field"><span className="field__label">{q.fieldSubject}</span><input className="input" value={email.subject} onChange={(e) => setEmail({ ...email, subject: e.target.value })} /></label>
-              <label className="field"><span className="field__label">{q.fieldMessage}</span><textarea className="input input--area" rows={2} value={email.body} onChange={(e) => setEmail({ ...email, body: e.target.value })} /></label>
+              <Field label={q.fieldTo}><Input type="email" value={email.to} placeholder={q.placeholderEmail} onChange={(e) => setEmail({ ...email, to: e.target.value })} /></Field>
+              <Field label={q.fieldSubject}><Input value={email.subject} onChange={(e) => setEmail({ ...email, subject: e.target.value })} /></Field>
+              <Field label={q.fieldMessage}><Textarea rows={2} value={email.body} onChange={(e) => setEmail({ ...email, body: e.target.value })} /></Field>
             </div>
           )}
-          {type === 'phone' && <label className="field"><span className="field__label">{q.fieldPhone}</span><input className="input" type="tel" inputMode="tel" value={phone} placeholder={q.placeholderPhone} onChange={(e) => setPhone(e.target.value)} /></label>}
+          {type === 'phone' && <Field label={q.fieldPhone}><Input type="tel" inputMode="tel" value={phone} placeholder={q.placeholderPhone} onChange={(e) => setPhone(e.target.value)} /></Field>}
 
-          <div className="field">
-            <span className="field__label">{q.size}</span>
-            <div className="seg flex-wrap" role="group">
-              {SIZES.map((s) => <button key={s.key} className={seg(sizePx === s.px)} onClick={() => setSizePx(s.px)}>{q[s.key]}</button>)}
-              <button className={seg(!SIZES.some((s) => s.px === sizePx))} onClick={() => setSizePx(640)}>{q.sizeCustom}</button>
-            </div>
+          <div className="flex flex-col gap-[0.4rem]">
+            <FieldLabel>{q.size}</FieldLabel>
+            <Seg className="flex-wrap" role="group">
+              {SIZES.map((s) => <SegButton key={s.key} active={sizePx === s.px} onClick={() => setSizePx(s.px)}>{q[s.key]}</SegButton>)}
+              <SegButton active={!SIZES.some((s) => s.px === sizePx)} onClick={() => setSizePx(640)}>{q.sizeCustom}</SegButton>
+            </Seg>
             {!SIZES.some((s) => s.px === sizePx) && (
               <input className="mt-2" type="range" min={128} max={2048} step={64} value={sizePx} onChange={(e) => setSizePx(Number(e.target.value))} aria-label={`${q.size} ${sizePx}px`} />
             )}
           </div>
-          <label className="field"><span className="field__label">{q.quietZone} · {margin}</span>
-            <input type="range" min={0} max={6} step={1} value={margin} onChange={(e) => setMargin(Number(e.target.value))} /></label>
-        </div>
+          <Field label={<>{q.quietZone} · {margin}</>}>
+            <input type="range" min={0} max={6} step={1} value={margin} onChange={(e) => setMargin(Number(e.target.value))} /></Field>
+        </Stack>
       </details>
 
       <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {q.privacy}</p>
-    </div>
+    </Stack>
   )
 }

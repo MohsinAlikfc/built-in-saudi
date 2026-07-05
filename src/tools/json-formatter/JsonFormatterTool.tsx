@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocale } from '../../i18n'
 import { CopyIcon, DownloadIcon } from '../../components/icons'
+import { Stack, Seg, SegButton, Textarea, Button, Check, CodeOut } from '../../components/ui'
 import { process, type Fmt } from './formatters'
 
 const FORMATS: { id: Fmt; label: string; ext: string }[] = [
@@ -66,31 +67,31 @@ export default function JsonFormatterTool() {
   }
 
   return (
-    <div className="stack" data-testid="json-formatter">
-      <div className="seg self-start" role="group" aria-label="format">
+    <Stack data-testid="json-formatter">
+      <Seg className="self-start" role="group" aria-label="format">
         {FORMATS.map((f) => (
-          <button key={f.id} className={`seg__btn ${fmt === f.id ? 'is-active' : ''}`} aria-pressed={fmt === f.id}
-            data-testid={`fmt-${f.id}`} onClick={() => { setFmt(f.id); setOutput(''); setError(null) }}>{f.label}</button>
+          <SegButton key={f.id} active={fmt === f.id} aria-pressed={fmt === f.id}
+            data-testid={`fmt-${f.id}`} onClick={() => { setFmt(f.id); setOutput(''); setError(null) }}>{f.label}</SegButton>
         ))}
-      </div>
+      </Seg>
 
-      <textarea
-        className="input input--area font-mono text-[0.9rem] min-h-[9rem]" data-testid="json-input"
+      <Textarea
+        className="font-mono text-[0.9rem] min-h-[9rem]" data-testid="json-input"
         placeholder={PLACEHOLDER[fmt]} value={raw} spellCheck={false} dir="ltr"
         onChange={(e) => setRaw(e.target.value)}
       />
 
       <div className="flex flex-wrap items-center gap-[0.6rem]">
-        <button className="btn btn--primary" data-testid="json-format" onClick={() => run(false)}>{s.format}</button>
-        <button className="btn" data-testid="json-minify" onClick={() => run(true)}>{s.minify}</button>
-        <div className="seg" role="group" aria-label={s.indent}>
+        <Button variant="primary" data-testid="json-format" onClick={() => run(false)}>{s.format}</Button>
+        <Button data-testid="json-minify" onClick={() => run(true)}>{s.minify}</Button>
+        <Seg role="group" aria-label={s.indent}>
           {[2, 4].map((n) => (
-            <button key={n} className={`seg__btn ${indent === n ? 'is-active' : ''}`} aria-pressed={indent === n}
-              onClick={() => setIndent(n)}>{n}</button>
+            <SegButton key={n} active={indent === n} aria-pressed={indent === n}
+              onClick={() => setIndent(n)}>{n}</SegButton>
           ))}
-        </div>
+        </Seg>
         {fmt === 'json' && (
-          <label className="check"><input type="checkbox" checked={sort} onChange={(e) => setSort(e.target.checked)} data-testid="json-sort" /> {s.sortKeys}</label>
+          <Check><input type="checkbox" checked={sort} onChange={(e) => setSort(e.target.checked)} data-testid="json-sort" /> {s.sortKeys}</Check>
         )}
       </div>
 
@@ -100,12 +101,12 @@ export default function JsonFormatterTool() {
         </p>
       ) : output ? (
         <>
-          <pre className="code-out overflow-x-auto p-4 bg-sand-100 border border-[color:var(--line-soft)] rounded-md text-ink whitespace-pre" dir="ltr" data-testid="json-output">{output}</pre>
+          <CodeOut className="overflow-x-auto p-4 bg-sand-100 border border-[color:var(--line-soft)] rounded-md text-ink whitespace-pre" dir="ltr" data-testid="json-output">{output}</CodeOut>
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <span className="text-[0.82rem] text-ink-faint font-mono">{s.chars(output.length)}</span>
             <div className="flex gap-[0.6rem]">
-              <button className="btn" data-testid="json-copy" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</button>
-              <button className="btn" onClick={download}><DownloadIcon /> {s.download}</button>
+              <Button data-testid="json-copy" onClick={copy}><CopyIcon /> {copied ? s.copied : s.copy}</Button>
+              <Button onClick={download}><DownloadIcon /> {s.download}</Button>
             </div>
           </div>
         </>
@@ -114,6 +115,6 @@ export default function JsonFormatterTool() {
       )}
 
       <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
-    </div>
+    </Stack>
   )
 }

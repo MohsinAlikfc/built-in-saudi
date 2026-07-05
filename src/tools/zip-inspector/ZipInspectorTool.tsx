@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocale } from '../../i18n'
+import { Stack } from '../../components/ui'
 
 const STR = {
   en: {
@@ -101,7 +102,7 @@ export default function ZipInspectorTool() {
   const saved = totals && totals.size > 0 ? Math.round((1 - totals.comp / totals.size) * 100) : 0
 
   return (
-    <div className="stack" data-testid="zip-inspector">
+    <Stack data-testid="zip-inspector">
       <label className="dropzone" data-testid="zip-drop"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handle(f) }}>
@@ -135,6 +136,6 @@ export default function ZipInspectorTool() {
           )}
         </>
       )}
-    </div>
+    </Stack>
   )
 }

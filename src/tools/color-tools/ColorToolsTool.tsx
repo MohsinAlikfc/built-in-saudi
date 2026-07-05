@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
+import { Field, Stack } from '../../components/ui'
 
 function hexToRgb(hex: string) {
   const h = hex.replace('#', '')
@@ -74,15 +75,14 @@ export default function ColorToolsTool() {
   )
 
   return (
-    <div className="stack" data-testid="color-tools">
+    <Stack data-testid="color-tools">
       <div className="flex flex-wrap items-end gap-4">
-        <label className="field">
-          <span className="field__label">{s.label}</span>
+        <Field label={s.label}>
           <input type="color" value={hex} data-testid="color-input" onChange={(e) => setHex(e.target.value)} className="w-16 h-12 rounded-md border border-[color:var(--line)] bg-transparent p-0 cursor-pointer" />
-        </label>
+        </Field>
         <div className="flex flex-col gap-2 flex-1 min-w-[12rem]">
           {([['HEX', hex.toUpperCase(), 'color-hex'], ['RGB', rgbStr, 'color-rgb'], ['HSL', hslStr, 'color-hsl']] as [string, string, string][]).map(([k, v, tid]) => (
-            <button key={k} className="flex items-center justify-between gap-3 input font-mono text-[0.9rem] hover:border-green-500" onClick={() => copy(v)} data-testid={tid}>
+            <button key={k} className="flex items-center justify-between gap-3 w-full px-[0.85rem] py-[0.7rem] text-ink bg-[var(--surface)] border border-[color:var(--line)] rounded-sm shadow-[inset_0_1px_2px_rgba(18,33,27,0.04)] font-mono text-[0.9rem] hover:border-green-500" onClick={() => copy(v)} data-testid={tid}>
               <span className="text-ink-faint text-[0.75rem] font-body">{k}</span><span className="truncate">{copied === v ? s.copied : v}</span>
             </button>
           ))}
@@ -96,6 +96,6 @@ export default function ColorToolsTool() {
         <Row title={s.shades} cols={shades} />
       </div>
       <p className="text-[0.8rem] text-ink-faint">{s.copy}</p>
-    </div>
+    </Stack>
   )
 }

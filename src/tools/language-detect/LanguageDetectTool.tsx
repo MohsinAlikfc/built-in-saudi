@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLocale } from '../../i18n'
+import { Stack, Textarea } from '../../components/ui'
 
 const STR = {
   en: { placeholder: 'Paste or type some text…', detected: 'Detected language', confidence: 'Confidence', alternatives: 'Other candidates', empty: 'Type at least a few words.', how: 'Script detection for non-Latin text; common-word matching for Latin scripts. All in your browser.' },
@@ -98,8 +99,8 @@ export default function LanguageDetectTool() {
   const topPct = cands[0] ? Math.min(99, Math.round((cands[0].score / total) * 100)) : 0
 
   return (
-    <div className="stack" data-testid="langdetect">
-      <textarea className="input w-full resize-y min-h-[120px] text-[1rem]" data-testid="lang-input" rows={5}
+    <Stack data-testid="langdetect">
+      <Textarea className="w-full resize-y min-h-[120px] text-[1rem]" data-testid="lang-input" rows={5}
         placeholder={s.placeholder} value={text} onChange={(e) => setText(e.target.value)} dir="auto" />
 
       {cands.length > 0 ? (
@@ -114,7 +115,7 @@ export default function LanguageDetectTool() {
             <div className="flex flex-wrap gap-[0.4rem] items-center mt-[0.3rem]">
               <span className="text-[0.76rem] text-ink-faint">{s.alternatives}</span>
               {cands.slice(1, 4).map((c) => (
-                <span key={c.lang} className="pill">{c.lang} · {NATIVE[c.lang] || ''}</span>
+                <span key={c.lang} className="inline-flex items-center gap-[0.3rem] px-[0.8rem] py-[0.32rem] rounded-full border border-[color:var(--line)] bg-[var(--surface)] text-ink-soft text-[0.8rem] font-semibold">{c.lang} · {NATIVE[c.lang] || ''}</span>
               ))}
             </div>
           )}
@@ -124,6 +125,6 @@ export default function LanguageDetectTool() {
       ) : null}
 
       <p className="pray__method-note">{s.how}</p>
-    </div>
+    </Stack>
   )
 }

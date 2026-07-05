@@ -6,6 +6,7 @@ import {
   strength, type Strength,
 } from './build'
 import { WORDS } from './words'
+import { Button, Seg, SegButton, Field, Select, Check } from '../../components/ui'
 
 type Mode = 'password' | 'passphrase'
 
@@ -92,21 +93,21 @@ export default function PasswordGeneratorTool() {
   return (
     <div className="flex flex-col gap-[1.3rem]" data-testid="password-generator">
       <div className="bg-[var(--surface)] border border-[color:var(--line-soft)] rounded-md p-[1.2rem]" data-testid="pw-output-wrap">
-        <label className="field__label" htmlFor="pw-output">{s.output}</label>
+        <label className="text-[0.82rem] font-semibold text-ink-soft tracking-[0.01em]" htmlFor="pw-output">{s.output}</label>
         <div className="flex gap-[0.6rem] items-stretch mt-[0.4rem] flex-wrap">
           <output id="pw-output" className="flex-1 min-w-[12rem] flex items-center font-mono text-[1.15rem] break-all px-[0.9rem] py-[0.7rem] bg-sand-100 border border-[color:var(--line-soft)] rounded-[5px] text-ink" data-testid="pw-output" dir="ltr">
             {noSet ? <span className="text-[color:var(--danger)] font-body text-[0.95rem]">{s.empty}</span> : value}
           </output>
         </div>
         <div className="flex gap-[0.6rem] mt-[0.6rem]">
-          <button className="btn flex-none px-[0.8rem]" onClick={regenerate} disabled={noSet}
+          <Button className="flex-none px-[0.8rem]" onClick={regenerate} disabled={noSet}
             aria-label={s.regenerateAria} title={s.regenerate} data-testid="pw-regenerate">
             <RefreshIcon /> {s.regenerate}
-          </button>
-          <button className="btn btn--primary flex-1 justify-center" onClick={copy} disabled={noSet || !value}
+          </Button>
+          <Button variant="primary" className="flex-1 justify-center" onClick={copy} disabled={noSet || !value}
             aria-label={s.copy} data-testid="pw-copy">
             <CopyIcon /> {copied ? s.copied : s.copy}
-          </button>
+          </Button>
         </div>
         {!noSet && (
           <div className="flex items-center gap-[0.7rem] mt-[0.9rem]" data-testid="pw-strength"
@@ -120,13 +121,13 @@ export default function PasswordGeneratorTool() {
       </div>
 
       <div className="bg-[var(--surface)] border border-[color:var(--line-soft)] rounded-lg shadow-[var(--shadow-sm)] p-[1.3rem] grid gap-[1.1rem]">
-        <div className="seg" role="group" aria-label={s.strength}>
+        <Seg role="group" aria-label={s.strength}>
           {(['password', 'passphrase'] as Mode[]).map((m) => (
-            <button key={m} className={`seg__btn ${mode === m ? 'is-active' : ''}`}
+            <SegButton key={m} active={mode === m}
               aria-pressed={mode === m} data-testid={`pw-mode-${m}`}
-              onClick={() => setMode(m)}>{s[m]}</button>
+              onClick={() => setMode(m)}>{s[m]}</SegButton>
           ))}
-        </div>
+        </Seg>
 
         {mode === 'password' ? (
           <>
@@ -152,15 +153,14 @@ export default function PasswordGeneratorTool() {
                 data-testid="pw-words" aria-label={s.words}
                 onChange={(e) => setWords(Number(e.target.value))} />
             </div>
-            <label className="field">
-              <span className="field__label">{s.separator}</span>
-              <select className="input" value={separator} data-testid="pw-separator"
+            <Field label={s.separator}>
+              <Select value={separator} data-testid="pw-separator"
                 aria-label={s.separator} onChange={(e) => setSeparator(e.target.value)}>
                 <option value="-">{s.sepDash}</option>
                 <option value=" ">{s.sepSpace}</option>
                 <option value=".">{s.sepDot}</option>
-              </select>
-            </label>
+              </Select>
+            </Field>
             <div className={CHECKS}>
               <Toggle label={s.capitalize} checked={capitalize} onChange={setCapitalize} testid="pw-capitalize" />
               <Toggle label={s.addNumber} checked={addNumber} onChange={setAddNumber} testid="pw-number" />
@@ -187,10 +187,10 @@ function Toggle({ label, checked, onChange, testid }: {
   label: string; checked: boolean; onChange: (v: boolean) => void; testid: string
 }) {
   return (
-    <label className="check">
+    <Check>
       <input type="checkbox" checked={checked} data-testid={testid}
         onChange={(e) => onChange(e.target.checked)} />
       {label}
-    </label>
+    </Check>
   )
 }

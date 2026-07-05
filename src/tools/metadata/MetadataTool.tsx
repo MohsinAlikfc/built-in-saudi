@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocale } from '../../i18n'
+import { Stack } from '../../components/ui'
 
 const STR = {
   en: {
@@ -232,7 +233,7 @@ export default function MetadataTool() {
   }
 
   return (
-    <div className="stack" data-testid="metadata">
+    <Stack data-testid="metadata">
       <label className="dropzone" data-testid="meta-drop"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handle(f) }}>
@@ -256,6 +257,6 @@ export default function MetadataTool() {
         </section>
       ))}
       {groups && groups.length === 1 && <p className="pray__method-note">{s.none}</p>}
-    </div>
+    </Stack>
   )
 }

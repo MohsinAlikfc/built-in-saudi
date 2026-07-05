@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { UploadIcon, DownloadIcon } from '../../components/icons'
+import { Button, Field, Stack, Seg, SegButton } from '../../components/ui'
 
 type Fmt = 'image/png' | 'image/jpeg' | 'image/webp'
 
@@ -63,7 +64,7 @@ export default function ImageFormatConverterTool() {
   }, [src, target, quality, bg])
 
   return (
-    <div className="stack" data-testid="image-format-converter">
+    <Stack data-testid="image-format-converter">
       {!src ? (
         <button className="dropzone" data-testid="ifc-drop" onClick={() => fileRef.current?.click()}
           onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); onFile(e.dataTransfer.files[0]) }}>
@@ -72,29 +73,26 @@ export default function ImageFormatConverterTool() {
         </button>
       ) : (
         <>
-          <label className="field">
-            <span className="field__label">{s.to}</span>
-            <div className="seg self-start" role="group">
+          <Field label={s.to}>
+            <Seg className="self-start" role="group">
               {(['image/png', 'image/jpeg', 'image/webp'] as Fmt[]).map((f) => (
-                <button key={f} className={`seg__btn ${target === f ? 'is-active' : ''}`} data-testid={`ifc-fmt-${LABEL[f]}`} onClick={() => setTarget(f)}>{LABEL[f]}</button>
+                <SegButton key={f} active={target === f} data-testid={`ifc-fmt-${LABEL[f]}`} onClick={() => setTarget(f)}>{LABEL[f]}</SegButton>
               ))}
-            </div>
-          </label>
+            </Seg>
+          </Field>
 
           {target !== 'image/png' && (
-            <label className="field">
-              <span className="field__label">{s.quality} · {Math.round(quality * 100)}%</span>
+            <Field label={`${s.quality} · ${Math.round(quality * 100)}%`}>
               <input type="range" min={0.1} max={1} step={0.02} value={quality} data-testid="ifc-quality" onChange={(e) => setQuality(+e.target.value)} />
-            </label>
+            </Field>
           )}
           {target === 'image/jpeg' && (
-            <label className="field">
-              <span className="field__label">{s.bg}</span>
+            <Field label={s.bg}>
               <div className="flex items-center gap-2">
                 <input type="color" value={bg} data-testid="ifc-bg" onChange={(e) => setBg(e.target.value)} className="w-10 h-9 rounded border border-[color:var(--line)] bg-transparent p-0" />
                 <span className="text-[0.8rem] text-ink-faint">{s.bgHint}</span>
               </div>
-            </label>
+            </Field>
           )}
 
           {out && (
@@ -108,14 +106,14 @@ export default function ImageFormatConverterTool() {
           )}
 
           <div className="flex gap-2">
-            <a className="btn btn--primary" href={out?.url} download={`${src.name}.${EXT[target]}`} data-testid="ifc-download"><DownloadIcon /> {s.download}</a>
-            <button className="btn" onClick={() => { setSrc(null); setOut(null) }}>{s.another}</button>
+            <Button variant="primary" href={out?.url ?? ''} download={`${src.name}.${EXT[target]}`} data-testid="ifc-download"><DownloadIcon /> {s.download}</Button>
+            <Button onClick={() => { setSrc(null); setOut(null) }}>{s.another}</Button>
           </div>
           {busy && <p className="text-ink-faint text-[0.9rem]">{s.working}</p>}
         </>
       )}
 
       <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
-    </div>
+    </Stack>
   )
 }
