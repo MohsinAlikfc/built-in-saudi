@@ -63,7 +63,7 @@ export function AppLauncher() {
               <SearchIcon className="w-5 h-5 text-ink-faint flex-none" />
               <input
                 type="search" autoFocus data-testid="launcher-search"
-                className="flex-1 min-w-0 border-none bg-transparent outline-none focus-visible:outline-none appearance-none font-body text-[1rem] text-ink py-[0.5rem] placeholder:text-ink-faint truncate [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+                className="tool-search__input flex-1 min-w-0 border-none bg-transparent outline-none appearance-none font-body text-[1rem] text-ink py-[0.5rem] placeholder:text-ink-faint truncate [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
                 placeholder={t.catalog.searchPlaceholder} value={query} onChange={(e) => setQuery(e.target.value)} aria-label={t.catalog.searchAria}
               />
             </div>

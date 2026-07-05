@@ -88,6 +88,11 @@ button { font: inherit; cursor: pointer; color: inherit; background: none; borde
 ::selection { background: color-mix(in srgb, var(--gold-400) 45%, transparent); }
 
 :focus-visible { outline: 2.5px solid var(--green-500); outline-offset: 2px; border-radius: 4px; }
+/* The search inputs show focus on their wrapping pill (focus-within ring), so
+   suppress the input's own outline. Needs to be here (unlayered) — a Tailwind
+   `focus-visible:outline-none` utility lives in @layer utilities and would lose
+   to the unlayered :focus-visible rule above. */
+.tool-search__input:focus, .tool-search__input:focus-visible { outline: none; }
 
 /* ── Layout helpers ─────────────────────────────── */
 .wrap { width: 100%; max-width: var(--wrap); margin-inline: auto; padding-inline: clamp(1.1rem, 4vw, 2.5rem); }
