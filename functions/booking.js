@@ -133,7 +133,7 @@ async function googleBusy(accessToken, calId, timeMinIso, timeMaxIso) {
     + `?timeMin=${encodeURIComponent(timeMinIso)}&timeMax=${encodeURIComponent(timeMaxIso)}`
     + '&singleEvents=true&orderBy=startTime&maxResults=2500'
   const r = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } })
-  if (!r.ok) throw new Error(`events ${r.status}`)
+  if (!r.ok) throw new Error(`events ${r.status}: ${(await r.text()).slice(0, 300)}`)
   const data = await r.json()
   const busy = []
   for (const ev of data.items || []) {
@@ -429,19 +429,15 @@ http('getAvailability', async (req, res) => {
     if (host.google && host.google.refreshToken) {
       try {
         const at = await accessTokenFor(host.google.refreshToken)
+        if (req.body && req.body.debug) {
+          try {
+            const ti = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${encodeURIComponent(at)}`).then((x) => x.json())
+            dbg.scopes = ti.scope || ti.error || null
+          } catch (e) { dbg.scopeErr = String((e && e.message) || e) }
+        }
         const gbusy = await googleBusy(at, host.google.calendarId || 'primary', new Date(now).toISOString(), new Date(horizonEnd).toISOString())
         busy.push(...gbusy)
         dbg.busyCount = gbusy.length
-        if (req.body && req.body.debug) {
-          const durl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(host.google.calendarId || 'primary')}/events`
-            + `?timeMin=${encodeURIComponent(new Date(now).toISOString())}&timeMax=${encodeURIComponent(new Date(horizonEnd).toISOString())}&singleEvents=true&orderBy=startTime&maxResults=50`
-          const dr = await fetch(durl, { headers: { Authorization: `Bearer ${at}` } })
-          const dj = await dr.json()
-          dbg.rawStatus = dr.status
-          dbg.rawCount = (dj.items || []).length
-          dbg.rawError = dj.error || null
-          dbg.sample = (dj.items || []).slice(0, 8).map((e) => ({ status: e.status, summary: e.summary, start: e.start }))
-        }
       } catch (e) {
         dbg.calErr = String((e && e.message) || e)
         console.error('calendar busy failed:', String((e && e.message) || e))
