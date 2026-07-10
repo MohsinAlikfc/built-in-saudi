@@ -50,6 +50,8 @@ const STR = {
     alertSettings: 'Alert settings', turnOff: 'Turn off alerts', done: 'Done',
     iqamaAlertLabel: 'Iqama alert', iqamaAlertHint: 'A second reminder at iqama',
     duhaLabel: 'Ḍuḥā prayer', duhaHint: 'Remind me when Ḍuḥā begins (after sunrise)',
+    followLabel: 'Follow me when I travel', followHint: 'If you move far from here, alerts switch to your current location',
+    followToast: (place: string) => `You’ve travelled — alerts now use ${place}.`,
     beforeLabel: 'Alert before', atAdhan: 'At adhan', minShort: (m: number) => `${m} min`,
     alertsFailed: 'We couldn’t turn on alerts just yet', alertsFixHint: 'Try this:',
     notifyNote: 'We’ll store your location to send alerts. Turn off anytime.',
@@ -82,6 +84,8 @@ const STR = {
     alertSettings: 'إعدادات التنبيه', turnOff: 'إيقاف التنبيهات', done: 'تم',
     iqamaAlertLabel: 'تنبيه الإقامة', iqamaAlertHint: 'تذكير ثانٍ عند الإقامة',
     duhaLabel: 'صلاة الضحى', duhaHint: 'ذكّرني عند دخول وقت الضحى (بعد الشروق)',
+    followLabel: 'تابِعني أثناء السفر', followHint: 'إذا ابتعدت كثيرًا عن هنا، تنتقل التنبيهات إلى موقعك الحالي',
+    followToast: (place: string) => `لقد سافرت — أصبحت التنبيهات على توقيت ${place}.`,
     beforeLabel: 'التنبيه قبل', atAdhan: 'عند الأذان', minShort: (m: number) => `${m} د`,
     alertsFailed: 'تعذّر تفعيل التنبيهات حتى الآن', alertsFixHint: 'جرّب هذا:',
     notifyNote: 'سنحفظ موقعك لإرسال التنبيهات. يمكنك الإيقاف في أي وقت.',
@@ -118,6 +122,20 @@ function readPrefs(): AlertPrefs {
 }
 function savePrefs(p: AlertPrefs) { try { localStorage.setItem(PREFS_KEY, JSON.stringify(p)) } catch { /* ignore */ } }
 
+// Auto-follow: when a device-location user travels far, re-point their alerts to
+// where they now are. Client-only + best-effort (checked on open/focus, only when
+// geolocation is already granted so we never prompt in the background).
+const AUTOLOC_KEY = 'bis-prayer-autoloc'
+function readAutoLoc(): boolean { try { return localStorage.getItem(AUTOLOC_KEY) !== '0' } catch { return true } }
+function saveAutoLoc(v: boolean) { try { localStorage.setItem(AUTOLOC_KEY, v ? '1' : '0') } catch { /* ignore */ } }
+const FOLLOW_KM = 75 // move beyond this from the alert location ⇒ treat as travelling
+function haversineKm(a1: number, o1: number, a2: number, o2: number): number {
+  const R = 6371, r = Math.PI / 180
+  const dLat = (a2 - a1) * r, dLon = (o2 - o1) * r
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a1 * r) * Math.cos(a2 * r) * Math.sin(dLon / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(h))
+}
+
 // Shared hero "pill" chip (was .pray__hero-pill): translucent capsule on the
 // green hero, with white 15px icons.
 const HERO_PILL =
@@ -149,6 +167,8 @@ export default function PrayerTimesTool() {
     try { return localStorage.getItem('bis-prayer-24h') === '1' } catch { return false }
   })
   const [prefs, setPrefs] = useState<AlertPrefs>(() => readPrefs())
+  const [autoLoc, setAutoLoc] = useState(readAutoLoc)
+  const [followToast, setFollowToast] = useState('')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [viewDateStr, setViewDateStr] = useState('') // '' = live (now-centric)
   const [showMore, setShowMore] = useState(false)
@@ -403,6 +423,48 @@ export default function PrayerTimesTool() {
     )
   }
 
+  // Auto-follow when travelling: if a device-location alert user has moved beyond
+  // FOLLOW_KM from their alert location, re-point alerts to where they now are.
+  // Best-effort: only when geolocation is already granted (never prompts), throttled.
+  const followRef = useRef<() => void>(() => {})
+  followRef.current = () => {
+    if (pushOn !== true || !autoLoc || cityId !== '') return
+    try {
+      const last = Number(localStorage.getItem('bis-prayer-follow') || 0)
+      if (Date.now() - last < 1_800_000) return // at most every 30 min
+    } catch { return }
+    ;(async () => {
+      let perm: PermissionState
+      try { perm = (await navigator.permissions.query({ name: 'geolocation' as PermissionName })).state } catch { return }
+      if (perm !== 'granted') return // don't prompt in the background
+      try { localStorage.setItem('bis-prayer-follow', String(Date.now())) } catch { /* ignore */ }
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude, lng = pos.coords.longitude
+        if (haversineKm(loc.lat, loc.lng, lat, lng) < FOLLOW_KM) return // hasn't travelled far
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+        setCityId('')
+        setLoc({ lat, lng, tz, label: s.myLocation })
+        saveLoc({ mode: 'geo', lat, lng, tz })
+        resolveGeoLabel(lat, lng, tz)
+        let place: string | undefined
+        try { const n = await reverseGeocode(lat, lng, locale); place = n ? n.split(/[،,]/)[0].trim() : undefined } catch { /* ignore */ }
+        await enablePush({ lat, lng, tz, place }, locale, { minutesBefore: prefs.minutesBefore, iqamaAlert: prefs.iqamaAlert, duha: prefs.duha, prayers: DAILY })
+        setFollowToast(place || s.myLocation)
+      }, () => {}, { timeout: 10000, maximumAge: 600000 })
+    })()
+  }
+  useEffect(() => {
+    followRef.current()
+    const onVis = () => { if (!document.hidden) followRef.current() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
+  useEffect(() => {
+    if (!followToast) return
+    const t = setTimeout(() => setFollowToast(''), 6000)
+    return () => clearTimeout(t)
+  }, [followToast])
+
   return (
     <div className="flex flex-col gap-[1.3rem]">
       {/* Big next-prayer hero */}
@@ -482,14 +544,22 @@ export default function PrayerTimesTool() {
       )}
       {settingsOpen && (
         <AlertSettings s={s} prefs={prefs} busy={pushBusy}
+          isGeo={cityId === ''} autoLoc={autoLoc} onAutoLoc={(v) => { setAutoLoc(v); saveAutoLoc(v) }}
           onApply={applyPrefs} onDisable={disableAlerts} onClose={() => setSettingsOpen(false)} />
+      )}
+
+      {followToast && (
+        <div className="fixed inset-x-3 bottom-4 z-[70] mx-auto max-w-[26rem] bg-green-600 text-sand-100 px-4 py-3 rounded-lg shadow-[var(--shadow-md)] text-[0.9rem] leading-snug animate-[fadeUp_0.3s_ease]" role="status" data-testid="follow-toast">
+          {s.followToast(followToast)}
+        </div>
       )}
     </div>
   )
 }
 
-function AlertSettings({ s, prefs, busy, onApply, onDisable, onClose }: {
+function AlertSettings({ s, prefs, busy, isGeo, autoLoc, onAutoLoc, onApply, onDisable, onClose }: {
   s: typeof STR['en']; prefs: AlertPrefs; busy: boolean
+  isGeo: boolean; autoLoc: boolean; onAutoLoc: (v: boolean) => void
   onApply: (p: AlertPrefs) => void; onDisable: () => void; onClose: () => void
 }) {
   return (
@@ -518,6 +588,14 @@ function AlertSettings({ s, prefs, busy, onApply, onDisable, onClose }: {
           <input type="checkbox" className="w-[22px] h-[22px] accent-green-600 flex-none" checked={prefs.duha} disabled={busy} data-testid="set-duha"
             onChange={(e) => onApply({ ...prefs, duha: e.target.checked })} />
         </label>
+
+        {isGeo && (
+          <label className="flex items-center justify-between gap-4 py-[0.85rem] px-[0.2rem] border-b border-[var(--line-soft)] last-of-type:border-b-0">
+            <span className="flex flex-col [&_small]:text-ink-faint [&_small]:text-[0.78rem] [&_small]:mt-[0.1rem]">{s.followLabel}<small>{s.followHint}</small></span>
+            <input type="checkbox" className="w-[22px] h-[22px] accent-green-600 flex-none" checked={autoLoc} data-testid="set-follow"
+              onChange={(e) => onAutoLoc(e.target.checked)} />
+          </label>
+        )}
 
         <SheetActions>
           <Button data-testid="set-disable" disabled={busy} onClick={onDisable}>{s.turnOff}</Button>
