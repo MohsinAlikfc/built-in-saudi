@@ -8,6 +8,8 @@ import * as adhan from 'adhan'
 import './booking.js'
 // CV Generator endpoint (cvGenerate).
 import './cv.js'
+// Link shortener (shorten, resolveLink, myLinks, deleteLink).
+import './shorten.js'
 
 const { Firestore } = firestore
 const db = new Firestore()

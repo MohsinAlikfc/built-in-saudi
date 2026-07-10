@@ -49,6 +49,11 @@ export const liveToolSeo: ToolSeo[] = [
     ar: { name: 'منشئ السيرة الذاتية', description: 'ارفع سيرتك واحصل عليها معادةَ الكتابة في قالب نظيف متوافق مع أنظمة التتبّع — إشارة بلا ضجيج. تُزال الصور والألوان والمعدّلات والمراجع؛ وتُستخلص المهارات وملخّص موجز. صدّر PDF أو Word.' },
   },
   {
+    id: 'link-shortener',
+    en: { name: 'Link Shortener', description: 'Turn a long URL into a clean built-in-saudi.com/s/… link you can share anywhere. Sign in with Google to create and manage your links and see their click counts. Each link is kept for 6 months. Free, no ads.' },
+    ar: { name: 'اختصار الروابط', description: 'حوّل رابطًا طويلًا إلى رابط قصير أنيق على built-in-saudi.com/s/… تشاركه في أي مكان. سجّل الدخول بحساب Google لإنشاء روابطك وإدارتها ورؤية عدد النقرات. يُحفظ كل رابط ٦ أشهر. مجاني بلا إعلانات.' },
+  },
+  {
     id: 'color-tools',
     en: { name: 'Color Picker & Palettes', description: 'Pick a colour and read it as HEX/RGB/HSL, then generate complementary, analogous and triadic palettes plus a shades ramp — copy any swatch. In your browser.' },
     ar: { name: 'منتقي الألوان واللوحات', description: 'اختر لونًا واقرأه بصيغ HEX/RGB/HSL، ثم ولّد لوحات مكمّلة ومتجانسة وثلاثية وتدرّجات — وانسخ أي لون. داخل متصفحك.' },

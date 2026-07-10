@@ -106,6 +106,7 @@ export interface MyDataReport {
   bookingPage: { code: string | null; meetingTypes: number } | null
   bookings: number
   cvRuns: number
+  shortLinks?: number
 }
 
 /** Report (del=false) or delete (del=true) everything stored for this Google user. */

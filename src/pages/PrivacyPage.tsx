@@ -50,6 +50,13 @@ const STR: Record<'en' | 'ar', { title: string; updated: string; intro: string; 
         ],
       },
       {
+        h: 'Link Shortener',
+        p: [
+          'The Link Shortener needs a server to redirect visitors, so it stores the links you create: the original URL, the short code, a click counter, and your Google account id/email as the owner. Sign-in uses Google only to confirm you are a real person and to tie links to you; it requests no Calendar, Drive or other scopes.',
+          'Short links are kept for 6 months and then expire and are deleted automatically. You can delete any link yourself at any time from the tool, and “Delete my data” below removes every link you own.',
+        ],
+      },
+      {
         h: 'Email and notifications',
         p: [
           'Booking confirmations are sent by email through Resend (our email provider) and include a calendar invite. Optional booking alerts are sent via Web Push and, if you connect it, Telegram. These carry only the details needed for the notification.',
@@ -66,6 +73,7 @@ const STR: Record<'en' | 'ar', { title: string; updated: string; intro: string; 
         p: [
           'Client-side tool data lives only in your browser until you clear it. For Book With Me, your host record and bookings are kept while your scheduling link is active. To delete your data, revoke Google access and email us and we will remove your host record and bookings.',
           'The CV Generator stores no CV content — only short-lived usage counters that reset over time, so there is nothing of yours to delete there.',
+          'Short links you create are kept for 6 months, then expire and are deleted automatically; you can also delete them yourself at any time.',
         ],
       },
       {
@@ -113,6 +121,13 @@ const STR: Record<'en' | 'ar', { title: string; updated: string; intro: string; 
         ],
       },
       {
+        h: 'اختصار الروابط',
+        p: [
+          'يحتاج مختصِر الروابط إلى خادم لإعادة توجيه الزوار، لذا يخزّن الروابط التي تنشئها: الرابط الأصلي، والرمز القصير، وعدّاد النقرات، ومعرّف/بريد حساب جوجل كمالك. يُستخدم تسجيل الدخول عبر جوجل فقط للتأكد أنك شخص حقيقي ولربط الروابط بك، ولا يطلب أي صلاحيات تقويم أو Drive أو غيرها.',
+          'تُحفظ الروابط القصيرة لمدة ٦ أشهر ثم تنتهي وتُحذف تلقائيًا. ويمكنك حذف أي رابط بنفسك في أي وقت من الأداة، كما يزيل «احذف بياناتي» أدناه كل روابطك.',
+        ],
+      },
+      {
         h: 'البريد والإشعارات',
         p: [
           'تُرسَل تأكيدات الحجز بالبريد عبر Resend (مزوّد البريد لدينا) وتتضمن دعوة تقويم. وتُرسَل التنبيهات الاختيارية عبر إشعارات الويب، وتيليجرام إن ربطته، ولا تحمل إلا تفاصيل الإشعار.',
@@ -129,6 +144,7 @@ const STR: Record<'en' | 'ar', { title: string; updated: string; intro: string; 
         p: [
           'تبقى بيانات الأدوات في متصفحك حتى تمسحها. أما «احجز معي» فيُحفظ سجلك وحجوزاتك ما دام رابط الحجز نشطًا. لحذف بياناتك، ألغِ وصول جوجل وراسلنا وسنحذف سجلك وحجوزاتك.',
           'لا يخزّن منشئ السيرة الذاتية أي محتوى — بل عدّادات استخدام قصيرة العمر تتجدد مع الوقت، فلا يوجد ما يُحذف هناك.',
+          'تُحفظ الروابط القصيرة التي تنشئها لمدة ٦ أشهر ثم تنتهي وتُحذف تلقائيًا، ويمكنك أيضًا حذفها بنفسك في أي وقت.',
         ],
       },
       {
@@ -154,8 +170,8 @@ export function PrivacyPage() {
 /** Sign in with Google to see everything stored for you, and delete it. */
 function DeleteMyData({ locale }: { locale: 'en' | 'ar' }) {
   const t = locale === 'ar'
-    ? { h: 'بياناتي', p: 'سجّل الدخول بحساب Google لترى كل ما نخزّنه عنك وتحذفه بنقرة واحدة.', page: 'صفحة حجز', none: 'لا شيء', bookings: 'حجوزات', cv: 'مرات استخدام مولّد السيرة', del: 'احذف كل بياناتي', deleting: 'جارٍ الحذف…', done: 'حُذفت جميع بياناتك.', err: 'حدث خطأ، حاول مجددًا.', nothing: 'لا نخزّن أي بيانات باسمك.' }
-    : { h: 'My data', p: 'Sign in with Google to see everything we store for you and delete it in one click.', page: 'Booking page', none: 'none', bookings: 'Bookings', cv: 'CV generator runs', del: 'Delete all my data', deleting: 'Deleting…', done: 'All your data has been deleted.', err: 'Something went wrong — please try again.', nothing: 'We store nothing under your account.' }
+    ? { h: 'بياناتي', p: 'سجّل الدخول بحساب Google لترى كل ما نخزّنه عنك وتحذفه بنقرة واحدة.', page: 'صفحة حجز', none: 'لا شيء', bookings: 'حجوزات', cv: 'مرات استخدام مولّد السيرة', links: 'روابط مختصرة', del: 'احذف كل بياناتي', deleting: 'جارٍ الحذف…', done: 'حُذفت جميع بياناتك.', err: 'حدث خطأ، حاول مجددًا.', nothing: 'لا نخزّن أي بيانات باسمك.' }
+    : { h: 'My data', p: 'Sign in with Google to see everything we store for you and delete it in one click.', page: 'Booking page', none: 'none', bookings: 'Bookings', cv: 'CV generator runs', links: 'Short links', del: 'Delete all my data', deleting: 'Deleting…', done: 'All your data has been deleted.', err: 'Something went wrong — please try again.', nothing: 'We store nothing under your account.' }
   const [idToken, setIdToken] = useState('')
   const [report, setReport] = useState<MyDataReport | null>(null)
   const [status, setStatus] = useState<'idle' | 'loading' | 'deleting' | 'done' | 'error'>('idle')
@@ -181,10 +197,10 @@ function DeleteMyData({ locale }: { locale: 'en' | 'ar' }) {
   async function del() {
     if (!idToken) return
     setStatus('deleting')
-    try { await myData(idToken, true); setStatus('done'); setReport((r) => (r ? { ...r, bookingPage: null, bookings: 0, cvRuns: 0 } : r)) } catch { setStatus('error') }
+    try { await myData(idToken, true); setStatus('done'); setReport((r) => (r ? { ...r, bookingPage: null, bookings: 0, cvRuns: 0, shortLinks: 0 } : r)) } catch { setStatus('error') }
   }
 
-  const empty = report && !report.bookingPage && report.bookings === 0 && report.cvRuns === 0
+  const empty = report && !report.bookingPage && report.bookings === 0 && report.cvRuns === 0 && (report.shortLinks || 0) === 0
 
   return (
     <div className="wrap max-w-[46rem] pb-[clamp(1.5rem,4vw,2.5rem)]">
@@ -202,6 +218,7 @@ function DeleteMyData({ locale }: { locale: 'en' | 'ar' }) {
                 <li>{t.page}: <b>{report.bookingPage ? `✓ (${report.bookingPage.meetingTypes})` : t.none}</b></li>
                 <li>{t.bookings}: <b>{report.bookings}</b></li>
                 <li>{t.cv}: <b>{report.cvRuns}</b></li>
+                <li>{t.links}: <b>{report.shortLinks || 0}</b></li>
               </ul>
               <Button variant="primary" data-testid="mydata-delete" disabled={status === 'deleting'} onClick={del} className="self-start !bg-gold-500 !border-gold-500 hover:!bg-gold-400">
                 {status === 'deleting' ? t.deleting : t.del}

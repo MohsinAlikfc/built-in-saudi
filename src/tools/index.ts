@@ -34,6 +34,7 @@ import { zipInspectorTool } from './zip-inspector/meta'
 import { metadataTool } from './metadata/meta'
 import { bookWithMeTool } from './book-with-me/meta'
 import { cvGeneratorTool } from './cv-generator/meta'
+import { linkShortenerTool } from './link-shortener/meta'
 
 /**
  * The tool catalog. Stable/beta tools render inside the app at /tools/:id.
@@ -44,6 +45,7 @@ import { cvGeneratorTool } from './cv-generator/meta'
 export const tools: Tool[] = [
   bookWithMeTool,
   cvGeneratorTool,
+  linkShortenerTool,
   qrCodeTool,
   imageCompressorTool,
   imageFormatConverterTool,

@@ -205,9 +205,16 @@ from the URL) to make that a config flip, not a rewrite. Trend home toward a
   **everything** stored for that user across the whole site. **Whenever you add any
   new per-user server-side storage, update `my-data` to report + delete it too** (and
   mention it in the Privacy page copy). Today it covers `bookingHosts/{sub}`,
-  `bookings` where `hostUid == sub`, and `cvUsage/{sub}`.
+  `bookings` where `hostUid == sub`, `cvUsage/{sub}`, and `shortLinks` where
+  `owner == sub`.
+- **Link shortener** (`functions/shorten.js`): `shorten` (Google-auth → create a
+  6-month short link in Firestore `shortLinks`, keyed by a random code, storing
+  `owner`/`url`/`expiresAt`/`hits`), `resolve-link` (public GET `?c=<code>` →
+  target URL; expired ⇒ 404 + lazy delete), `my-links`, `delete-link`. The public
+  redirect is a **top-level `/s/:code` route** (`ShortLinkPage`, no locale/chrome)
+  that resolves + `location.replace`. Same GIS client ID as the CV tool.
 - **Functions deploy = CI** (not manual gcloud): `.github/workflows/deploy-functions.yml`
-  deploys all seventeen functions on any `functions/**` change, authenticating **keylessly
+  deploys all twenty-one functions on any `functions/**` change, authenticating **keylessly
   via Workload Identity Federation** (pool `github` in `blitz-ksa`, deploy SA
   `gh-fn-deploy@…`). Repo vars `GCP_PROJECT`/`GCP_WIF_PROVIDER`/`GCP_DEPLOY_SA`/
   `GOOGLE_OAUTH_CLIENT_ID`/`TELEGRAM_BOT_USERNAME` + repo secrets `VAPID_PUBLIC`/
