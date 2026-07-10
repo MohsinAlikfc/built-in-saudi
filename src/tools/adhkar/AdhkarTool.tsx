@@ -10,8 +10,8 @@ import { ADHKAR, type When } from './data'
 const STR = {
   en: {
     morning: 'Morning', evening: 'Evening', sleep: 'Before sleep',
-    lede: 'The core morning and evening remembrances from the Qur’an and authentic Sunnah. Tap the count button to track your repetitions — your progress is kept for today on this device.',
-    times: (n: number) => `×${n}`, done: 'Done', reset: 'Reset', count: 'Count', overall: 'Progress',
+    lede: 'The core morning and evening remembrances from the Qur’an and authentic Sunnah. Tap a card to count a repetition — your progress is kept for today on this device (refresh to reset).',
+    times: (n: number) => `×${n}`, done: 'Done', overall: 'Progress',
     note: 'Arabic is the Qur’an/Sunnah text; transliteration and meaning were written for this app — verify before relying on them.',
     progress: (d: number, t: number) => `${d} / ${t}`,
     remind: 'Enable alerts', remindOn: 'Alerts on',
@@ -23,8 +23,8 @@ const STR = {
   },
   ar: {
     morning: 'الصباح', evening: 'المساء', sleep: 'قبل النوم',
-    lede: 'أذكار الصباح والمساء الأساسية من القرآن والسنة الصحيحة. اضغط زر العدّ لتتبّع التكرار — يُحفظ تقدّمك لهذا اليوم على جهازك.',
-    times: (n: number) => `×${n}`, done: 'تمّ', reset: 'إعادة', count: 'عدّ', overall: 'التقدّم',
+    lede: 'أذكار الصباح والمساء الأساسية من القرآن والسنة الصحيحة. اضغط البطاقة لعدّ تكرار — يُحفظ تقدّمك لهذا اليوم على جهازك (حدّث الصفحة لإعادة التصفير).',
+    times: (n: number) => `×${n}`, done: 'تمّ', overall: 'التقدّم',
     note: 'النص العربي من القرآن والسنة؛ وكُتب النطق والمعنى الإنجليزي لهذا التطبيق — تحقّق قبل الاعتماد عليهما.',
     progress: (d: number, t: number) => `${d} / ${t}`,
     remind: 'تفعيل التنبيهات', remindOn: 'التنبيهات مفعّلة',
@@ -118,11 +118,6 @@ export default function AdhkarTool() {
     })
   }
 
-  function resetAll() {
-    setProgress({})
-    try { localStorage.removeItem(storeKey(when)) } catch { /* ignore */ }
-  }
-
   return (
     <div className="flex flex-col gap-5 max-w-[46rem] mx-auto pb-16" data-testid="adhkar">
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -140,7 +135,6 @@ export default function AdhkarTool() {
               {remindOn ? <CogIcon /> : <BellIcon />} {remindOn ? s.remindOn : s.remind}
             </Pill>
           )}
-          <Pill data-testid="adhkar-reset" onClick={resetAll}>{s.reset}</Pill>
         </div>
       </div>
       {remindErr && <p className="text-[0.8rem] text-[color:var(--danger)]">{remindErr}</p>}
@@ -152,8 +146,17 @@ export default function AdhkarTool() {
           const pct = Math.min(100, Math.round((cur / d.count) * 100))
           return (
             <li key={d.id}>
+              {/* The whole card is the counter — tap it to count one. Not-done
+                  carries a prominent 2px border (still to do); once complete it
+                  drops to the plain 1px static border. */}
               <div
-                className={`border rounded-md bg-[var(--surface)] p-4 flex flex-col gap-3 transition-[border-color,opacity] duration-150 ${done ? 'border-green-600 opacity-70' : 'border-[color:var(--line-soft)]'}`}
+                role="button"
+                tabIndex={0}
+                data-testid={`dhikr-${d.id}`}
+                aria-label={`${d.translit || d.en} — ${s.progress(cur, d.count)}`}
+                onClick={() => tap(d.id, d.count)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(d.id, d.count) } }}
+                className={`rounded-md bg-[var(--surface)] p-4 flex flex-col gap-3 cursor-pointer select-none transition-[border-color,opacity] duration-150 ${done ? 'border border-[color:var(--line-soft)] opacity-70' : 'border-2 border-green-600'}`}
               >
                 <div className="flex items-center justify-end">
                   <span className="text-[0.75rem] font-semibold text-ink-faint tabular-nums">{s.times(d.count)}</span>
@@ -161,11 +164,8 @@ export default function AdhkarTool() {
                 <p dir="rtl" lang="ar" className="font-ar text-[1.4rem] leading-[2] text-ink">{d.ar}</p>
 
                 {d.count > 1 && (
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 h-2 rounded-full bg-sand-200 overflow-hidden">
-                      <div className="h-full bg-green-600 rounded-full transition-[width] duration-200" style={{ width: `${pct}%` }} />
-                    </div>
-                    <span className="tabular-nums text-[0.8rem] font-semibold text-ink-soft flex-none">{s.progress(cur, d.count)}</span>
+                  <div className="h-2 rounded-full bg-sand-200 overflow-hidden">
+                    <div className="h-full bg-green-600 rounded-full transition-[width] duration-200" style={{ width: `${pct}%` }} />
                   </div>
                 )}
 
@@ -174,21 +174,6 @@ export default function AdhkarTool() {
                   {locale !== 'ar' && <p className="text-[0.9rem] text-ink leading-relaxed">{d.en}</p>}
                   <p className="text-[0.78rem] text-ink-faint">{d.ref}</p>
                 </div>
-
-                {/* Both states use .pill (same box → no layout shift on toggle).
-                    Count is the accent pill; Done just drops its background/border
-                    (kept transparent, so the border width is preserved) and mutes
-                    the text — so a completed dhikr reads as flat, not a button. */}
-                <Pill
-                  onClick={() => tap(d.id, d.count)}
-                  data-testid={`dhikr-${d.id}`}
-                  aria-label={`${s.count} — ${s.progress(cur, d.count)}`}
-                  variant={done ? 'default' : 'accent'}
-                  className="self-center mt-1"
-                  style={done ? { background: 'transparent', borderColor: 'transparent', color: 'var(--ink-faint)' } : undefined}
-                >
-                  {done ? s.done : s.count}
-                </Pill>
               </div>
             </li>
           )
