@@ -51,6 +51,7 @@ const STR = {
     jdBody: 'Paste the full job description and we’ll tailor this CV to it — reordering and re-emphasising what matters for this role. We never add experience you don’t already have.',
     jdPh: 'Paste the job description here…',
     jdSubmit: 'Tailor my CV',
+    jdTooShort: 'Please paste the full job description — a line or two isn’t enough to tailor accurately.',
     jdWorking: 'Tailoring…',
     jdDone: 'Tailored to the job — use the switch to compare with your generated CV.',
     serverSaveTitle: 'Save for later',
@@ -132,6 +133,7 @@ const STR = {
     jdBody: 'الصق الوصف الوظيفي كاملًا وسنخصّص هذه السيرة له — بإعادة الترتيب وإبراز ما يهم هذه الوظيفة. لا نضيف أبدًا خبرة لا تملكها.',
     jdPh: 'الصق الوصف الوظيفي هنا…',
     jdSubmit: 'خصّص سيرتي',
+    jdTooShort: 'الرجاء لصق الوصف الوظيفي كاملًا — سطر أو سطران لا يكفيان للتخصيص بدقة.',
     jdWorking: 'جارٍ التخصيص…',
     jdDone: 'خُصّصت للوظيفة — استخدم المُبدّل للمقارنة بسيرتك المُنشأة.',
     serverSaveTitle: 'احفظ للاحقًا',
@@ -521,7 +523,8 @@ export default function CvGeneratorTool() {
   // Tailor the CV to a pasted job description. Customising also saves the CV to
   // the account (so it can be reopened), which the JD dialog tells the user.
   async function tailor() {
-    if (!idToken || !cv || !jdText.trim() || jdBusy) return
+    if (!idToken || !cv || jdBusy) return
+    if (jdText.trim().length < 40) { setErr(s.jdTooShort); return }
     setJdBusy(true)
     setErr('')
     try {
@@ -756,7 +759,7 @@ export default function CvGeneratorTool() {
             <Sheet onClose={() => { if (!jdBusy) setJdOpen(false) }}>
               <SheetTitle>{s.jdTitle}</SheetTitle>
               <p className="text-[0.9rem] text-ink-soft leading-relaxed">{s.jdBody}</p>
-              <Textarea value={jdText} onChange={(e) => setJdText(e.target.value)} placeholder={s.jdPh}
+              <Textarea value={jdText} onChange={(e) => { setJdText(e.target.value); if (err) setErr('') }} placeholder={s.jdPh}
                 data-testid="cv-jd-text" className="min-h-[34vh] resize-y" autoFocus />
               <p className="text-[0.78rem] text-ink-faint leading-relaxed">
                 {s.jdSaveNote}{' '}
@@ -764,7 +767,7 @@ export default function CvGeneratorTool() {
               </p>
               {err && <p className="text-[0.85rem] text-gold-500" data-testid="cv-jd-err">{err}</p>}
               <SheetActions>
-                <Button variant="primary" onClick={tailor} disabled={jdBusy || jdText.trim().length < 40} data-testid="cv-jd-submit">
+                <Button variant="primary" onClick={tailor} disabled={jdBusy || !jdText.trim()} data-testid="cv-jd-submit">
                   {jdBusy ? s.jdWorking : s.jdSubmit}
                 </Button>
               </SheetActions>
