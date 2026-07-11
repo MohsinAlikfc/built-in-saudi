@@ -2,9 +2,9 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useLocale, localePath } from '../../i18n'
-import { Button, Input, Stack, Spinner } from '../../components/ui'
+import { Button, Input, Textarea, Stack, Spinner, Sheet, SheetTitle, SheetActions } from '../../components/ui'
 import { DownloadIcon, MicIcon, BookmarkIcon } from '../../components/icons'
-import { loadGis, GOOGLE_CLIENT_ID, decodeJwt, generateCv, refineCv } from '../../lib/cvApi'
+import { loadGis, GOOGLE_CLIENT_ID, decodeJwt, generateCv, refineCv, tailorCv } from '../../lib/cvApi'
 import { hideFooterStore } from '../../lib/hideFooter'
 import { inAppBrowser } from '../../lib/inAppBrowser'
 import { renderCvHtml } from './template'
@@ -45,11 +45,21 @@ const STR = {
     word: 'Save as Word',
     optimized: 'Optimized',
     original: 'Original',
+    generated: 'Generated',
+    tailored: 'Tailored',
     fullscreen: 'Fullscreen',
     exitFs: 'Exit fullscreen',
+    saveOptions: 'Save options',
     saveForLater: 'Save for later',
     savedForLater: 'Saved on this device — resume it anytime.',
     resumeSaved: 'Resume your saved CV',
+    customizeJd: 'Customize for JD',
+    jdTitle: 'Customize for a job',
+    jdBody: 'Paste the full job description and we’ll tailor this CV to it — reordering and re-emphasising what matters for this role. We never add experience you don’t already have.',
+    jdPh: 'Paste the job description here…',
+    jdSubmit: 'Tailor my CV',
+    jdWorking: 'Tailoring…',
+    jdDone: 'Tailored to the job — use the switch to compare with your generated CV.',
     changesTitle: 'Improvements made',
     qLabel: (i: number, n: number) => `Question ${i} of ${n}`,
     answerPh: 'Type or speak your answer…',
@@ -94,11 +104,21 @@ const STR = {
     word: 'حفظ Word',
     optimized: 'المُحسّنة',
     original: 'الأصلية',
+    generated: 'المُنشأة',
+    tailored: 'المُخصّصة',
     fullscreen: 'ملء الشاشة',
     exitFs: 'إنهاء ملء الشاشة',
+    saveOptions: 'خيارات الحفظ',
     saveForLater: 'احفظ للاحقًا',
     savedForLater: 'حُفظت على هذا الجهاز — استأنفها متى شئت.',
     resumeSaved: 'استأنف سيرتك المحفوظة',
+    customizeJd: 'خصّص للوظيفة',
+    jdTitle: 'خصّص لوظيفة',
+    jdBody: 'الصق الوصف الوظيفي كاملًا وسنخصّص هذه السيرة له — بإعادة الترتيب وإبراز ما يهم هذه الوظيفة. لا نضيف أبدًا خبرة لا تملكها.',
+    jdPh: 'الصق الوصف الوظيفي هنا…',
+    jdSubmit: 'خصّص سيرتي',
+    jdWorking: 'جارٍ التخصيص…',
+    jdDone: 'خُصّصت للوظيفة — استخدم المُبدّل للمقارنة بسيرتك المُنشأة.',
     changesTitle: 'التحسينات المُطبَّقة',
     qLabel: (i: number, n: number) => `سؤال ${i} من ${n}`,
     answerPh: 'اكتب أو انطق إجابتك…',
@@ -233,9 +253,13 @@ export default function CvGeneratorTool() {
   const [saveMenu, setSaveMenu] = useState(false)
   const [adjustOpen, setAdjustOpen] = useState(false)
   const [pdfBusy, setPdfBusy] = useState(false)
-  const [showOriginal, setShowOriginal] = useState(false)
+  const [showAlt, setShowAlt] = useState(false) // preview shows the alternate view (tailored CV, or the uploaded original)
   const [fs, setFs] = useState(false) // preview is in browser fullscreen
   const [origPages, setOrigPages] = useState<string[]>([]) // uploaded PDF rendered to page images (for loading + the "Original" flip)
+  const [tailoredCv, setTailoredCv] = useState<Cv | null>(null) // JD-tailored version (ephemeral; not persisted)
+  const [jdOpen, setJdOpen] = useState(false)
+  const [jdText, setJdText] = useState('')
+  const [jdBusy, setJdBusy] = useState(false)
   const previewRef = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLDivElement>(null)
   const gisRef = useRef<{ renderButton: (el: HTMLElement, o: Record<string, unknown>) => void } | null>(null)
@@ -344,7 +368,8 @@ export default function CvGeneratorTool() {
     setErr('')
     setErrDetail('')
     setCv(null)
-    setShowOriginal(false)
+    setShowAlt(false)
+    setTailoredCv(null)
     setOrigPages([])
     setStatus('extracting')
     let pdfver = '?'
@@ -386,6 +411,8 @@ export default function CvGeneratorTool() {
     try {
       const r = await generateCv(idToken, text)
       setCv(r.cv)
+      setTailoredCv(null)
+      setShowAlt(false)
       setAnswersLeft(r.answersLeft)
       setPolishLeft(r.polishLeft)
       setQueue(r.questions)
@@ -449,15 +476,23 @@ export default function CvGeneratorTool() {
   // Vector, selectable-text PDF rendered from the Cv JSON via react-pdf (see
   // CvPdf.tsx). Dynamically imported so @react-pdf/renderer + fonts load only on
   // the first download, not with the tool.
+  // The CV currently on screen — the tailored version when the user is viewing
+  // it, else the generated one. Downloads and "save" act on what you see.
+  const activeCv = tailoredCv && showAlt ? tailoredCv : cv
+  // What the preview switch compares against the generated CV: the tailored
+  // version once it exists (it wins over the original), else the uploaded
+  // original (only available right after an upload). Null → no switch shown.
+  const altKind: 'tailored' | 'original' | null = tailoredCv ? 'tailored' : origPages.length > 0 ? 'original' : null
+
   async function exportPdf() {
-    if (!cv || pdfBusy) return
+    if (!activeCv || pdfBusy) return
     setPdfBusy(true)
     try {
       const { cvToPdfBlob } = await import('./CvPdf')
-      const blob = await cvToPdfBlob(cv)
+      const blob = await cvToPdfBlob(activeCv)
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = `${cvFilename(cv)}.pdf`
+      a.download = `${cvFilename(activeCv)}.pdf`
       document.body.appendChild(a)
       a.click()
       a.remove()
@@ -470,10 +505,10 @@ export default function CvGeneratorTool() {
   }
 
   function exportWord() {
-    if (!cv) return
+    if (!activeCv) return
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(cvToDocxBlob(cv))
-    a.download = `${cvFilename(cv)}.docx`
+    a.href = URL.createObjectURL(cvToDocxBlob(activeCv))
+    a.download = `${cvFilename(activeCv)}.docx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -481,15 +516,39 @@ export default function CvGeneratorTool() {
   }
 
   function saveForLater() {
-    if (!cv) return
-    try { localStorage.setItem('bis-cv-saved', JSON.stringify({ cv, savedAt: Date.now() })) } catch { /* storage full */ }
-    setSaved(cv)
+    if (!activeCv) return
+    try { localStorage.setItem('bis-cv-saved', JSON.stringify({ cv: activeCv, savedAt: Date.now() })) } catch { /* storage full */ }
+    setSaved(activeCv)
     setSaveMenu(false)
     setToast(s.savedForLater)
+  }
+
+  // Tailor the generated CV to a pasted job description (ephemeral; shown via the
+  // preview switch alongside the generated version).
+  async function tailor() {
+    if (!idToken || !cv || !jdText.trim() || jdBusy) return
+    setJdBusy(true)
+    setErr('')
+    try {
+      const r = await tailorCv(idToken, cv, jdText.trim())
+      setTailoredCv(r.cv)
+      setShowAlt(true)
+      setJdOpen(false)
+      setToast(s.jdDone)
+    } catch (e) {
+      setErr((e as Error).message || s.genErr)
+    } finally {
+      setJdBusy(false)
+    }
   }
   function resumeSaved() {
     if (!saved) return
     setCv(saved)
+    // A restored CV has no original upload and no tailored version — the preview
+    // switch stays hidden until the user customises for a job.
+    setTailoredCv(null)
+    setShowAlt(false)
+    setOrigPages([])
     setQueue([])
     setQIndex(0)
     setStatus('done')
@@ -602,27 +661,51 @@ export default function CvGeneratorTool() {
 
       {status === 'done' && cv && (
         <>
-          {/* Immersive full-bleed preview, docked flush to the navbar, scaled to fit.
-              The optimized iframe stays mounted (keeps inline edits); the original
-              PDF is overlaid when flipped. */}
+          {/* Immersive full-bleed preview, docked flush to the navbar, scaled to
+              fit. Renders the Cv JSON read-only (source of truth); the tailored
+              version or the uploaded original is shown via the switch. */}
           <div ref={previewRef} className={`mx-[calc(50%-50vw)] w-screen max-w-[100vw] mt-[calc(clamp(1.5rem,4vw,2.5rem)*-1)] relative overflow-hidden bg-[#e9ebef] ${fs ? 'h-[100dvh]' : 'h-[calc(100dvh-8.5rem)] max-[560px]:h-[calc(100dvh-8rem)] min-h-[22rem]'}`}>
             <iframe
               ref={iframeRef}
-              title={cvFilename(cv)}
+              title={cvFilename(activeCv || cv)}
               className="block w-full h-full border-0 bg-[#e9ebef]"
-              srcDoc={renderCvHtml(cv, { preview: true })}
+              srcDoc={renderCvHtml(tailoredCv && showAlt ? tailoredCv : cv, { preview: true })}
             />
-            {showOriginal && origPages.length > 0 && (
+            {showAlt && altKind === 'original' && origPages.length > 0 && (
               <PdfPages pages={origPages} className="absolute inset-0 h-full" />
             )}
 
             {/* Controls live INSIDE the preview so they stay visible in fullscreen. */}
-            {origPages.length > 0 && (
+            {/* View switch (top-left): generated↔tailored after customising, or
+                optimized↔original for a fresh upload. Hidden with nothing to compare. */}
+            {altKind && (
               <div className="absolute start-3 top-3 z-10 flex items-stretch rounded-md border border-[color:var(--line)] bg-[var(--surface)] shadow-[var(--shadow-md)] overflow-hidden text-[0.82rem] font-semibold">
-                <button type="button" data-testid="cv-view-optimized" onClick={() => setShowOriginal(false)} className={`px-3 py-1.5 border-0 cursor-pointer ${!showOriginal ? 'bg-green-600 text-sand-100' : 'bg-transparent text-ink-soft hover:bg-sand-100'}`}>{s.optimized}</button>
-                <button type="button" data-testid="cv-view-original" onClick={() => setShowOriginal(true)} className={`px-3 py-1.5 border-0 border-s border-[color:var(--line)] cursor-pointer ${showOriginal ? 'bg-green-600 text-sand-100' : 'bg-transparent text-ink-soft hover:bg-sand-100'}`}>{s.original}</button>
+                <button type="button" data-testid="cv-view-optimized" onClick={() => setShowAlt(false)} className={`px-3 py-1.5 border-0 cursor-pointer ${!showAlt ? 'bg-green-600 text-sand-100' : 'bg-transparent text-ink-soft hover:bg-sand-100'}`}>{altKind === 'tailored' ? s.generated : s.optimized}</button>
+                <button type="button" data-testid="cv-view-original" onClick={() => setShowAlt(true)} className={`px-3 py-1.5 border-0 border-s border-[color:var(--line)] cursor-pointer ${showAlt ? 'bg-green-600 text-sand-100' : 'bg-transparent text-ink-soft hover:bg-sand-100'}`}>{altKind === 'tailored' ? s.tailored : s.original}</button>
               </div>
             )}
+
+            {/* Save menu (bottom-left), mirroring the fullscreen button: an icon
+                that opens Word / Save-for-later upward. */}
+            <div className="absolute start-3 bottom-3 z-10">
+              {saveMenu && (
+                <div className="absolute bottom-full start-0 mb-1.5 bg-[var(--surface)] border border-[color:var(--line)] rounded-md shadow-[var(--shadow-md)] overflow-hidden min-w-[12rem]">
+                  <button type="button" data-testid="cv-word" onClick={() => { exportWord(); setSaveMenu(false) }}
+                    className="flex items-center gap-2 w-full text-start px-4 py-2.5 text-[0.88rem] text-ink-soft hover:bg-[color-mix(in_srgb,var(--green-400)_10%,transparent)] border-0 bg-transparent cursor-pointer whitespace-nowrap">
+                    <DownloadIcon /> {s.word}
+                  </button>
+                  <button type="button" data-testid="cv-save-later" onClick={saveForLater}
+                    className="flex items-center gap-2 w-full text-start px-4 py-2.5 text-[0.88rem] text-ink-soft hover:bg-[color-mix(in_srgb,var(--green-400)_10%,transparent)] border-0 border-t border-[color:var(--line-soft)] bg-transparent cursor-pointer whitespace-nowrap">
+                    <BookmarkIcon /> {s.saveForLater}
+                  </button>
+                </div>
+              )}
+              <button type="button" onClick={() => setSaveMenu((v) => !v)} aria-label={s.saveOptions} aria-expanded={saveMenu} data-testid="cv-save-menu"
+                className="grid place-items-center size-9 rounded-md border border-[color:var(--line)] bg-[var(--surface)] text-ink-soft shadow-[var(--shadow-md)] hover:text-green-700 cursor-pointer">
+                <BookmarkIcon className="size-[1.15rem]" />
+              </button>
+            </div>
+
             <button type="button" onClick={toggleFullscreen} data-testid="cv-fullscreen" aria-label={fs ? s.exitFs : s.fullscreen} title={fs ? s.exitFs : s.fullscreen}
               className="absolute end-3 top-3 z-10 grid place-items-center size-9 rounded-md border border-[color:var(--line)] bg-[var(--surface)] text-ink-soft shadow-[var(--shadow-md)] hover:text-green-700 cursor-pointer">
               {fs
@@ -660,26 +743,15 @@ export default function CvGeneratorTool() {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center justify-between gap-3">
-                  <div className="relative flex items-stretch rounded-md shadow-[var(--shadow-sm)]">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2">
                     <button type="button" onClick={exportPdf} data-testid="cv-pdf" disabled={pdfBusy}
-                      className="inline-flex items-center gap-2 rounded-s-md bg-green-600 text-sand-100 px-4 py-2.5 text-[0.9rem] font-semibold hover:bg-green-700 border-0 cursor-pointer disabled:opacity-70 disabled:cursor-wait">
+                      className="inline-flex items-center gap-2 rounded-md bg-green-600 text-sand-100 px-4 py-2.5 text-[0.9rem] font-semibold hover:bg-green-700 border-0 cursor-pointer disabled:opacity-70 disabled:cursor-wait shadow-[var(--shadow-sm)]">
                       {pdfBusy ? <Spinner className="size-4" /> : <DownloadIcon />} {s.pdf}
                     </button>
-                    <button type="button" aria-label={s.word} aria-expanded={saveMenu} onClick={() => setSaveMenu((v) => !v)}
-                      className="inline-flex items-center rounded-e-md bg-green-700 text-sand-100 px-2.5 text-base border-0 border-s border-[color:color-mix(in_srgb,var(--sand-100)_30%,transparent)] hover:bg-green-600 cursor-pointer">▾</button>
-                    {saveMenu && (
-                      <div className="absolute bottom-full start-0 mb-1.5 bg-[var(--surface)] border border-[color:var(--line)] rounded-md shadow-[var(--shadow-md)] overflow-hidden min-w-[12rem]">
-                        <button type="button" data-testid="cv-word" onClick={() => { exportWord(); setSaveMenu(false) }}
-                          className="flex items-center gap-2 w-full text-start px-4 py-2.5 text-[0.88rem] text-ink-soft hover:bg-[color-mix(in_srgb,var(--green-400)_10%,transparent)] border-0 bg-transparent cursor-pointer whitespace-nowrap">
-                          <DownloadIcon /> {s.word}
-                        </button>
-                        <button type="button" data-testid="cv-save-later" onClick={saveForLater}
-                          className="flex items-center gap-2 w-full text-start px-4 py-2.5 text-[0.88rem] text-ink-soft hover:bg-[color-mix(in_srgb,var(--green-400)_10%,transparent)] border-0 border-t border-[color:var(--line-soft)] bg-transparent cursor-pointer whitespace-nowrap">
-                          <BookmarkIcon /> {s.saveForLater}
-                        </button>
-                      </div>
-                    )}
+                    <Button onClick={() => { setErr(''); setJdOpen(true) }} data-testid="cv-customize-jd">
+                      {s.customizeJd}
+                    </Button>
                   </div>
                   <Button onClick={() => setAdjustOpen(true)} data-testid="cv-adjust-open"
                     disabled={polishLeft <= 0 && !currentQ}
@@ -693,7 +765,22 @@ export default function CvGeneratorTool() {
           document.body,
           )}
 
-          {err && <p className="fixed inset-x-0 bottom-1 text-center text-[0.8rem] text-gold-500 z-50">{err}</p>}
+          {err && !jdOpen && <p className="fixed inset-x-0 bottom-1 text-center text-[0.8rem] text-gold-500 z-50">{err}</p>}
+
+          {jdOpen && (
+            <Sheet onClose={() => { if (!jdBusy) setJdOpen(false) }}>
+              <SheetTitle>{s.jdTitle}</SheetTitle>
+              <p className="text-[0.9rem] text-ink-soft leading-relaxed">{s.jdBody}</p>
+              <Textarea value={jdText} onChange={(e) => setJdText(e.target.value)} placeholder={s.jdPh}
+                data-testid="cv-jd-text" className="min-h-[38vh] resize-y" autoFocus />
+              {err && <p className="text-[0.85rem] text-gold-500" data-testid="cv-jd-err">{err}</p>}
+              <SheetActions>
+                <Button variant="primary" onClick={tailor} disabled={jdBusy || jdText.trim().length < 40} data-testid="cv-jd-submit">
+                  {jdBusy ? s.jdWorking : s.jdSubmit}
+                </Button>
+              </SheetActions>
+            </Sheet>
+          )}
         </>
       )}
 

@@ -78,6 +78,18 @@ export async function generateCv(idToken: string, text: string): Promise<CvResul
   return parseResult(data)
 }
 
+/** Tailor the generated CV to a specific job description (separate 24h budget). */
+export async function tailorCv(idToken: string, cv: Cv, jobDescription: string): Promise<{ cv: Cv; tailorsLeft: number }> {
+  const r = await fetch(`${FN}/cv-tailor`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken, cv, jobDescription }),
+  })
+  const data = await r.json().catch(() => ({}))
+  if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`)
+  return { cv: data.cv as Cv, tailorsLeft: Number(data.tailorsLeft ?? 0) }
+}
+
 /** Apply one message — an answer to an AI question ('answer') or a free tweak ('polish').
  *  `context` is the previous change summary so the user can correct it ("no, like this"). */
 export async function refineCv(idToken: string, cv: Cv, instruction: string, kind: 'answer' | 'polish', context = '', sourceText = ''): Promise<CvResult> {

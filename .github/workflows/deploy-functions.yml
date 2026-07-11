@@ -68,6 +68,7 @@ jobs:
           # CV Generator
           gcloud functions deploy cv-generate             "${common[@]}" --entry-point=cvGenerate
           gcloud functions deploy cv-refine               "${common[@]}" --entry-point=cvRefine
+          gcloud functions deploy cv-tailor               "${common[@]}" --entry-point=cvTailor
 
           gcloud functions deploy shorten                 "${common[@]}" --entry-point=shorten
           gcloud functions deploy resolve-link            "${common[@]}" --entry-point=resolveLink

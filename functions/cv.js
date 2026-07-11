@@ -20,6 +20,7 @@ const UPLOAD_LIMIT = 2 // fresh generations per rolling 24h per user
 const OWNER_EMAIL = 'bjorn.a.goransson@gmail.com' // exempt from all rate limits
 const ANSWER_LIMIT = 5 // answers to the AI's own gap questions (quality-critical)
 const POLISH_LIMIT = 3 // user-initiated free-form tweaks
+const TAILOR_LIMIT = 3 // job-description tailorings per rolling 24h per user
 const QUESTION_CAP = 5 // most questions the model may surface at once
 const WINDOW_MS = 24 * 60 * 60 * 1000
 
@@ -90,6 +91,13 @@ The CV object shape (omit a section with an empty array; omit optional strings b
 Return ONLY JSON of the form: { "cv": { …the CV object above… }, "questions": [ up to 5 short strings ] }`
 
 const GENERATE_SYSTEM = `You are an elite technical résumé editor. You receive the raw text of a person's existing CV and you REBUILD it from scratch as JSON. Regenerate everything — do not copy verbatim; tighten, sharpen, and fix issues silently.\n\n${RULES}`
+
+const TAILOR_SYSTEM = `You are an elite technical résumé editor tailoring a candidate's CV to ONE specific job. You are given the candidate's current CV as JSON and the target JOB DESCRIPTION. Produce a version of the CV optimised for THIS job:
+- Rewrite the "summary" and the "role" headline to target this position, mirroring the job's language and priorities (honestly, never dishonestly).
+- Reorder skills, experience bullets and projects so the items MOST relevant to this job come first; condense or drop clearly irrelevant material.
+- Re-bold keywords so the ones this job cares about stand out, and surface matching technologies/skills the candidate genuinely has.
+- NEVER invent skills, tools, employers, dates or achievements the candidate does not already have. Tailoring means re-emphasising and rephrasing what is TRUE — not fabricating a match. If the candidate lacks something the job wants, simply do not claim it.
+Keep the EXACT same CV shape and obey every rule below.\n\n${RULES}\n\nReturn ONLY JSON of the form { "cv": { …the CV object above… } } — no questions needed.`
 
 const REFINE_SYSTEM = `You are an elite technical résumé editor in a short back-and-forth with the candidate. You are given the current CV as JSON plus their message — which is EITHER an answer to one of your earlier questions OR an instruction to change something. Incorporate it: if it answers a gap, weave the new information in and drop that question; if it's an instruction, apply it. Preserve everything untouched, keep the EXACT same CV shape, keep obeying every rule, keep fixing issues silently, and re-evaluate remaining questions.\n\n${RULES}\n\nADDITIONALLY, include a "summary": ONE short past-tense sentence stating the concrete change you made to the CV (e.g. "Added your core stack — Java, Spring Boot, Kafka — to Skills and the Morgan Stanley role."). Return { "cv": { …the CV object… }, "questions": [ up to 5 strings ], "summary": "…" }.`
 
@@ -240,6 +248,40 @@ http('cvRefine', async (req, res) => {
     else polishCount += 1
     await ref.update({ answerCount, polishCount, updatedAt: new Date() })
     res.json({ ok: true, cv, questions, summary, answersLeft: ANSWER_LIMIT - answerCount, polishLeft: POLISH_LIMIT - polishCount })
+  } catch (e) {
+    fail(res, e)
+  }
+})
+
+// POST { idToken, cv, jobDescription } → { ok, cv, tailorsLeft }. Tailors the
+// generated CV to a specific job description. TAILOR_LIMIT per rolling 24h.
+http('cvTailor', async (req, res) => {
+  cors(req, res)
+  if (req.method === 'OPTIONS') return res.status(204).send('')
+  if (req.method !== 'POST') return res.status(405).send('POST only')
+  try {
+    const { idToken, cv: current, jobDescription } = req.body || {}
+    const user = await verifyGoogle(idToken)
+    if (!user) return res.status(401).json({ error: 'sign in with Google first' })
+    if (!current || typeof current !== 'object') return res.status(400).json({ error: 'missing CV' })
+    if (!jobDescription || String(jobDescription).trim().length < 40) {
+      return res.status(400).json({ error: 'paste the full job description (a bit longer)' })
+    }
+
+    const ref = db.collection(USAGE).doc(user.sub)
+    const now = Date.now()
+    const d = (await ref.get()).data() || {}
+    const recent = (Array.isArray(d.tailors) ? d.tailors : []).filter((t) => now - Number(t) < WINDOW_MS)
+    if (user.email !== OWNER_EMAIL && recent.length >= TAILOR_LIMIT) {
+      return res.status(429).json({ error: `Limit reached — you can tailor ${TAILOR_LIMIT} CVs per 24 hours. Try again later.` })
+    }
+
+    const { cv } = await callOpenAI(
+      TAILOR_SYSTEM,
+      `Current CV JSON:\n${JSON.stringify(normalize(current)).slice(0, 24000)}\n\nTARGET JOB DESCRIPTION:\n${String(jobDescription).slice(0, 8000)}`,
+    )
+    await ref.set({ tailors: [...recent, now], email: user.email, updatedAt: new Date() }, { merge: true })
+    res.json({ ok: true, cv, tailorsLeft: TAILOR_LIMIT - recent.length - 1 })
   } catch (e) {
     fail(res, e)
   }

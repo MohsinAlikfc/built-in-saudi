@@ -214,7 +214,7 @@ from the URL) to make that a config flip, not a rewrite. Trend home toward a
   redirect is a **top-level `/s/:code` route** (`ShortLinkPage`, no locale/chrome)
   that resolves + `location.replace`. Same GIS client ID as the CV tool.
 - **Functions deploy = CI** (not manual gcloud): `.github/workflows/deploy-functions.yml`
-  deploys all twenty-one functions on any `functions/**` change, authenticating **keylessly
+  deploys all twenty-two functions on any `functions/**` change, authenticating **keylessly
   via Workload Identity Federation** (pool `github` in `blitz-ksa`, deploy SA
   `gh-fn-deploy@…`). Repo vars `GCP_PROJECT`/`GCP_WIF_PROVIDER`/`GCP_DEPLOY_SA`/
   `GOOGLE_OAUTH_CLIENT_ID`/`TELEGRAM_BOT_USERNAME` + repo secrets `VAPID_PUBLIC`/
