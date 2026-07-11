@@ -14,19 +14,19 @@ const STR = {
   en: {
     drop: 'Drop a PDF, or tap to choose', reading: 'Reading…',
     disclaimer: 'Rudimentary editor: you can move/delete images and delete text runs, and add new text. Existing text can’t be re-typed, boxes are approximate, and unusual/scanned PDFs may not map cleanly. Edits apply on export.',
-    addText: 'Add text', del: 'Delete', undo: 'Undo delete', size: 'Font', zoomIn: 'Zoom in', zoomOut: 'Zoom out',
+    addText: 'Add text', del: 'Delete', undo: 'Undo delete', size: 'Font',
     page: 'Page', of: 'of', image: 'image', text: 'text', moved: 'moved', typeHere: 'Type…',
     export: 'Download edited PDF', working: 'Preparing…', another: 'Edit another', locked: 'This PDF is locked / encrypted.',
-    tapImg: 'Tap an image or text to select · drag an image to move · use handles to resize new text',
+    tapImg: 'Tap an image or text to select · drag an image to move · handles resize new text · pinch to zoom',
     privacy: 'Edited on your device — your PDF is never uploaded.',
   },
   ar: {
     drop: 'أفلت ملف PDF أو اضغط للاختيار', reading: 'جارٍ القراءة…',
     disclaimer: 'محرر مبدئي: يمكنك تحريك/حذف الصور وحذف مقاطع النص وإضافة نص جديد. لا يمكن إعادة كتابة النص الموجود، والمربعات تقريبية، وبعض ملفات PDF غير الاعتيادية/الممسوحة قد لا تُعالَج بدقة. تُطبَّق التعديلات عند التصدير.',
-    addText: 'أضف نصًا', del: 'حذف', undo: 'تراجع', size: 'الخط', zoomIn: 'تكبير', zoomOut: 'تصغير',
+    addText: 'أضف نصًا', del: 'حذف', undo: 'تراجع', size: 'الخط',
     page: 'صفحة', of: 'من', image: 'صورة', text: 'نص', moved: 'مُحرّك', typeHere: 'اكتب…',
     export: 'تنزيل PDF المعدّل', working: 'جارٍ التحضير…', another: 'عدّل آخر', locked: 'هذا الملف مقفل / مشفّر.',
-    tapImg: 'اضغط صورة أو نصًا للتحديد · اسحب الصورة لتحريكها · استخدم المقابض لتغيير حجم النص الجديد',
+    tapImg: 'اضغط صورة أو نصًا للتحديد · اسحب الصورة لتحريكها · المقابض تغيّر حجم النص الجديد · اقرص للتكبير',
     privacy: 'يُعدّل على جهازك — لا يُرفع ملفك أبدًا.',
   },
 }
@@ -42,7 +42,6 @@ export default function PdfEditTool() {
   const [pages, setPages] = useState<RenderedPage[] | null>(null)
   const [pc, setPc] = useState<PageContent[] | null>(null)
   const [pi, setPi] = useState(0)
-  const [zoom, setZoom] = useState(1)
   const [deleted, setDeleted] = useState<Set<string>>(new Set())
   const [moves, setMoves] = useState<Map<string, Move>>(new Map())
   const [texts, setTexts] = useState<TextBox[]>([])
@@ -201,11 +200,6 @@ export default function PdfEditTool() {
           {/* toolbar */}
           <div className="flex items-center gap-2 flex-wrap">
             <Button data-testid="edit-add-text" onClick={addText}>＋ {s.addText}</Button>
-            <span className="inline-flex items-center gap-1">
-              <Button className="px-2 min-w-[2rem] justify-center" aria-label={s.zoomOut} disabled={zoom <= 1} onClick={() => setZoom((z) => Math.max(1, z - 0.5))}>−</Button>
-              <span className="text-[0.8rem] text-ink-faint w-10 text-center">{Math.round(zoom * 100)}%</span>
-              <Button className="px-2 min-w-[2rem] justify-center" aria-label={s.zoomIn} disabled={zoom >= 3} onClick={() => setZoom((z) => Math.min(3, z + 0.5))}>＋</Button>
-            </span>
             <span className="flex-1" />
             {pages.length > 1 && (
               <span className="inline-flex items-center gap-1 text-[0.85rem] text-ink-soft">
@@ -216,10 +210,11 @@ export default function PdfEditTool() {
             )}
           </div>
 
-          {/* page area */}
-          <div className="overflow-auto max-h-[70vh] bg-[#e9ebef] rounded-md p-2">
+          {/* page area — normal flow so the browser's native pinch-zoom + scroll
+              work; only the draggable boxes take touch-action away. */}
+          <div className="bg-[#e9ebef] rounded-md p-2">
             <div ref={pageBoxRef} className="relative mx-auto bg-white shadow-[var(--shadow-sm)]"
-              style={{ width: zoom === 1 ? `min(100%, ${aspect * 72}vh)` : `${zoom * 100}%`, aspectRatio: `${aspect}` }}
+              style={{ width: `min(100%, ${aspect * 78}vh)`, aspectRatio: `${aspect}` }}
               onPointerDown={() => setSel(null)} onPointerMove={(e) => { objMove(e); tbMove(e) }} onPointerUp={up} onPointerCancel={up}>
               <img src={pages[pi].url} alt="" className="absolute inset-0 w-full h-full pointer-events-none select-none" draggable={false} />
 
