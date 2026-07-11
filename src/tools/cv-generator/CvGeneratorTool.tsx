@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
-import { useLocale, localePath } from '../../i18n'
+import { useLocale } from '../../i18n'
 import { Button, Input, Textarea, Stack, Spinner, Sheet, SheetTitle, SheetActions, Check } from '../../components/ui'
 import { DownloadIcon, MicIcon, BookmarkIcon, CloudIcon } from '../../components/icons'
 import { loadGis, GOOGLE_CLIENT_ID, decodeJwt, generateCv, refineCv, tailorCv, saveCvServer, getSavedCv, deleteCvServer } from '../../lib/cvApi'
 import { hideFooterStore } from '../../lib/hideFooter'
+import { cvHeaderStore } from '../../lib/cvHeader'
 import { inAppBrowser } from '../../lib/inAppBrowser'
 import { renderCvHtml } from './template'
 import { cvToDocxBlob } from './docx'
@@ -23,9 +23,6 @@ const STR = {
   en: {
     heroTitle: 'Optimize your CV',
     heroBody: 'This tool rewrites the CV you already have and asks a couple of quick questions to fill any gaps.',
-    dataNote: 'How we use your data:',
-    privacyLink: 'Privacy',
-    termsLink: 'Terms',
     choose: 'Upload your CV',
     extracting: 'Reading your CV…',
     extracted: (n: number) => `Got it — read ${n.toLocaleString()} characters.`,
@@ -68,7 +65,6 @@ const STR = {
     serverSaveBtn: 'Save to my account',
     serverSaving: 'Saving…',
     serverSavedMsg: 'Saved to your account — resume it on any device.',
-    resumeSigninNote: 'Saved a CV to your account? Sign in to pick it up here.',
     changesTitle: 'Improvements made',
     qLabel: (i: number, n: number) => `Question ${i} of ${n}`,
     answerPh: 'Type or speak your answer…',
@@ -91,9 +87,6 @@ const STR = {
   ar: {
     heroTitle: 'حسّن سيرتك الذاتية',
     heroBody: 'تعيد هذه الأداة كتابة سيرتك الحالية وتطرح سؤالين سريعين لسدّ أي ثغرات.',
-    dataNote: 'كيف نستخدم بياناتك:',
-    privacyLink: 'الخصوصية',
-    termsLink: 'الشروط',
     choose: 'ارفع سيرتك الذاتية',
     extracting: 'جارٍ قراءة سيرتك…',
     extracted: (n: number) => `تمّ — قُرئ ${n.toLocaleString()} حرفًا.`,
@@ -136,7 +129,6 @@ const STR = {
     serverSaveBtn: 'احفظ في حسابي',
     serverSaving: 'جارٍ الحفظ…',
     serverSavedMsg: 'حُفظت في حسابك — استأنفها على أي جهاز.',
-    resumeSigninNote: 'حفظت سيرة في حسابك؟ سجّل الدخول لاستئنافها هنا.',
     changesTitle: 'التحسينات المُطبَّقة',
     qLabel: (i: number, n: number) => `سؤال ${i} من ${n}`,
     answerPh: 'اكتب أو انطق إجابتك…',
@@ -283,10 +275,9 @@ export default function CvGeneratorTool() {
   const [serverSaving, setServerSaving] = useState(false)
   const [serverSaved, setServerSaved] = useState(false) // this session's CV is also on the server
   const serverBtnRef = useRef<HTMLDivElement>(null) // Google button inside the server-save modal
-  const heroSigninRef = useRef<HTMLDivElement>(null) // Google button on the landing (resume on another device)
   const previewRef = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLDivElement>(null)
-  const gisRef = useRef<{ renderButton: (el: HTMLElement, o: Record<string, unknown>) => void } | null>(null)
+  const gisRef = useRef<Awaited<ReturnType<typeof loadGis>> | null>(null)
   const activeRef = useRef<HTMLDivElement>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   // Guards the auto-generate effect so a failed generation never re-triggers it
@@ -321,18 +312,20 @@ export default function CvGeneratorTool() {
     }
   }, [gisReady, idToken, text, status])
 
-  // Render the Google buttons inside the server-save modal / on the landing.
+  // Render the Google button inside the server-save modal when not signed in.
   useEffect(() => {
     if (!gisReady || idToken || !gisRef.current) return
     if (serverSaveOpen && serverBtnRef.current) {
       serverBtnRef.current.innerHTML = ''
       gisRef.current.renderButton(serverBtnRef.current, { theme: 'filled_blue', size: 'large', text: 'signin_with', shape: 'pill' })
     }
-    if (status === 'idle' && heroSigninRef.current) {
-      heroSigninRef.current.innerHTML = ''
-      gisRef.current.renderButton(heroSigninRef.current, { theme: 'outline', size: 'medium', text: 'signin_with', shape: 'pill' })
-    }
-  }, [gisReady, idToken, serverSaveOpen, status])
+  }, [gisReady, idToken, serverSaveOpen])
+
+  // Navbar Log in / Log out (rendered by the shared Header via cvHeaderStore).
+  const login = useCallback(() => { try { gisRef.current?.prompt() } catch { /* ignore */ } }, [])
+  const logout = useCallback(() => { setIdToken(null); try { gisRef.current?.disableAutoSelect() } catch { /* ignore */ } }, [])
+  useEffect(() => { cvHeaderStore.set({ active: true, signedIn: !!idToken, login, logout }) }, [idToken, login, logout])
+  useEffect(() => () => cvHeaderStore.set({ active: false, signedIn: false, login: () => {}, logout: () => {} }), [])
 
   // On sign-in, pull any server-saved CV: enable Resume, auto-resume from the
   // landing, and finish a save the user kicked off from the modal.
@@ -676,12 +669,6 @@ export default function CvGeneratorTool() {
             )}
           </div>
         )}
-        {status === 'idle' && !idToken && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-1">
-            <div ref={heroSigninRef} className="[color-scheme:light]" data-testid="cv-hero-signin" />
-            <span className="text-[0.82rem] opacity-90">{s.resumeSigninNote}</span>
-          </div>
-        )}
       </div>
     </div>
   )
@@ -700,15 +687,6 @@ export default function CvGeneratorTool() {
     </div>
   )
 
-  // Discreet data-usage line, docked just above the site footer.
-  const dataLinks = (
-    <p className="text-[0.72rem] text-ink-faint opacity-80 flex items-center gap-2 mt-auto pt-6">
-      <span>{s.dataNote}</span>
-      <Link to={localePath(locale, '/privacy')} className="underline" style={{ color: 'var(--ink-faint)' }} data-testid="cv-privacy-link">{s.privacyLink}</Link>
-      <span aria-hidden="true">·</span>
-      <Link to={localePath(locale, '/terms')} className="underline" style={{ color: 'var(--ink-faint)' }} data-testid="cv-terms-link">{s.termsLink}</Link>
-    </p>
-  )
 
   return (
     <Stack data-testid="cv-generator" className="min-h-[70vh]">
@@ -925,8 +903,6 @@ export default function CvGeneratorTool() {
           <span aria-hidden="true" className="mt-0.5">✓</span><span>{toast}</span>
         </div>
       )}
-
-      {status !== 'done' && dataLinks}
     </Stack>
   )
 }

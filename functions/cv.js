@@ -337,10 +337,14 @@ http('cvGet', async (req, res) => {
     const snap = await ref.get()
     if (!snap.exists) return res.json({ ok: true, cv: null })
     const d = snap.data()
-    if (d.expiresAt && d.expiresAt.toMillis && d.expiresAt.toMillis() < Date.now()) {
+    const now = Date.now()
+    if (d.expiresAt && d.expiresAt.toMillis && d.expiresAt.toMillis() < now) {
       ref.delete().catch(() => {})
       return res.json({ ok: true, cv: null })
     }
+    // Sliding window: touch the expiry on every successful resume so a CV that's
+    // actively used doesn't lapse, while abandoned ones still expire.
+    ref.update({ expiresAt: new Date(now + SAVE_RETENTION_MS) }).catch(() => {})
     res.json({ ok: true, cv: d.cv || null })
   } catch (e) {
     fail(res, e)

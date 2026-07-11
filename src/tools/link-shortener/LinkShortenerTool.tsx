@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
-import { useLocale, localePath } from '../../i18n'
+import { useLocale } from '../../i18n'
 import { Button, Input, Stack, Spinner, Sheet, SheetTitle } from '../../components/ui'
 import { LinkIcon } from '../../components/icons'
 import { loadGis, GOOGLE_CLIENT_ID } from '../../lib/cvApi'
@@ -30,9 +29,6 @@ const STR = {
     minutes: (n: number) => (n <= 1 ? 'a minute' : `${n} minutes`),
     loginTitle: 'Sign in to shorten',
     loginBody: 'Creating a short link needs a Google sign-in — it ties the link to you so you can manage or delete it later. Your link is shortened as soon as you sign in.',
-    dataNote: 'How we use your data:',
-    privacy: 'Privacy',
-    terms: 'Terms',
   },
   ar: {
     heroTitle: 'اختصار الروابط',
@@ -56,9 +52,6 @@ const STR = {
     minutes: (n: number) => (n <= 1 ? 'دقيقة' : `${n} دقيقة`),
     loginTitle: 'سجّل الدخول للاختصار',
     loginBody: 'يتطلب إنشاء رابط قصير تسجيل الدخول بحساب Google — لربط الرابط بك لتتمكن من إدارته أو حذفه لاحقًا. سيُختصر رابطك فور تسجيل دخولك.',
-    dataNote: 'كيف نستخدم بياناتك:',
-    privacy: 'الخصوصية',
-    terms: 'الشروط',
   },
 }
 
@@ -196,13 +189,6 @@ export default function LinkShortenerTool() {
           ))}
         </ul>
       )}
-
-      <p className="text-[0.72rem] text-ink-faint opacity-80 flex items-center gap-2 mt-auto pt-6">
-        <span>{s.dataNote}</span>
-        <Link to={localePath(locale, '/privacy')} className="underline" style={{ color: 'var(--ink-faint)' }}>{s.privacy}</Link>
-        <span aria-hidden="true">·</span>
-        <Link to={localePath(locale, '/terms')} className="underline" style={{ color: 'var(--ink-faint)' }}>{s.terms}</Link>
-      </p>
 
       {/* Sticky bottom sign-in — portaled to <body> so `fixed inset-x-0` bleeds
           full-width (ToolPage's transform otherwise resolves it against the tool

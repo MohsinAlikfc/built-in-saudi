@@ -38,6 +38,7 @@ export const ar: Dict = {
     reportIssue: 'أبلغ عن مشكلة',
     privacy: 'الخصوصية',
     terms: 'الشروط',
+    dataNote: 'كيف نستخدم بياناتك',
   },
 
   notif: {

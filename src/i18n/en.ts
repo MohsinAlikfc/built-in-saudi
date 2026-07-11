@@ -38,6 +38,7 @@ export const en = {
     reportIssue: 'Report an issue',
     privacy: 'Privacy',
     terms: 'Terms',
+    dataNote: 'How we use your data',
   },
 
   notif: {

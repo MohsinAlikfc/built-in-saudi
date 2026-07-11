@@ -9,6 +9,7 @@ interface GisId {
   initialize(cfg: { client_id: string; callback: (r: { credential: string }) => void }): void
   renderButton(el: HTMLElement, opts: Record<string, unknown>): void
   disableAutoSelect(): void
+  prompt(momentListener?: (n: unknown) => void): void
 }
 declare global {
   interface Window {

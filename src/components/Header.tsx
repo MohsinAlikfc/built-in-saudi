@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useLocale, localePath, swapLocaleInPath, setStoredLocale, localizeTool } from '../i18n'
 import { bookingHeaderStore } from '../lib/bookingHeader'
+import { cvHeaderStore } from '../lib/cvHeader'
 import { connectGoogleUrl } from '../lib/bookingApi'
 import { getTool } from '../tools'
 import { AppLauncher } from './AppLauncher'
@@ -31,6 +32,9 @@ export function Header() {
     try { code = (JSON.parse(localStorage.getItem('bis-bookwith') || '{}').code) || '' } catch { /* ignore */ }
     window.location.href = connectGoogleUrl(code, locale)
   }
+  // The CV Generator drives its own Log in / Log out control in the navbar.
+  const onCv = /\/apps\/cv-generator(\/|$)/.test(location.pathname)
+  const cvAuth = useSyncExternalStore(cvHeaderStore.subscribe, cvHeaderStore.get, cvHeaderStore.get)
   const bookingTitle = useSyncExternalStore(bookingHeaderStore.subscribe, bookingHeaderStore.get, bookingHeaderStore.get)
   const match = location.pathname.match(/\/apps\/([^/]+)/)
   const currentTool = match ? getTool(match[1]) : null
@@ -66,6 +70,26 @@ export function Header() {
               type="button"
               onClick={bookLogout}
               data-testid="book-logout"
+              className="inline-flex items-center justify-center h-9 border border-[color:var(--line)] rounded-full px-[0.9rem] text-[0.85rem] leading-none font-semibold text-ink-soft hover:text-gold-500 hover:border-[color-mix(in_srgb,var(--color-gold-400)_45%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-gold-400)_10%,transparent)] bg-transparent cursor-pointer"
+            >
+              {locale === 'ar' ? 'تسجيل الخروج' : 'Log out'}
+            </button>
+          )}
+          {onCv && cvAuth.active && !cvAuth.signedIn && (
+            <button
+              type="button"
+              onClick={cvAuth.login}
+              data-testid="cv-login"
+              className="inline-flex items-center justify-center h-9 rounded-full px-[0.9rem] text-[0.85rem] leading-none font-semibold text-sand-100 bg-green-600 hover:bg-green-700 border-0 cursor-pointer"
+            >
+              {locale === 'ar' ? 'تسجيل الدخول' : 'Log in'}
+            </button>
+          )}
+          {onCv && cvAuth.active && cvAuth.signedIn && (
+            <button
+              type="button"
+              onClick={cvAuth.logout}
+              data-testid="cv-logout"
               className="inline-flex items-center justify-center h-9 border border-[color:var(--line)] rounded-full px-[0.9rem] text-[0.85rem] leading-none font-semibold text-ink-soft hover:text-gold-500 hover:border-[color-mix(in_srgb,var(--color-gold-400)_45%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-gold-400)_10%,transparent)] bg-transparent cursor-pointer"
             >
               {locale === 'ar' ? 'تسجيل الخروج' : 'Log out'}
