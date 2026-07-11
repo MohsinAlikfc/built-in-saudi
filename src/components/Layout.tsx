@@ -79,6 +79,19 @@ function LocalizedLayout({ locale }: { locale: Locale }) {
     document.documentElement.setAttribute('data-debug', '')
     const label = (el: Element | null) =>
       el ? `${(el as HTMLElement).tagName}.${((el as HTMLElement).getAttribute('class') || '(none)').split(/\s+/).slice(0, 4).join('.')}`.slice(0, 60) : '—'
+    // More identity for an otherwise-anonymous div: id / testid / a text or
+    // src/href snippet, so we can tell WHICH element it is in the source.
+    const detail = (el: Element | null) => {
+      if (!el) return ''
+      const h = el as HTMLElement
+      const bits: string[] = []
+      if (h.id) bits.push(`#${h.id}`)
+      const tid = h.getAttribute('data-testid'); if (tid) bits.push(`testid=${tid}`)
+      const src = h.getAttribute('src') || h.getAttribute('href'); if (src) bits.push(`src=${src.slice(0, 40)}`)
+      const txt = (h.textContent || '').trim().replace(/\s+/g, ' '); if (txt) bits.push(`"${txt.slice(0, 50)}"`)
+      const kids = h.children.length; if (!txt && kids) bits.push(`${kids} kids <${(h.firstElementChild?.tagName || '').toLowerCase()}>`)
+      return bits.join('  ').slice(0, 90)
+    }
     const tick = () => {
       const de = document.documentElement
       let wideEl: Element | null = null, wMax = 0
@@ -102,6 +115,7 @@ function LocalizedLayout({ locale }: { locale: Locale }) {
           `WIDEST ${Math.round(wMax)}  ${label(wideEl)}`,
           `→FAR right ${Math.round(rMax)}${rr ? ` (L ${Math.round(rr.left)} W ${Math.round(rr.width)})` : ''}`,
           `   ${label(rightEl)}`,
+          `   ${detail(rightEl)}`,
           `↓FAR bottom ${Math.round(bMax)}  ${label(downEl)}`,
         ].join('\n'),
       })
