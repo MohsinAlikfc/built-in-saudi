@@ -223,7 +223,16 @@ function ChatInput({
 
 /** The uploaded PDF rendered as page images (reliable everywhere, unlike an
  *  <iframe> that depends on the browser's native PDF viewer). */
-function PdfPages({ pages, className = '' }: { pages: string[]; className?: string }) {
+function PdfPages({ pages, className = '', cover = false }: { pages: string[]; className?: string; cover?: boolean }) {
+  // `cover`: fill the whole area with the first page (used as the blurred
+  // backdrop behind the sign-in / generating card, so there's no white gap).
+  if (cover) {
+    return (
+      <div className={`overflow-hidden bg-[#e9ebef] ${className}`}>
+        {pages[0] && <img src={pages[0]} alt="" className="w-full h-full object-cover object-top" />}
+      </div>
+    )
+  }
   return (
     <div className={`overflow-y-auto bg-[#e9ebef] ${className}`}>
       <div className="flex flex-col items-center gap-3 py-4 px-2">
@@ -727,12 +736,12 @@ export default function CvGeneratorTool() {
               generate" card. */}
           {origPages.length > 0 && (status === 'ready' || status === 'generating') && (
             <div className="mx-[calc(50%-50vw)] w-screen max-w-[100vw] mt-[calc(clamp(1.5rem,4vw,2.5rem)*-1)] relative overflow-hidden h-[calc(100dvh-11rem)] min-h-[22rem]" data-testid="cv-loading">
-              <PdfPages pages={origPages} className={`absolute inset-0 transition-[filter,transform] duration-500 ${status === 'generating' ? 'blur-[7px] scale-[1.03]' : status === 'ready' && !idToken ? 'blur-[3px] scale-[1.01]' : ''}`} />
+              <PdfPages pages={origPages} cover className={`absolute inset-0 transition-[filter,transform] duration-500 ${status === 'generating' ? 'blur-[7px] scale-[1.03]' : status === 'ready' && !idToken ? 'blur-[3px] scale-[1.01]' : ''}`} />
               {status === 'generating' && (
                 <>
                   <div aria-hidden="true" className="absolute inset-0 pointer-events-none bg-[color-mix(in_srgb,var(--sand-50)_35%,transparent)]" />
                   <div aria-hidden="true" className="absolute inset-x-0 top-0 h-24 pointer-events-none blur-[2px] bg-[linear-gradient(to_bottom,transparent,color-mix(in_srgb,var(--green-500)_45%,transparent),color-mix(in_srgb,var(--green-300)_60%,transparent),color-mix(in_srgb,var(--green-500)_45%,transparent),transparent)] animate-[cvscan_2.4s_cubic-bezier(0.4,0,0.6,1)_infinite]" />
-                  <div className="absolute inset-x-0 top-5 flex justify-center px-4 pointer-events-none">
+                  <div className="absolute inset-x-0 bottom-6 flex justify-center px-4 pointer-events-none">
                     <span className="inline-flex items-center gap-2.5 rounded-full bg-[var(--ink)] text-sand-100 px-4 py-2 text-[0.92rem] font-semibold shadow-[var(--shadow-md)]">
                       <Spinner className="size-[1.1rem]" label={s.building} />
                       <span key={loadingStep} className="animate-[fadeUp_0.4s_ease]">{s.steps[loadingStep]}</span>
