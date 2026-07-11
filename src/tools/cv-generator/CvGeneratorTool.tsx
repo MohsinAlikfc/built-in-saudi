@@ -80,6 +80,9 @@ const STR = {
     noPolish: 'That’s all your tweaks — upload again to start fresh.',
     makeAdjustments: 'Make adjustments',
     closeAdjust: 'Done',
+    shortHint: 'Your CV fills less than a page — add more detail?',
+    addDetail: 'Add detail',
+    adding: 'Adding…',
     startOver: 'Start over',
     signinErr: 'Google sign-in couldn’t load. Disable blockers and retry.',
     voice: 'Voice input',
@@ -144,6 +147,9 @@ const STR = {
     noPolish: 'انتهت تعديلاتك — ارفع من جديد للبدء من الصفر.',
     makeAdjustments: 'أجرِ تعديلات',
     closeAdjust: 'تم',
+    shortHint: 'سيرتك تملأ أقل من صفحة — أضف مزيدًا من التفاصيل؟',
+    addDetail: 'أضف تفاصيل',
+    adding: 'جارٍ الإضافة…',
     startOver: 'ابدأ من جديد',
     signinErr: 'تعذّر تحميل تسجيل دخول جوجل. عطّل المانعات وأعد المحاولة.',
     voice: 'إدخال صوتي',
@@ -280,6 +286,9 @@ export default function CvGeneratorTool() {
   const [jdOpen, setJdOpen] = useState(false)
   const [jdText, setJdText] = useState('')
   const [jdBusy, setJdBusy] = useState(false)
+  const [cvFill, setCvFill] = useState<number | null>(null) // rendered CV height ÷ one A4 page
+  const [elaborating, setElaborating] = useState(false)
+  const [elaborateDone, setElaborateDone] = useState(false) // suppress the suggestion after a round
   const [persist, setPersist] = useState(false) // "Save for later" checkbox: keep this CV in localStorage
   const [serverSaveOpen, setServerSaveOpen] = useState(false) // modal offering cross-device (server) save
   const [serverSaving, setServerSaving] = useState(false)
@@ -374,10 +383,18 @@ export default function CvGeneratorTool() {
     }
   }, [qIndex, status])
 
-  // Hide the site footer while the immersive result preview is on screen.
+  // Hide the site footer while the immersive result preview is on screen, and
+  // lock document scroll: the done view is a full-screen preview + a fixed bottom
+  // bar, so the page must not scroll (stray padding / dvh quirks below the
+  // preview were producing a huge blank scroll area). Lock <html> (modals lock
+  // <body>, so the two don't fight).
   useEffect(() => {
     hideFooterStore.set(status === 'done')
-    return () => hideFooterStore.set(false)
+    const root = document.documentElement
+    const prev = root.style.overflow
+    if (status === 'done') root.style.overflow = 'hidden'
+    else root.style.overflow = prev
+    return () => { hideFooterStore.set(false); root.style.overflow = '' }
   }, [status])
 
   // Track browser fullscreen so the preview iframe fills the screen.
@@ -443,6 +460,8 @@ export default function CvGeneratorTool() {
     setServerSaved(false)
     setPersist(false)
     setSigninFallback(false)
+    setCvFill(null)
+    setElaborateDone(false)
     setOrigPages([])
     setStatus('extracting')
     let pdfver = '?'
@@ -488,6 +507,8 @@ export default function CvGeneratorTool() {
       setShowAlt(false)
       setServerSaved(false)
       setPersist(false)
+      setCvFill(null)
+      setElaborateDone(false)
       setAnswersLeft(r.answersLeft)
       setPolishLeft(r.polishLeft)
       setQueue(r.questions)
@@ -560,6 +581,9 @@ export default function CvGeneratorTool() {
   // version once it exists (it wins over the original), else the uploaded
   // original (only available right after an upload). Null → no switch shown.
   const altKind: 'tailored' | 'original' | null = tailoredCv ? 'tailored' : origPages.length > 0 ? 'original' : null
+  // Suggest an elaboration round when the generated CV fills under 90% of a page
+  // (only when viewing the base CV and we have the original to draw from).
+  const shortCv = status === 'done' && !!idToken && !!text && !(tailoredCv && showAlt) && cvFill !== null && cvFill < 0.9 && !elaborateDone
 
   async function exportPdf() {
     if (!activeCv || pdfBusy) return
@@ -655,6 +679,41 @@ export default function CvGeneratorTool() {
       setJdBusy(false)
     }
   }
+  // Measure how much of one A4 page the rendered CV fills (via the read-only
+  // preview iframe) so we can offer an "add more detail" round when it's short.
+  function measureFill() {
+    try {
+      const doc = iframeRef.current?.contentDocument
+      const r = doc?.querySelector('.resume') as HTMLElement | null
+      const fit = doc?.getElementById('cvfit') as HTMLElement | null
+      if (!r || !fit) return
+      const z = fit.style.zoom
+      fit.style.zoom = '' // measure unscaled
+      const h = r.getBoundingClientRect().height
+      fit.style.zoom = z
+      if (h > 0) setCvFill(h / ((297 * 96) / 25.4)) // ÷ one A4 page height in px
+    } catch { /* not ready — ignore */ }
+  }
+
+  // One more AI round that expands a too-short CV with truthful detail.
+  async function elaborate() {
+    if (!idToken || !cv || elaborating) return
+    setElaborating(true)
+    setErr('')
+    try {
+      const r = await refineCv(idToken, cv, 'Please expand my CV with more detail so it better fills a full page.', 'elaborate', lastChangeRef.current, text)
+      setCv(r.cv)
+      syncPersist(r.cv)
+      if (r.summary) { setToast(r.summary); lastChangeRef.current = r.summary }
+      setElaborateDone(true)
+      setCvFill(null)
+    } catch (e) {
+      setErr((e as Error).message || s.genErr)
+    } finally {
+      setElaborating(false)
+    }
+  }
+
   function resumeSaved() {
     if (!saved) return
     setCv(saved)
@@ -665,6 +724,8 @@ export default function CvGeneratorTool() {
     setShowAlt(false)
     setOrigPages([])
     setPersist(true)
+    setCvFill(null)
+    setElaborateDone(false)
     setQueue([])
     setQIndex(0)
     setStatus('done')
@@ -794,6 +855,7 @@ export default function CvGeneratorTool() {
               title={cvFilename(activeCv || cv)}
               className="block w-full h-full border-0 bg-[#e9ebef]"
               srcDoc={renderCvHtml(tailoredCv && showAlt ? tailoredCv : cv, { preview: true })}
+              onLoad={() => { measureFill(); window.setTimeout(measureFill, 600) }}
             />
             {showAlt && altKind === 'original' && origPages.length > 0 && (
               <PdfPages pages={origPages} className="absolute inset-0 h-full" />
@@ -868,21 +930,32 @@ export default function CvGeneratorTool() {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <button type="button" onClick={exportPdf} data-testid="cv-pdf" disabled={pdfBusy}
-                      className="inline-flex items-center gap-2 rounded-md bg-green-600 text-sand-100 px-4 py-2.5 text-[0.9rem] font-semibold hover:bg-green-700 border-0 cursor-pointer disabled:opacity-70 disabled:cursor-wait shadow-[var(--shadow-sm)]">
-                      {pdfBusy ? <Spinner className="size-4" /> : <DownloadIcon />} {s.pdf}
-                    </button>
-                    <Button onClick={() => { setErr(''); setJdOpen(true) }} data-testid="cv-customize-jd">
-                      {s.customizeJd}
+                <div className="flex flex-col gap-2">
+                  {shortCv && (
+                    <div className="flex items-center justify-between gap-3 flex-wrap rounded-md bg-[color-mix(in_srgb,var(--green-400)_12%,transparent)] border border-[color:color-mix(in_srgb,var(--green-500)_30%,transparent)] px-3 py-1.5" data-testid="cv-short-hint">
+                      <span className="text-[0.85rem] text-ink-soft">{s.shortHint}</span>
+                      <button type="button" onClick={elaborate} disabled={elaborating} data-testid="cv-elaborate"
+                        className="inline-flex items-center gap-1.5 rounded-md bg-green-600 text-sand-100 px-3 py-1.5 text-[0.82rem] font-semibold hover:bg-green-700 border-0 cursor-pointer disabled:opacity-70 disabled:cursor-wait flex-none">
+                        {elaborating && <Spinner className="size-3.5" />}{elaborating ? s.adding : s.addDetail}
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={exportPdf} data-testid="cv-pdf" disabled={pdfBusy}
+                        className="inline-flex items-center gap-2 rounded-md bg-green-600 text-sand-100 px-4 py-2.5 text-[0.9rem] font-semibold hover:bg-green-700 border-0 cursor-pointer disabled:opacity-70 disabled:cursor-wait shadow-[var(--shadow-sm)]">
+                        {pdfBusy ? <Spinner className="size-4" /> : <DownloadIcon />} {s.pdf}
+                      </button>
+                      <Button onClick={() => { setErr(''); setJdOpen(true) }} data-testid="cv-customize-jd">
+                        {s.customizeJd}
+                      </Button>
+                    </div>
+                    <Button onClick={() => setAdjustOpen(true)} data-testid="cv-adjust-open"
+                      disabled={polishLeft <= 0 && !currentQ}
+                      title={polishLeft <= 0 && !currentQ ? s.noPolish : undefined}>
+                      {s.makeAdjustments}{currentQ ? ` · ${queue.length - qIndex}` : ''}
                     </Button>
                   </div>
-                  <Button onClick={() => setAdjustOpen(true)} data-testid="cv-adjust-open"
-                    disabled={polishLeft <= 0 && !currentQ}
-                    title={polishLeft <= 0 && !currentQ ? s.noPolish : undefined}>
-                    {s.makeAdjustments}{currentQ ? ` · ${queue.length - qIndex}` : ''}
-                  </Button>
                 </div>
               )}
             </div>

@@ -22,6 +22,7 @@ const UPLOAD_LIMIT = 2 // fresh generations per rolling 24h per user
 const OWNER_EMAIL = 'bjorn.a.goransson@gmail.com' // exempt from all rate limits
 const ANSWER_LIMIT = 5 // answers to the AI's own gap questions (quality-critical)
 const POLISH_LIMIT = 3 // user-initiated free-form tweaks
+const ELABORATE_LIMIT = 2 // "add more detail" rounds when the CV is under a page
 const TAILOR_LIMIT = 3 // job-description tailorings per rolling 24h per user
 const QUESTION_CAP = 5 // most questions the model may surface at once
 const WINDOW_MS = 24 * 60 * 60 * 1000
@@ -198,7 +199,7 @@ http('cvGenerate', async (req, res) => {
 
     const { cv, questions } = await callOpenAI(GENERATE_SYSTEM, `Here is the raw CV text. Rebuild it as JSON per the rules:\n\n${String(text).slice(0, 30000)}`)
     // Record the successful upload and reset both budgets for this new CV.
-    await ref.set({ uploads: [...recent, now], answerCount: 0, polishCount: 0, email: user.email, updatedAt: new Date() }, { merge: true })
+    await ref.set({ uploads: [...recent, now], answerCount: 0, polishCount: 0, elaborateCount: 0, email: user.email, updatedAt: new Date() }, { merge: true })
     res.json({ ok: true, cv, questions, answersLeft: ANSWER_LIMIT, polishLeft: POLISH_LIMIT })
   } catch (e) {
     fail(res, e)
@@ -219,21 +220,28 @@ http('cvRefine', async (req, res) => {
     if (!instruction || String(instruction).trim().length < 2) return res.status(400).json({ error: 'missing instruction' })
 
     const isAnswer = kind === 'answer'
+    const isElaborate = kind === 'elaborate'
     const ref = db.collection(USAGE).doc(user.sub)
     const d = (await ref.get()).data() || {}
     let answerCount = Number(d.answerCount || 0)
     let polishCount = Number(d.polishCount || 0)
+    let elaborateCount = Number(d.elaborateCount || 0)
     const isOwner = user.email === OWNER_EMAIL
     if (!isOwner && isAnswer && answerCount >= ANSWER_LIMIT) {
       return res.status(429).json({ error: `You’ve answered the maximum of ${ANSWER_LIMIT} questions for this CV.` })
     }
-    if (!isOwner && !isAnswer && polishCount >= POLISH_LIMIT) {
+    if (!isOwner && isElaborate && elaborateCount >= ELABORATE_LIMIT) {
+      return res.status(429).json({ error: `You’ve used all ${ELABORATE_LIMIT} “add more detail” rounds for this CV.` })
+    }
+    if (!isOwner && !isAnswer && !isElaborate && polishCount >= POLISH_LIMIT) {
       return res.status(429).json({ error: `You’ve used all ${POLISH_LIMIT} polish requests for this CV. Upload again to start fresh.` })
     }
 
     const lead = isAnswer
       ? 'The candidate is ANSWERING one or more of your questions'
-      : 'The candidate asks you to change something (a polish request)'
+      : isElaborate
+        ? 'The CV currently fills LESS THAN ONE PAGE. Expand it to better fill a full page — WITHOUT inventing anything: restore useful detail from the original that the first pass trimmed, add specific, credible detail to experience bullets (responsibilities, scope, tools, measurable impact), enrich the summary, and round out the skills. Every addition must be grounded in the original CV or a reasonable, truthful elaboration of what is already there — never fabricate employers, dates, metrics or skills. Keep it signal-first, not padded with filler'
+        : 'The candidate asks you to change something (a polish request)'
     // The previous change, so the candidate can react to it ("no, not like that, like this").
     const prev = typeof context === 'string' && context.trim()
       ? `\n\nYour most recent change to this CV was: "${String(context).slice(0, 400)}". The candidate may be reacting to it — if so, correct it accordingly.`
@@ -247,9 +255,10 @@ http('cvRefine', async (req, res) => {
       `Current CV JSON:\n${JSON.stringify(normalize(current)).slice(0, 24000)}${prev}${src}\n\n${lead}:\n${String(instruction).slice(0, 1000)}`,
     )
     if (isAnswer) answerCount += 1
+    else if (isElaborate) elaborateCount += 1
     else polishCount += 1
-    await ref.update({ answerCount, polishCount, updatedAt: new Date() })
-    res.json({ ok: true, cv, questions, summary, answersLeft: ANSWER_LIMIT - answerCount, polishLeft: POLISH_LIMIT - polishCount })
+    await ref.update({ answerCount, polishCount, elaborateCount, updatedAt: new Date() })
+    res.json({ ok: true, cv, questions, summary, answersLeft: ANSWER_LIMIT - answerCount, polishLeft: POLISH_LIMIT - polishCount, elaborateLeft: ELABORATE_LIMIT - elaborateCount })
   } catch (e) {
     fail(res, e)
   }
