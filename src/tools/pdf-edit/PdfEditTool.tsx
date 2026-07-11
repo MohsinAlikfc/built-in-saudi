@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '../../i18n'
 import { UploadIcon, DownloadIcon, InfoIcon } from '../../components/icons'
 import { Stack, Button, Spinner } from '../../components/ui'
@@ -16,7 +16,7 @@ const STR = {
     addText: 'Add text', del: 'Delete', undo: 'Undo delete', size: 'Font',
     page: 'Page', of: 'of', image: 'image', text: 'text', moved: 'moved', typeHere: 'Type…',
     export: 'Download edited PDF', working: 'Preparing…', another: 'Edit another', locked: 'This PDF is locked / encrypted.',
-    tapImg: 'Tap an image to select, then drag to move · corner/side dots resize · top dot rotates · pinch to zoom',
+    tapImg: 'Select an image, then drag or arrow-keys to move · dots resize · top dot (or [ ]) rotates · Delete removes · pinch to zoom',
     privacy: 'Edited on your device — your PDF is never uploaded.',
   },
   ar: {
@@ -25,7 +25,7 @@ const STR = {
     addText: 'أضف نصًا', del: 'حذف', undo: 'تراجع', size: 'الخط',
     page: 'صفحة', of: 'من', image: 'صورة', text: 'نص', moved: 'مُحرّك', typeHere: 'اكتب…',
     export: 'تنزيل PDF المعدّل', working: 'جارٍ التحضير…', another: 'عدّل آخر', locked: 'هذا الملف مقفل / مشفّر.',
-    tapImg: 'اضغط صورة للتحديد ثم اسحبها للتحريك · النقاط الجانبية للتحجيم · النقطة العلوية للتدوير · اقرص للتكبير',
+    tapImg: 'حدّد صورة ثم اسحبها أو استخدم الأسهم للتحريك · النقاط للتحجيم · النقطة العلوية (أو [ ]) للتدوير · Delete للحذف · اقرص للتكبير',
     privacy: 'يُعدّل على جهازك — لا يُرفع ملفك أبدًا.',
   },
 }
@@ -134,6 +134,43 @@ export default function PdfEditTool() {
   function toggleDelete(id: string) {
     setDeleted((cur) => { const s2 = new Set(cur); s2.has(id) ? s2.delete(id) : s2.add(id); return s2 }); setOut(null)
   }
+  function bumpImg(o: EditObject, patch: Partial<ImgXf>) {
+    if (!clips.current.has(o.id)) { const c = cropImage(o); if (c) clips.current.set(o.id, c) }
+    setXf((cur) => { const m = new Map(cur); m.set(o.id, { ...xfOf(o), ...patch }); return m }); setOut(null)
+  }
+
+  // Keyboard nudge/rotate/resize/delete for the selected object — also makes the
+  // tool keyboard-accessible and gives tests a deterministic way to drive it.
+  useEffect(() => {
+    if (!sel) return
+    function onKey(e: KeyboardEvent) {
+      const ae = document.activeElement
+      if (editing || (ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT'))) return
+      const img = pc?.[pi]?.objects.find((o) => o.id === sel && o.kind === 'image')
+      const tb = texts.find((t) => t.id === sel)
+      if (!img && !tb) return
+      const step = e.shiftKey ? 0.02 : 0.004
+      const k = e.key
+      if (k === 'Delete' || k === 'Backspace') { img ? toggleDelete(img.id) : delText(tb!.id); e.preventDefault(); return }
+      let dx = 0, dy = 0
+      if (k === 'ArrowLeft') dx = -step; else if (k === 'ArrowRight') dx = step
+      else if (k === 'ArrowUp') dy = -step; else if (k === 'ArrowDown') dy = step
+      if (dx || dy) {
+        if (img) { const b = xfOf(img); bumpImg(img, { cx: clamp(b.cx + dx, 0, 1), cy: clamp(b.cy + dy, 0, 1) }) }
+        else if (tb) setTexts((c) => c.map((t) => (t.id === tb.id ? { ...t, x: clamp(t.x + dx, 0, 1 - t.w), y: clamp(t.y + dy, 0, 1 - t.h) } : t)))
+        setOut(null); e.preventDefault(); return
+      }
+      if (img) {
+        const b = xfOf(img)
+        if (k === '[') { bumpImg(img, { rot: b.rot - 0.0349 }); e.preventDefault() }        // −2°
+        else if (k === ']') { bumpImg(img, { rot: b.rot + 0.0349 }); e.preventDefault() }    // +2°
+        else if (k === '-' || k === '_') { bumpImg(img, { w: b.w * 0.95, h: b.h * 0.95 }); e.preventDefault() }
+        else if (k === '=' || k === '+') { bumpImg(img, { w: b.w * 1.0526, h: b.h * 1.0526 }); e.preventDefault() }
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [sel, editing, pc, pi, texts, xf]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- inserted text boxes ----------------------------------------------------
   function addText() {

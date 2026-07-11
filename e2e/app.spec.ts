@@ -28,7 +28,7 @@ test.describe('home', () => {
     await expect(page.getByTestId('app-launcher-panel')).toBeVisible()
     await page.getByTestId('launcher-search').fill('uuid')
     await page.getByTestId('tool-uuid-generator').click()
-    await expect(page).toHaveURL(/\/tools\/uuid-generator$/)
+    await expect(page).toHaveURL(/\/apps\/uuid-generator$/)
   })
 })
 
