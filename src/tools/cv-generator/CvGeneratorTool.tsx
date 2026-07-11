@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useLocale, localePath } from '../../i18n'
 import { Button, Textarea, Stack, Spinner, Sheet, SheetTitle, SheetActions, Check } from '../../components/ui'
@@ -631,7 +632,7 @@ export default function CvGeneratorTool() {
               )}
             </div>
           )}
-          {status === 'generating' && origPages.length === 0 && (
+          {(status === 'generating' || (status === 'ready' && !!idToken)) && origPages.length === 0 && (
             <div className="py-24 flex flex-col items-center gap-4" data-testid="cv-loading">
               <Spinner className="size-9" label={s.building} />
               <span key={loadingStep} className="text-[0.95rem] font-medium text-ink-soft animate-[fadeUp_0.4s_ease]">{s.steps[loadingStep]}</span>
@@ -671,7 +672,9 @@ export default function CvGeneratorTool() {
         <>
           {/* Immersive preview as a FIXED layer below the navbar (not in flow), so
               the page has nothing to scroll — mobile `100dvh` + touch-scroll used to
-              leave a huge scrollable gray area. Renders the Cv JSON read-only. */}
+              leave a huge scrollable gray area. Portaled to <body> so ToolPage's
+              transform doesn't make `fixed` resolve against the (tiny) tool box. */}
+          {createPortal(
           <div ref={previewRef} className={`overflow-hidden bg-[#e9ebef] ${fs ? 'fixed inset-0 z-50' : 'fixed inset-x-0 bottom-0 top-[68px] max-[560px]:top-[60px] z-30'}`}>
             <iframe
               ref={iframeRef}
@@ -738,8 +741,9 @@ export default function CvGeneratorTool() {
             </button>
               </div>
             </div>
-          </div>
-
+          </div>,
+          document.body,
+          )}
 
           {jdOpen && (
             <Sheet onClose={() => { if (!jdBusy) setJdOpen(false) }}>
