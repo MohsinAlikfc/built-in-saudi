@@ -519,12 +519,13 @@ http('myData', async (req, res) => {
     const { idToken, del } = req.body || {}
     const user = await verifyGoogle(idToken)
     if (!user || !user.sub) return res.status(401).json({ error: 'sign in first' })
-    const [hostDoc, bk, cvDoc, cvSavedDoc, links] = await Promise.all([
+    const [hostDoc, bk, cvDoc, cvSavedDoc, links, promptDoc] = await Promise.all([
       db.collection(HOSTS).doc(user.sub).get(),
       db.collection(BOOKINGS).where('hostUid', '==', user.sub).get(),
       db.collection('cvUsage').doc(user.sub).get(),
       db.collection('cvSaved').doc(user.sub).get(),
       db.collection('shortLinks').where('owner', '==', user.sub).get(),
+      db.collection('promptUsage').doc(user.sub).get(),
     ])
     const report = {
       email: user.email || null,
@@ -533,6 +534,7 @@ http('myData', async (req, res) => {
       cvRuns: cvDoc.exists ? ((cvDoc.get('uploads')) || []).length : 0,
       savedCv: cvSavedDoc.exists,
       shortLinks: links.size,
+      promptRuns: promptDoc.exists ? ((promptDoc.get('runs')) || []).length : 0,
     }
     if (del) {
       const batch = db.batch()
@@ -541,6 +543,7 @@ http('myData', async (req, res) => {
       if (hostDoc.exists) batch.delete(hostDoc.ref)
       if (cvDoc.exists) batch.delete(cvDoc.ref)
       if (cvSavedDoc.exists) batch.delete(cvSavedDoc.ref)
+      if (promptDoc.exists) batch.delete(promptDoc.ref)
       await batch.commit()
     }
     res.json({ ok: true, report, deleted: !!del })

@@ -526,6 +526,16 @@ export function SignatureIcon({ className }: P) {
   )
 }
 
+export function RadarIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <path d="M12 3l7.5 4.5v9L12 21l-7.5-4.5v-9z" />
+      <path d="M12 8l3.7 2.2v4.6L12 17l-3.7-2.2v-4.6z" />
+      <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
 export function VideoCallIcon({ className }: P) {
   return (
     <svg {...base} className={className} aria-hidden="true">

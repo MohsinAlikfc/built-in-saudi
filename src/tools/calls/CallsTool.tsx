@@ -8,24 +8,33 @@ const SITE = 'https://built-in-saudi.com'
 const NAME_KEY = 'bis-call-name'
 const code6 = () => { const A = 'abcdefghjkmnpqrstuvwxyz23456789'; let s = ''; const b = crypto.getRandomValues(new Uint8Array(7)); for (let i = 0; i < 7; i++) s += A[b[i] % A.length]; return s }
 
+// Playful anonymous default: a kunya ("Abu <name>") from 30 classic Arabic names.
+const KUNYA: [string, string][] = [
+  ['Khalid', 'خالد'], ['Faisal', 'فيصل'], ['Salman', 'سلمان'], ['Turki', 'تركي'], ['Nawaf', 'نواف'],
+  ['Majid', 'ماجد'], ['Saud', 'سعود'], ['Bandar', 'بندر'], ['Fahad', 'فهد'], ['Nasser', 'ناصر'],
+  ['Abdullah', 'عبدالله'], ['Omar', 'عمر'], ['Yousef', 'يوسف'], ['Ibrahim', 'إبراهيم'], ['Hamad', 'حمد'],
+  ['Rakan', 'راكان'], ['Ziyad', 'زياد'], ['Talal', 'طلال'], ['Waleed', 'وليد'], ['Sultan', 'سلطان'],
+  ['Mishal', 'مشعل'], ['Badr', 'بدر'], ['Tariq', 'طارق'], ['Ayman', 'أيمن'], ['Sami', 'سامي'],
+  ['Marwan', 'مروان'], ['Rayan', 'ريان'], ['Anas', 'أنس'], ['Layth', 'ليث'], ['Zaid', 'زيد'],
+]
+const randName = (ar: boolean) => { const b = crypto.getRandomValues(new Uint8Array(1)); const p = KUNYA[b[0] % KUNYA.length]; return ar ? `أبو ${p[1]}` : `Abu ${p[0]}` }
+
 const STR = {
   en: {
-    title: 'Private call', lead: 'A peer-to-peer meeting — video, whiteboard, chat and files go straight between browsers. Only the initial handshake touches a tiny relay; the call itself never touches a server.',
-    yourName: 'Your name', start: 'Start a call', joinCode: 'Join call', withCam: 'Camera on', joining: 'Connecting…',
+    title: 'Private call', lead: 'True peer-to-peer meetings — video, whiteboard, chat and files go straight between browsers. Only the initial handshake, never any data, touches our server.',
+    yourName: 'Your name', start: 'Start a call', joinCode: 'Join call', shuffle: 'Random name', joining: 'Connecting…',
     mic: 'Mic', cam: 'Camera', screen: 'Share screen', stopScreen: 'Stop sharing', board: 'Whiteboard', chat: 'Chat', invite: 'Invite', leave: 'Leave',
     you: 'You', waiting: 'Waiting for others to join — share the invite.', clear: 'Clear', typeMsg: 'Message…', send: 'Send', dropFiles: 'Drop files to send, or tap',
     copied: 'Invite link copied', copyLink: 'Copy link', shareImg: 'Share invite image', inviteHint: 'Share the image (QR + link) or copy the link.',
-    noConnect: 'Some networks (strict firewalls) can’t make a direct link and won’t connect — that’s the no-relay trade-off.',
-    privacy: 'Media & data are peer-to-peer — never uploaded. Small groups only.',
+    privacy: 'All data is peer-to-peer, only the handshake uses the server.',
   },
   ar: {
-    title: 'مكالمة خاصة', lead: 'اجتماع مباشر بين الأجهزة — الفيديو والسبورة والدردشة والملفات تنتقل مباشرة بين المتصفحات. فقط المصافحة الأولى تمر بمُرحِّل صغير؛ أما المكالمة فلا تمر بأي خادم.',
-    yourName: 'اسمك', start: 'ابدأ مكالمة', joinCode: 'انضم للمكالمة', withCam: 'الكاميرا', joining: 'جارٍ الاتصال…',
+    title: 'مكالمة خاصة', lead: 'اجتماعات مباشرة بين الأجهزة فعليًا — الفيديو والسبورة والدردشة والملفات تنتقل مباشرةً بين المتصفحات. فقط المصافحة الأولى، ولا أي بيانات، تمر بخادمنا.',
+    yourName: 'اسمك', start: 'ابدأ مكالمة', joinCode: 'انضم للمكالمة', shuffle: 'اسم عشوائي', joining: 'جارٍ الاتصال…',
     mic: 'المايك', cam: 'الكاميرا', screen: 'مشاركة الشاشة', stopScreen: 'إيقاف المشاركة', board: 'السبورة', chat: 'الدردشة', invite: 'دعوة', leave: 'مغادرة',
     you: 'أنت', waiting: 'بانتظار انضمام آخرين — شارك الدعوة.', clear: 'مسح', typeMsg: 'رسالة…', send: 'إرسال', dropFiles: 'أفلت ملفات للإرسال أو اضغط',
     copied: 'تم نسخ رابط الدعوة', copyLink: 'نسخ الرابط', shareImg: 'مشاركة صورة الدعوة', inviteHint: 'شارك الصورة (رمز + رابط) أو انسخ الرابط.',
-    noConnect: 'بعض الشبكات (جدران حماية صارمة) لا تستطيع إنشاء اتصال مباشر ولن تتصل — هذه مقايضة عدم استخدام مُرحِّل.',
-    privacy: 'الوسائط والبيانات مباشرة بين الأجهزة — لا تُرفع أبدًا. مجموعات صغيرة فقط.',
+    privacy: 'كل البيانات مباشرة بين الأجهزة، فقط المصافحة تستخدم الخادم.',
   },
 }
 
@@ -46,17 +55,16 @@ export default function CallsTool() {
   const { locale } = useLocale()
   const s = STR[locale]
   const initialRoom = new URLSearchParams(window.location.search).get('room') || ''
-  const [name, setName] = useState(() => { try { return localStorage.getItem(NAME_KEY) || '' } catch { return '' } })
+  const [name, setName] = useState(() => { try { return localStorage.getItem(NAME_KEY) || randName(locale === 'ar') } catch { return randName(locale === 'ar') } })
   const [phase, setPhase] = useState<'lobby' | 'live'>('lobby')
   const [room, setRoom] = useState(initialRoom)
   const [busy, setBusy] = useState(false)
-  const [wantCam, setWantCam] = useState(true)
 
   const rtc = useRef<CallRoom | null>(null)
   const [local, setLocal] = useState<MediaStream | null>(null)
   const [peers, setPeers] = useState<Map<string, MediaStream>>(new Map())
   const [names, setNames] = useState<Map<string, string>>(new Map())
-  const [mic, setMic] = useState(true), [cam, setCam] = useState(true), [sharing, setSharing] = useState(false)
+  const [mic, setMic] = useState(false), [cam, setCam] = useState(false), [sharing, setSharing] = useState(false)
   const [panel, setPanel] = useState<'none' | 'board' | 'chat'>('none')
   const [chat, setChat] = useState<ChatItem[]>([])
   const [msg, setMsg] = useState('')
@@ -98,7 +106,7 @@ export default function CallsTool() {
       onData, onFileChunk,
     })
     rtc.current = r
-    try { await r.start(wantCam); setPhase('live') }
+    try { await r.start(); setPhase('live') }
     catch { setToast('Camera/mic permission needed'); setTimeout(() => setToast(''), 3000) }
     finally { setBusy(false) }
   }
@@ -146,17 +154,21 @@ export default function CallsTool() {
   if (phase === 'lobby') {
     return (
       <Stack data-testid="calls">
-        <p className="text-[0.95rem] text-ink-soft leading-relaxed">{s.lead}</p>
-        <div className="flex flex-col gap-3 max-w-[24rem]">
-          <label className="flex flex-col gap-1"><span className="text-[0.85rem] font-medium text-ink-soft">{s.yourName}</span>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="—" data-testid="call-name" /></label>
-          <label className="inline-flex items-center gap-2 text-[0.9rem] text-ink-soft cursor-pointer"><input type="checkbox" checked={wantCam} onChange={(e) => setWantCam(e.target.checked)} className="accent-green-600" /> {s.withCam}</label>
+        <div className="max-w-[30rem] rounded-lg border border-green-900/40 bg-green-950 text-sand-100 p-5 sm:p-6 flex flex-col gap-4">
+          <p className="text-[0.95rem] leading-relaxed text-sand-100/90">{s.lead}</p>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[0.82rem] font-medium text-sand-100/70">{s.yourName}</span>
+            <div className="flex gap-2">
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="—" data-testid="call-name" className="flex-1" />
+              <button type="button" onClick={() => setName(randName(locale === 'ar'))} title={s.shuffle} aria-label={s.shuffle}
+                className="shrink-0 px-3 rounded-md border border-sand-100/25 bg-transparent text-[1.05rem] text-sand-100 hover:bg-sand-100/10">🎲</button>
+            </div>
+          </label>
           {initialRoom
             ? <Button variant="primary" disabled={busy} onClick={() => go(true)} data-testid="call-join">{busy ? s.joining : `${s.joinCode} · ${initialRoom}`}</Button>
             : <Button variant="primary" disabled={busy} onClick={() => go(false)} data-testid="call-start">{busy ? s.joining : s.start}</Button>}
+          <p className="text-[0.78rem] text-sand-100/70 flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
         </div>
-        <p className="text-[0.8rem] text-ink-faint flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
-        <p className="text-[0.78rem] text-ink-faint">{s.noConnect}</p>
       </Stack>
     )
   }

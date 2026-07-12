@@ -46,9 +46,12 @@ export class CallRoom {
 
   constructor(room: string, handlers: CallHandlers) { this.room = room; this.h = handlers }
 
-  async start(video: boolean): Promise<void> {
-    this.local = await navigator.mediaDevices.getUserMedia({ audio: true, video: video ? { width: 1280, height: 720 } : false })
+  async start(): Promise<void> {
+    this.local = await navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 1280, height: 720 } })
     this.camTrack = this.local.getVideoTracks()[0] || null
+    // Privacy-first: join muted with the camera off — the user turns each on.
+    this.local.getAudioTracks().forEach((t) => (t.enabled = false))
+    this.local.getVideoTracks().forEach((t) => (t.enabled = false))
     this.h.onLocal?.(this.local)
     this.live = true
     await this.post('send', { to: 'all', type: 'join' })

@@ -108,6 +108,7 @@ export interface MyDataReport {
   cvRuns: number
   savedCv?: boolean
   shortLinks?: number
+  promptRuns?: number
 }
 
 /** Report (del=false) or delete (del=true) everything stored for this Google user. */

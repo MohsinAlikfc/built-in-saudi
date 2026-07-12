@@ -44,6 +44,11 @@ export const liveToolSeo: ToolSeo[] = [
     ar: { name: 'مكالمة خاصة', description: 'ابدأ مكالمة فيديو خاصة مباشرة بين الأجهزة من صورة دعوة واحدة (رمز QR + رابط). الفيديو ومشاركة الشاشة والسبورة المشتركة والدردشة وإرسال الملفات تنتقل مباشرة بين المتصفحات عبر WebRTC — فقط المصافحة الأولى تمر بمُرحِّل صغير لا يرى مكالمتك. STUN عام، بلا تسجيل، لمجموعات صغيرة.' },
   },
   {
+    id: 'prompt-analyzer',
+    en: { name: 'Prompt Analyzer', description: 'Paste an LLM system prompt and one AI pass scores it 1–5 across eight dimensions — purpose coherence, context-vs-instruction harmony, spikiness, shoutiness, contradictions, framing, an escape hatch and downstream stakes — as a spider chart, with concrete issues listed. One analysis per 24 hours.' },
+    ar: { name: 'محلّل الموجّهات', description: 'الصق موجّه نظام لنموذج لغوي فيقيّمه مرور واحد للذكاء الاصطناعي من ١ إلى ٥ عبر ثمانية أبعاد — تماسك الغرض وتناغم السياق مع التعليمات والحدّة والصياح والتناقضات والصياغة ومنفذ الخروج والاستخدام اللاحق — كمخطط عنكبوتي مع سرد المشكلات. تحليل واحد كل ٢٤ ساعة.' },
+  },
+  {
     id: 'book-me',
     en: { name: 'Book Me', description: 'A free, no-sign-up scheduling link — paint your weekly availability, set the meeting length with gaps and buffers, and share one link. People self-book an open slot without the email back-and-forth; you get a push, a Telegram DM and an email when they book.' },
     ar: { name: 'احجز معي', description: 'رابط جدولة مجاني بلا تسجيل — ارسم أوقات فراغك الأسبوعية، وحدِّد مدة الاجتماع بفواصل ومهل، وشارك رابطًا واحدًا. يحجز الناس وقتًا متاحًا دون تبادل رسائل، وتصلك إشعارات ورسالة تيليجرام وبريد عند الحجز.' },

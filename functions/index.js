@@ -12,6 +12,8 @@ import './cv.js'
 import './shorten.js'
 // P2P Calls signaling relay (callSignal) — handshake only, never call content.
 import './call.js'
+// Prompt Analyzer (analyzePrompt) — one LLM grade per 24h.
+import './prompt.js'
 
 const { Firestore } = firestore
 const db = new Firestore()

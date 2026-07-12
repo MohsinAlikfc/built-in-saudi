@@ -52,6 +52,20 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/apps/calls"/>
   </url>
   <url>
+    <loc>https://built-in-saudi.com/en/apps/prompt-analyzer</loc>
+    <lastmod>2026-07-12</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/apps/prompt-analyzer"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/apps/prompt-analyzer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/apps/prompt-analyzer"/>
+  </url>
+  <url>
+    <loc>https://built-in-saudi.com/ar/apps/prompt-analyzer</loc>
+    <lastmod>2026-07-12</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/apps/prompt-analyzer"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/apps/prompt-analyzer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/apps/prompt-analyzer"/>
+  </url>
+  <url>
     <loc>https://built-in-saudi.com/en/apps/qr-code</loc>
     <lastmod>2026-07-02</lastmod>
     <changefreq>monthly</changefreq>
