@@ -54,6 +54,7 @@ export default function PdfEditTool() {
   const [boxH, setBoxH] = useState(0)
   const pageImgRef = useRef<HTMLImageElement>(null)
   const clips = useRef<Map<string, string>>(new Map())
+  const covers = useRef<Map<string, string>>(new Map())
 
   const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
   const nrm = (e: React.PointerEvent) => {
@@ -66,8 +67,8 @@ export default function PdfEditTool() {
     setBusy(true); setErr(''); setOut(null); setDeleted(new Set()); setXf(new Map()); setTexts([]); setSel(null); setPi(0); clips.current = new Map()
     try {
       const [{ renderPdf }, { loadEditable }] = await Promise.all([import('../../lib/pdfRender'), import('./contentStream')])
-      const [rendered, editable] = await Promise.all([renderPdf(await f.arrayBuffer()), loadEditable(await f.arrayBuffer())])
-      setFile(f); setPages(rendered); setPc(editable.pages)
+      const [rendered, editable] = await Promise.all([renderPdf(await f.arrayBuffer(), 2, true), loadEditable(await f.arrayBuffer())])
+      setFile(f); setPages(rendered); setPc(editable.pages); covers.current = new Map()
     } catch {
       setErr(s.locked); setFile(null); setPages(null); setPc(null)
     } finally { setBusy(false) }
@@ -86,6 +87,19 @@ export default function PdfEditTool() {
 
   const xfOf = (o: EditObject): ImgXf => xf.get(o.id) || { cx: o.x + o.w / 2, cy: o.y + o.h / 2, w: o.w, h: o.h, rot: 0 }
 
+  // The clean, real extracted image (transparent) matched to this object by rect;
+  // falls back to a crop of the page raster if extraction missed it.
+  function extractedFor(o: EditObject): string | null {
+    const imgs = pages?.[o.page]?.images
+    if (!imgs?.length) return null
+    const ocx = o.x + o.w / 2, ocy = o.y + o.h / 2
+    let best: (typeof imgs)[number] | null = null, bd = Infinity
+    for (const im of imgs) {
+      const d = Math.hypot(im.x + im.w / 2 - ocx, im.y + im.h / 2 - ocy) + Math.abs(im.w - o.w) + Math.abs(im.h - o.h)
+      if (d < bd) { bd = d; best = im }
+    }
+    return best && bd < 0.12 ? best.url : null
+  }
   function cropImage(o: EditObject): string | null {
     const img = pageImgRef.current
     if (!img || !img.naturalWidth) return null
@@ -96,12 +110,33 @@ export default function PdfEditTool() {
     ctx.drawImage(img, o.x * nw, o.y * nh, o.w * nw, o.h * nh, 0, 0, cw, ch)
     try { return cv.toDataURL('image/png') } catch { return null }
   }
+  // Sample the page just outside the image so the "vacated" cover blends with the
+  // background (white looked wrong on coloured pages).
+  function sampleBg(o: EditObject): string {
+    const img = pageImgRef.current
+    if (!img?.naturalWidth) return '#ffffff'
+    try {
+      const c = document.createElement('canvas'); c.width = 1; c.height = 1
+      const x = c.getContext('2d'); if (!x) return '#ffffff'
+      const px = Math.round((o.x + o.w / 2) * img.naturalWidth)
+      const py = Math.round(Math.max(0, (o.y - 0.006) * img.naturalHeight))
+      x.drawImage(img, px, py, 1, 1, 0, 0, 1, 1)
+      const d = x.getImageData(0, 0, 1, 1).data
+      return `rgb(${d[0]},${d[1]},${d[2]})`
+    } catch { return '#ffffff' }
+  }
+  function ensureClip(o: EditObject) {
+    if (clips.current.has(o.id)) return
+    const c = extractedFor(o) || cropImage(o)
+    if (c) clips.current.set(o.id, c)
+    covers.current.set(o.id, sampleBg(o))
+  }
   function imgStart(e: React.PointerEvent, o: EditObject, mode: 'move' | 'resize' | 'rotate', handle?: Handle) {
     e.stopPropagation(); e.preventDefault()
     setSel(o.id)
     if (deleted.has(o.id)) return
     ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
-    if (!clips.current.has(o.id)) { const c = cropImage(o); if (c) clips.current.set(o.id, c) }
+    ensureClip(o)
     const r = pageBoxRef.current!.getBoundingClientRect()
     const st = xfOf(o)
     const aspect = (o.w * r.width) / (o.h * r.height) // image's true w:h in screen px
@@ -143,7 +178,7 @@ export default function PdfEditTool() {
     setDeleted((cur) => { const s2 = new Set(cur); s2.has(id) ? s2.delete(id) : s2.add(id); return s2 }); setOut(null)
   }
   function bumpImg(o: EditObject, patch: Partial<ImgXf>) {
-    if (!clips.current.has(o.id)) { const c = cropImage(o); if (c) clips.current.set(o.id, c) }
+    ensureClip(o)
     setXf((cur) => { const m = new Map(cur); m.set(o.id, { ...xfOf(o), ...patch }); return m }); setOut(null)
   }
 
@@ -323,18 +358,20 @@ export default function PdfEditTool() {
                 const on = sel === o.id
                 const clip = clips.current.get(o.id)
                 const b = t || { cx: o.x + o.w / 2, cy: o.y + o.h / 2, w: o.w, h: o.h, rot: 0 }
+                const cover = covers.current.get(o.id) || '#ffffff'
                 const orig = { left: `${o.x * 100}%`, top: `${o.y * 100}%`, width: `${o.w * 100}%`, height: `${o.h * 100}%` }
+                const origCover = { ...orig, background: cover }
                 const box = { left: `${(b.cx - b.w / 2) * 100}%`, top: `${(b.cy - b.h / 2) * 100}%`, width: `${b.w * 100}%`, height: `${b.h * 100}%`, transform: `rotate(${b.rot}rad)`, transformOrigin: 'center' }
                 if (isDel) return (
                   <div key={o.id}>
-                    <div className="absolute bg-white pointer-events-none" style={orig} />
+                    <div className="absolute pointer-events-none" style={origCover} />
                     <button type="button" onClick={() => toggleDelete(o.id)} data-testid="edit-undo" title={s.undo}
                       className="absolute outline outline-1 outline-[color:var(--danger)] bg-transparent cursor-pointer" style={orig} />
                   </div>
                 )
                 return (
                   <div key={o.id}>
-                    {t && <div className="absolute bg-white pointer-events-none" style={orig} />}
+                    {t && <div className="absolute pointer-events-none" style={origCover} />}
                     <div data-testid="edit-obj-image"
                       className={`absolute cursor-move touch-none ${on ? 'outline outline-2 outline-green-600' : 'hover:outline hover:outline-1 hover:outline-green-500'}`}
                       style={box} onPointerDown={(e) => imgStart(e, o, 'move')}>
