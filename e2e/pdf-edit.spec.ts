@@ -59,9 +59,8 @@ test.describe('pdf-edit end-to-end', () => {
     const STEPS = 10
     for (let i = 0; i < STEPS; i++) await page.keyboard.press('ArrowRight')
 
-    await page.getByTestId('edit-export').click()
     const dl = page.waitForEvent('download')
-    await page.getByTestId('edit-download').click()
+    await page.getByTestId('edit-export').click()
     const editedBytes = new Uint8Array(readFileSync(await (await dl).path()))
 
     const after = await imageCtm(editedBytes)
@@ -85,9 +84,8 @@ test.describe('pdf-edit end-to-end', () => {
     await img.click()
     const N = 4
     for (let i = 0; i < N; i++) await page.keyboard.press('=') // grow ×1.0526 each
-    await page.getByTestId('edit-export').click()
     const dl = page.waitForEvent('download')
-    await page.getByTestId('edit-download').click()
+    await page.getByTestId('edit-export').click()
     const editedBytes = new Uint8Array(readFileSync(await (await dl).path()))
     const after = await imageCtm(editedBytes)
     expect(after.count).toBe(1)
@@ -102,9 +100,8 @@ test.describe('pdf-edit end-to-end', () => {
     await expect(img).toBeVisible({ timeout: 15_000 })
     await img.click()
     await page.keyboard.press('Delete')
-    await page.getByTestId('edit-export').click()
     const dl = page.waitForEvent('download')
-    await page.getByTestId('edit-download').click()
+    await page.getByTestId('edit-export').click()
     const editedBytes = new Uint8Array(readFileSync(await (await dl).path()))
     const after = await imageCtm(editedBytes)
     expect(after.count).toBe(0) // image gone

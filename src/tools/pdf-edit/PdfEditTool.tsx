@@ -237,8 +237,13 @@ export default function PdfEditTool() {
   }
   function delText(id: string) { setTexts((c) => c.filter((t) => t.id !== id)); setSel(null); setEditing(null); setOut(null) }
 
+  function saveBlob(url: string) {
+    const a = document.createElement('a'); a.href = url; a.download = (file?.name.replace(/\.pdf$/i, '') || 'edited') + '-edited.pdf'
+    document.body.appendChild(a); a.click(); a.remove()
+  }
   async function download() {
     if (!file || !pc) return
+    if (out) { saveBlob(out.url); return } // already built — just download again
     setBusy(true); setErr('')
     try {
       const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib')
@@ -261,7 +266,9 @@ export default function PdfEditTool() {
       }
       const bytes = await pdf.save()
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
-      setOut((p) => { if (p) URL.revokeObjectURL(p.url); return { url: URL.createObjectURL(blob), size: blob.size } })
+      const url = URL.createObjectURL(blob)
+      setOut((p) => { if (p) URL.revokeObjectURL(p.url); return { url, size: blob.size } })
+      saveBlob(url) // download in the same click
     } catch {
       setErr(s.locked)
     } finally { setBusy(false) }
@@ -343,8 +350,10 @@ export default function PdfEditTool() {
                           <span className="absolute left-1/2 -top-6 w-px h-6 bg-green-600 pointer-events-none" />
                           <span data-handle="rot" onPointerDown={(e) => imgStart(e, o, 'rotate')}
                             className="absolute left-1/2 -top-6 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-green-600 border-2 border-white rounded-full touch-none cursor-grab" aria-label="rotate" />
+                          {/* delete below the bottom edge (mirrors the rotate handle above), so it clears the corner handles */}
+                          <span className="absolute left-1/2 top-full h-6 w-px bg-[var(--danger)]/60 -translate-x-1/2 pointer-events-none" />
                           <button type="button" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); toggleDelete(o.id) }} aria-label={s.del}
-                            className="absolute -right-2 -bottom-2 w-7 h-7 rounded-full bg-[var(--danger)] text-white grid place-items-center border-2 border-white cursor-pointer shadow-[var(--shadow-sm)] [&_svg]:w-4 [&_svg]:h-4"><TrashIcon /></button>
+                            className="absolute left-1/2 top-full mt-6 -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[var(--danger)] text-white grid place-items-center border-2 border-white cursor-pointer shadow-[var(--shadow-sm)] [&_svg]:w-4 [&_svg]:h-4"><TrashIcon /></button>
                         </>
                       )}
                     </div>
@@ -398,15 +407,12 @@ export default function PdfEditTool() {
               })}
             </div>
           </div>
-          <p className="text-[0.8rem] text-ink-faint text-center">{s.tapImg}</p>
 
-          {/* export */}
+          {/* export — one click builds AND downloads */}
           <div className="flex items-center gap-2">
-            {!out ? (
-              <Button variant="primary" data-testid="edit-export" disabled={busy} onClick={download}>{busy ? s.working : s.export}</Button>
-            ) : (
-              <Button variant="primary" href={out.url} download="edited.pdf" data-testid="edit-download"><DownloadIcon /> {s.export} · {(out.size / 1024).toFixed(0)} KB</Button>
-            )}
+            <Button variant="primary" data-testid="edit-export" disabled={busy} onClick={download}>
+              <DownloadIcon /> {busy ? s.working : s.export}{out ? ` · ${(out.size / 1024).toFixed(0)} KB` : ''}
+            </Button>
             <Button onClick={() => { setFile(null); setPages(null); setPc(null); setOut(null) }}>{s.another}</Button>
           </div>
         </div>

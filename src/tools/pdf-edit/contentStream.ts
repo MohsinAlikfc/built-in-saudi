@@ -248,6 +248,12 @@ export async function loadEditable(data: ArrayBuffer): Promise<{ pdf: PDFDocumen
  *  origin) + screen-clockwise rotation in radians. */
 export interface ImgXf { cx: number; cy: number; w: number; h: number; rot: number }
 
+// An opaque ExtGState we add to each page, referenced by every appended redraw.
+// Without it, a redraw appended at the end of the stream inherits whatever
+// graphics state was left there — often `ca 0` (fully transparent) — and the
+// image paints invisibly. writePage installs it; applyEdits references it.
+export const OPAQUE_GS = 'GSbisEdit'
+
 /** Apply deletions + image transforms. A transformed image is REMOVED from its
  *  (possibly clipped/grouped) original draw and REDRAWN fresh at the top level of
  *  the stream — so it's free of any clip or group, at exactly the target box. */
@@ -271,7 +277,7 @@ export function applyEdits(pc: PageContent, deleted: Set<string>, transforms: Ma
       const e = tcx - 0.5 * (a + c), f = tcy - 0.5 * (b + d)
       // ...expressed in the coordinate space present at the append point.
       const [a2, b2, c2, d2, e2, f2] = mul([a, b, c, d, e, f], endInv)
-      appends.push(`q ${fmt(a2)} ${fmt(b2)} ${fmt(c2)} ${fmt(d2)} ${fmt(e2)} ${fmt(f2)} cm /${o.name} Do Q`)
+      appends.push(`q /${OPAQUE_GS} gs ${fmt(a2)} ${fmt(b2)} ${fmt(c2)} ${fmt(d2)} ${fmt(e2)} ${fmt(f2)} cm /${o.name} Do Q`)
     }
   }
   removals.sort((x, y) => y.start - x.start)
@@ -281,9 +287,25 @@ export function applyEdits(pc: PageContent, deleted: Set<string>, transforms: Ma
   return out
 }
 
-/** Replace a page's content with an edited string (uncompressed stream). */
+/** Replace a page's content with an edited string, and install the opaque
+ *  ExtGState the appended redraws reference (so they aren't hit by a lingering
+ *  `ca 0`). */
 export function writePage(pdf: PDFDocument, pageIndex: number, content: string): void {
-  const bytes = Uint8Array.from(content, (ch) => ch.charCodeAt(0) & 0xff)
-  const stream = pdf.context.stream(bytes)
-  pdf.getPage(pageIndex).node.set(PDFName.of('Contents'), pdf.context.register(stream))
+  const page = pdf.getPage(pageIndex)
+  try {
+    const res = page.node.Resources()
+    if (res) {
+      let egs = res.lookup(PDFName.of('ExtGState')) as ReturnType<typeof pdf.context.obj> | undefined
+      // @ts-expect-error loose dict shape
+      if (!egs || typeof egs.set !== 'function') { egs = pdf.context.obj({}); res.set(PDFName.of('ExtGState'), egs) }
+      const gs = pdf.context.obj({})
+      gs.set(PDFName.of('ca'), pdf.context.obj(1))
+      gs.set(PDFName.of('CA'), pdf.context.obj(1))
+      gs.set(PDFName.of('BM'), PDFName.of('Normal'))
+      // @ts-expect-error egs is a PDFDict at this point
+      egs.set(PDFName.of(OPAQUE_GS), gs)
+    }
+  } catch { /* resources missing/odd — redraws may inherit alpha, still export */ }
+  const stream = pdf.context.stream(Uint8Array.from(content, (ch) => ch.charCodeAt(0) & 0xff))
+  page.node.set(PDFName.of('Contents'), pdf.context.register(stream))
 }
