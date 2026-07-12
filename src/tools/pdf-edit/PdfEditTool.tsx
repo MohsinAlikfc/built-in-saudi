@@ -51,6 +51,7 @@ export default function PdfEditTool() {
   const [out, setOut] = useState<{ url: string; size: number } | null>(null)
   const lastSize = useRef(14)
   const pageBoxRef = useRef<HTMLDivElement>(null)
+  const [boxH, setBoxH] = useState(0)
   const pageImgRef = useRef<HTMLImageElement>(null)
   const clips = useRef<Map<string, string>>(new Map())
 
@@ -81,7 +82,7 @@ export default function PdfEditTool() {
   // shows the cropped clip so you see the real image. Gesture maths run in
   // pixels (rotation-aware) then store a normalised centre/size/rotation.
   const g = useRef<{ mode: 'tb' | 'resize'; id: string; handle?: Handle; nx: number; ny: number; o: { x: number; y: number; w: number; h: number } } | null>(null)
-  const gi = useRef<{ mode: 'move' | 'resize' | 'rotate'; id: string; handle?: Handle; sx: number; sy: number; rw: number; rh: number; cxpx: number; cypx: number; start: ImgXf } | null>(null)
+  const gi = useRef<{ mode: 'move' | 'resize' | 'rotate'; id: string; handle?: Handle; sx: number; sy: number; rw: number; rh: number; cxpx: number; cypx: number; aspect: number; start: ImgXf } | null>(null)
 
   const xfOf = (o: EditObject): ImgXf => xf.get(o.id) || { cx: o.x + o.w / 2, cy: o.y + o.h / 2, w: o.w, h: o.h, rot: 0 }
 
@@ -103,7 +104,8 @@ export default function PdfEditTool() {
     if (!clips.current.has(o.id)) { const c = cropImage(o); if (c) clips.current.set(o.id, c) }
     const r = pageBoxRef.current!.getBoundingClientRect()
     const st = xfOf(o)
-    gi.current = { mode, id: o.id, handle, sx: e.clientX, sy: e.clientY, rw: r.width, rh: r.height, cxpx: r.left + st.cx * r.width, cypx: r.top + st.cy * r.height, start: st }
+    const aspect = (o.w * r.width) / (o.h * r.height) // image's true w:h in screen px
+    gi.current = { mode, id: o.id, handle, sx: e.clientX, sy: e.clientY, rw: r.width, rh: r.height, cxpx: r.left + st.cx * r.width, cypx: r.top + st.cy * r.height, aspect, start: st }
   }
   function imgMove(e: React.PointerEvent) {
     const d = gi.current
@@ -124,7 +126,13 @@ export default function PdfEditTool() {
       const W0 = st.w * d.rw, H0 = st.h * d.rh
       const sX = d.handle!.includes('e') ? 1 : d.handle!.includes('w') ? -1 : 0
       const sY = d.handle!.includes('s') ? 1 : d.handle!.includes('n') ? -1 : 0
-      const nW = Math.max(14, W0 + sX * lx), nH = Math.max(14, H0 + sY * ly)
+      let nW = Math.max(14, W0 + sX * lx), nH = Math.max(14, H0 + sY * ly)
+      // Corner handles snap to the image's true proportions when close (within
+      // ~16px); drag further and it breaks away to a free (distorted) resize.
+      if (sX !== 0 && sY !== 0 && d.aspect > 0) {
+        const propH = nW / d.aspect
+        if (Math.abs(nH - propH) < 16) nH = propH
+      }
       const lsx = (sX * (nW - W0)) / 2, lsy = (sY * (nH - H0)) / 2 // centre shifts half the growth
       const csx = lsx * c - lsy * s, csy = lsx * s + lsy * c
       next = { cx: st.cx + csx / d.rw, cy: st.cy + csy / d.rh, w: nW / d.rw, h: nH / d.rh, rot: st.rot }
@@ -171,6 +179,14 @@ export default function PdfEditTool() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [sel, editing, pc, pi, texts, xf]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Track the rendered page height so text-box font sizes map points → real px.
+  useEffect(() => {
+    const el = pageBoxRef.current; if (!el) return
+    const ro = new ResizeObserver(() => setBoxH(el.clientHeight))
+    ro.observe(el); setBoxH(el.clientHeight)
+    return () => ro.disconnect()
+  }, [pages, pi])
 
   // ---- inserted text boxes ----------------------------------------------------
   function addText() {
@@ -339,7 +355,9 @@ export default function PdfEditTool() {
               {/* inserted text boxes */}
               {curTexts.map((t) => {
                 const on = sel === t.id
-                const fontPx = `calc(${t.size} / ${pc[pi].hPt} * 100%)`
+                // Real px (points → screen), and Helvetica to match the exported
+                // font — textareas otherwise default to monospace.
+                const fs = { fontSize: `${boxH > 0 ? (t.size * boxH) / pc[pi].hPt : t.size}px`, fontFamily: 'Helvetica, Arial, sans-serif', lineHeight: 1.2 }
                 return (
                   <div key={t.id} data-testid="edit-textbox"
                     className={`absolute touch-none ${on ? 'outline outline-2 outline-green-600' : 'outline-dashed outline-1 outline-green-500/60'}`}
@@ -349,10 +367,10 @@ export default function PdfEditTool() {
                     {editing === t.id ? (
                       <textarea autoFocus value={t.text} onChange={(e) => { setTexts((c) => c.map((x) => x.id === t.id ? { ...x, text: e.target.value } : x)); setOut(null) }}
                         onBlur={() => setEditing(null)} onPointerDown={(e) => e.stopPropagation()}
-                        className="w-full h-full resize-none bg-[color-mix(in_srgb,var(--green-400)_8%,white)] border-0 outline-none p-0 leading-tight text-ink overflow-hidden"
-                        style={{ fontSize: fontPx }} data-testid="edit-textarea" />
+                        className="w-full h-full resize-none bg-[color-mix(in_srgb,var(--green-400)_8%,white)] border-0 outline-none p-0 text-ink overflow-hidden"
+                        style={fs} data-testid="edit-textarea" />
                     ) : (
-                      <div className="w-full h-full whitespace-pre-wrap break-words leading-tight text-ink overflow-hidden" style={{ fontSize: fontPx }} onClick={() => setEditing(t.id)}>
+                      <div className="w-full h-full whitespace-pre-wrap break-words text-ink overflow-hidden" style={fs} onClick={() => setEditing(t.id)}>
                         {t.text || <span className="text-ink-faint">{s.typeHere}</span>}
                       </div>
                     )}

@@ -37,9 +37,8 @@ export interface EditObject {
   kind: 'image' | 'text'
   page: number
   x: number; y: number; w: number; h: number // normalised, top-left origin
-  delStart: number; delEnd: number            // byte span to remove on delete
-  insertAt?: number                            // where to inject a move-cm (images)
-  outer?: Mat                                  // CTM active at the image's draw block (for correct move space)
+  delStart: number; delEnd: number            // byte span to remove (the `/Name Do` op for images)
+  name?: string                                // image XObject name — for a fresh top-level redraw
   str?: string                                 // best-effort text (label only)
 }
 
@@ -48,6 +47,7 @@ export interface PageContent {
   content: string     // decoded content stream (latin1)
   wPt: number; hPt: number
   objects: EditObject[]
+  endCtm: Mat         // CTM at end of stream (for placing fresh top-level redraws)
 }
 
 interface Tok { t: 'num' | 'name' | 'str' | 'arr' | 'op' | 'other'; v: string; nums?: number[]; text?: string; s: number; e: number }
@@ -150,14 +150,14 @@ function pageContentString(pdf: PDFDocument, page: ReturnType<PDFDocument['getPa
     .join('\n')
 }
 
-/** Parse one page's content into editable objects. */
-function parsePage(content: string, page: number, wPt: number, hPt: number, imageNames: Set<string>): EditObject[] {
+/** Parse one page's content into editable objects + the CTM left at end of the
+ *  stream (identity for balanced streams; used to place fresh top-level redraws). */
+function parsePage(content: string, page: number, wPt: number, hPt: number, imageNames: Set<string>): { objects: EditObject[]; endCtm: Mat } {
   const toks = tokenize(content)
   const objs: EditObject[] = []
   let ctm: Mat = [...ID]
   let tm: Mat = [...ID], tlm: Mat = [...ID], fontSize = 12, leading = 0
-  const gstack: { ctm: Mat; qStart: number; imgs: EditObject[] }[] = []
-  let block: { ctm: Mat; qStart: number; imgs: EditObject[] } | null = null
+  const gstack: Mat[] = []
   const ops: Tok[] = [] // operand buffer
   let uid = 0
   const nums = () => ops.filter((o) => o.t === 'num').map((o) => Number(o.v))
@@ -167,13 +167,8 @@ function parsePage(content: string, page: number, wPt: number, hPt: number, imag
     if (tk.t !== 'op') { ops.push(tk); continue }
     const op = tk.v
     switch (op) {
-      case 'q': gstack.push({ ctm: [...ctm], qStart: tk.s, imgs: [] }); block = gstack[gstack.length - 1]; break
-      case 'Q': {
-        const popped = gstack.pop()
-        if (popped) { ctm = popped.ctm; for (const im of popped.imgs) im.delEnd = tk.e }
-        block = gstack.length ? gstack[gstack.length - 1] : null
-        break
-      }
+      case 'q': gstack.push([...ctm]); break
+      case 'Q': { const p = gstack.pop(); if (p) ctm = p; break }
       case 'cm': { const a = nums(); if (a.length >= 6) ctm = mul(a.slice(0, 6) as Mat, ctm); break }
       case 'BT': tm = [...ID]; tlm = [...ID]; break
       case 'Tf': { const a = nums(); if (a.length) fontSize = a[a.length - 1]; break }
@@ -194,17 +189,17 @@ function parsePage(content: string, page: number, wPt: number, hPt: number, imag
       }
       case 'Do': {
         const nm = [...ops].reverse().find((o) => o.t === 'name')
-        if (nm && imageNames.has(nm.v) && block) {
+        if (nm && imageNames.has(nm.v)) {
           const [a, , , d, e, f] = ctm
           const x0 = Math.min(e, e + a), y1 = Math.max(f, f + d)
-          const im: EditObject = {
+          objs.push({
             id: `o${page}_${uid++}`, kind: 'image', page,
             x: x0 / wPt, y: 1 - y1 / hPt, w: Math.abs(a) / wPt, h: Math.abs(d) / hPt,
-            delStart: block.qStart, delEnd: tk.e, insertAt: block.qStart + 1,
-            outer: [...block.ctm] as Mat, // coordinate space at this image's block
-          }
-          block.imgs.push(im)
-          objs.push(im)
+            // Delete/edit target is just the `/Name Do` draw op — leaving the
+            // enclosing q/clip/cm harmless — so a transform can redraw the image
+            // fresh at the top level, free of any clip or group it was inside.
+            delStart: nm.s, delEnd: tk.e, name: nm.v,
+          })
         }
         break
       }
@@ -218,7 +213,7 @@ function parsePage(content: string, page: number, wPt: number, hPt: number, imag
     }
     ops.length = 0
   }
-  return objs
+  return { objects: objs, endCtm: ctm }
 }
 
 function textObj(s: number, e: number, str: string, tm: Mat, ctm: Mat, fontSize: number, page: number, wPt: number, hPt: number, id: number): EditObject {
@@ -243,8 +238,8 @@ export async function loadEditable(data: ArrayBuffer): Promise<{ pdf: PDFDocumen
     const { width, height } = page.getSize()
     let content = ''
     try { content = pageContentString(pdf, page) } catch { /* unreadable */ }
-    const objects = content ? parsePage(content, i, width, height, getImageNames(pdf, page)) : []
-    pages.push({ page: i, content, wPt: width, hPt: height, objects })
+    const parsed = content ? parsePage(content, i, width, height, getImageNames(pdf, page)) : { objects: [], endCtm: [...ID] as Mat }
+    pages.push({ page: i, content, wPt: width, hPt: height, objects: parsed.objects, endCtm: parsed.endCtm })
   })
   return { pdf, pages }
 }
@@ -253,37 +248,36 @@ export async function loadEditable(data: ArrayBuffer): Promise<{ pdf: PDFDocumen
  *  origin) + screen-clockwise rotation in radians. */
 export interface ImgXf { cx: number; cy: number; w: number; h: number; rot: number }
 
-/** Apply deletions + image transforms (move/scale/rotate) to a page's content.
- *  For a transformed image we inject one `cm` at its draw block that maps the
- *  original placement to the target box (scale·rotate·translate about centres). */
+/** Apply deletions + image transforms. A transformed image is REMOVED from its
+ *  (possibly clipped/grouped) original draw and REDRAWN fresh at the top level of
+ *  the stream — so it's free of any clip or group, at exactly the target box. */
 export function applyEdits(pc: PageContent, deleted: Set<string>, transforms: Map<string, ImgXf>): string {
-  type Edit = { start: number; end: number; rep: string }
-  const edits: Edit[] = []
+  const removals: { start: number; end: number }[] = []
+  const appends: string[] = []
   const W = pc.wPt, H = pc.hPt
   const fmt = (n: number) => (Object.is(n, -0) ? 0 : n).toFixed(4)
+  const endInv = inv(pc.endCtm) // stream may end under a transform; undo it so we draw in page space
   for (const o of pc.objects) {
-    if (deleted.has(o.id)) { edits.push({ start: o.delStart, end: o.delEnd, rep: '' }); continue }
-    if (o.kind === 'image' && o.insertAt != null && transforms.has(o.id)) {
+    if (deleted.has(o.id)) { removals.push({ start: o.delStart, end: o.delEnd }); continue }
+    if (o.kind === 'image' && o.name && transforms.has(o.id)) {
       const t = transforms.get(o.id)!
-      const sx = o.w ? t.w / o.w : 1, sy = o.h ? t.h / o.h : 1
-      const R = -t.rot // screen y-down is flipped vs PDF y-up
+      removals.push({ start: o.delStart, end: o.delEnd }) // drop the original draw
+      // Place the image's unit square at the target box (centre cx,cy · size w,h · rotation).
+      const sw = t.w * W, sh = t.h * H
+      const R = -t.rot // screen y-down vs PDF y-up
       const cos = Math.cos(R), sin = Math.sin(R)
-      const a = sx * cos, b = sx * sin, c = -sy * sin, d = sy * cos
-      const ocx = (o.x + o.w / 2) * W, ocy = H - (o.y + o.h / 2) * H
+      const a = sw * cos, b = sw * sin, c = -sh * sin, d = sh * cos
       const tcx = t.cx * W, tcy = H - t.cy * H
-      const e = tcx - (ocx * a + ocy * c), f = tcy - (ocx * b + ocy * d)
-      // `Tp` is the transform in PAGE space; the image's draw block may run under
-      // an outer CTM (page flip / unit scale), so inject Tp conjugated into that
-      // space: OUTER · Tp · OUTER⁻¹. (Identity outer → Tp unchanged.)
-      const Tp: Mat = [a, b, c, d, e, f]
-      const O = o.outer || [1, 0, 0, 1, 0, 0]
-      const [ia, ib, ic, id, ie, iff] = mul(mul(O, Tp), inv(O))
-      edits.push({ start: o.insertAt, end: o.insertAt, rep: `\n${fmt(ia)} ${fmt(ib)} ${fmt(ic)} ${fmt(id)} ${fmt(ie)} ${fmt(iff)} cm` })
+      const e = tcx - 0.5 * (a + c), f = tcy - 0.5 * (b + d)
+      // ...expressed in the coordinate space present at the append point.
+      const [a2, b2, c2, d2, e2, f2] = mul([a, b, c, d, e, f], endInv)
+      appends.push(`q ${fmt(a2)} ${fmt(b2)} ${fmt(c2)} ${fmt(d2)} ${fmt(e2)} ${fmt(f2)} cm /${o.name} Do Q`)
     }
   }
-  edits.sort((x, y) => y.start - x.start)
+  removals.sort((x, y) => y.start - x.start)
   let out = pc.content
-  for (const ed of edits) out = out.slice(0, ed.start) + ed.rep + out.slice(ed.end)
+  for (const r of removals) out = out.slice(0, r.start) + out.slice(r.end)
+  if (appends.length) out += '\n' + appends.join('\n') + '\n'
   return out
 }
 
