@@ -42,6 +42,8 @@ export interface CallHandlers {
   onAdmitted?(): void
   /** Someone muted someone (by name → target id). If target is us, we're muted too. */
   onMuteNotice?(by: string, targetId: string, targetIsMe: boolean): void
+  /** The meeting was closed (host ended it, or it was nuked after a disconnect). */
+  onClosed?(): void
 }
 
 interface Peer {
@@ -110,8 +112,11 @@ export class CallRoom {
     if (p?.dc?.readyState === 'open') p.dc.send(JSON.stringify({ c: 'admit' } as Ctrl))
   }
 
+  /** Nuke the meeting: mark the room closed on the relay (future joins → not found). */
+  async close(): Promise<void> { try { await this.post('close', {}) } catch { /* */ } this.leave() }
+
   // ---- signaling relay (handshake + presence trigger only) -------------------
-  private async post(action: 'send' | 'poll', extra: Record<string, unknown>): Promise<{ msgs?: { from: string; type: string; payload: unknown; seq: number }[] }> {
+  private async post(action: 'send' | 'poll' | 'close', extra: Record<string, unknown>): Promise<{ msgs?: { from: string; type: string; payload: unknown; seq: number }[]; closed?: boolean }> {
     const r = await fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room: this.room, from: this.me, action, ...extra }) })
     return r.ok ? r.json() : {}
   }
@@ -121,6 +126,7 @@ export class CallRoom {
     while (this.active) {
       try {
         const d = await this.post('poll', { since: this.since })
+        if (d.closed) { this.h.onClosed?.(); this.leave(); break }
         for (const m of d.msgs || []) { await this.onSignal(m.from, m.type, m.payload); if (m.seq > this.since) this.since = m.seq }
       } catch { /* transient */ }
       const settling = [...this.peers.values()].some((p) => p.pc.connectionState !== 'connected')

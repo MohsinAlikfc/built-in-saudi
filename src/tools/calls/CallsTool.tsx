@@ -8,6 +8,7 @@ import { CallRoom, type DataMsg, type PeerInfo } from './rtc'
 
 const SITE = 'https://built-in-saudi.com'
 const NAME_KEY = 'bis-call-name'
+const HOST_KEY = 'bis-call-host' // the room code this browser is hosting (for reconnect)
 const code6 = () => { const A = 'abcdefghjkmnpqrstuvwxyz23456789'; let s = ''; const b = crypto.getRandomValues(new Uint8Array(7)); for (let i = 0; i < 7; i++) s += A[b[i] % A.length]; return s }
 
 // Playful anonymous default: a kunya ("Abu <name>") from 30 classic Arabic names.
@@ -31,6 +32,7 @@ const STR = {
     lobbyList: 'Waiting in the lobby', admit: 'Let in', waitingHost: 'Waiting for the host to let you in…', cancel: 'Cancel',
     participants: 'Participants', endMeeting: 'End meeting', hangUp: 'Leave', sendFiles: 'Send files', muteMe: 'Mute me', unmuteMe: 'Unmute',
     camOn: 'Turn camera on', camOff: 'Turn camera off', mutedBy: 'muted', muteThem: 'Mute for everyone', filesTitle: 'Files', noPreview: 'No preview — download to open', download: 'Download',
+    hostGone: 'The host disconnected', endsIn: 'meeting ends in', ended: 'This meeting has ended or can’t be found.', newCall: 'Start a new call',
     privacy: 'All data is peer-to-peer, only the handshake uses the server.',
   },
   ar: {
@@ -42,6 +44,7 @@ const STR = {
     lobbyList: 'في غرفة الانتظار', admit: 'اسمح بالدخول', waitingHost: 'بانتظار أن يسمح لك المضيف بالدخول…', cancel: 'إلغاء',
     participants: 'المشاركون', endMeeting: 'إنهاء الاجتماع', hangUp: 'مغادرة', sendFiles: 'إرسال ملفات', muteMe: 'اكتم صوتي', unmuteMe: 'ألغِ الكتم',
     camOn: 'تشغيل الكاميرا', camOff: 'إيقاف الكاميرا', mutedBy: 'كتم', muteThem: 'اكتم للجميع', filesTitle: 'الملفات', noPreview: 'لا معاينة — نزّل للفتح', download: 'تنزيل',
+    hostGone: 'انقطع اتصال المضيف', endsIn: 'ينتهي الاجتماع خلال', ended: 'انتهى هذا الاجتماع أو تعذّر العثور عليه.', newCall: 'ابدأ مكالمة جديدة',
     privacy: 'كل البيانات مباشرة بين الأجهزة، فقط المصافحة تستخدم الخادم.',
   },
 }
@@ -110,14 +113,19 @@ export default function CallsTool() {
   // Captured once at mount — we later rewrite the URL to ?room=…, which must not
   // flip this (it determines host vs guest).
   const [initialRoom] = useState(() => new URLSearchParams(window.location.search).get('room') || '')
+  // If this browser hosted this exact room, opening its ?room link means the host
+  // is reconnecting (not a guest) — they can resume within the disconnect grace.
+  const [isHostReturn] = useState(() => { try { return !!initialRoom && localStorage.getItem(HOST_KEY) === initialRoom } catch { return false } })
   const [name, setName] = useState(() => { try { return localStorage.getItem(NAME_KEY) || randName(locale === 'ar') } catch { return randName(locale === 'ar') } })
-  const [phase, setPhase] = useState<'lobby' | 'hosting' | 'waiting' | 'live'>('lobby')
+  const [phase, setPhase] = useState<'lobby' | 'hosting' | 'waiting' | 'live' | 'ended'>('lobby')
   const [room, setRoom] = useState(initialRoom)
   const [busy, setBusy] = useState(false)
-  const isGuest = !!initialRoom
+  const isGuest = !!initialRoom && !isHostReturn
   // Everyone we've connected to (data channel), with the name/role/lobby state
   // they told us peer-to-peer. The host's waiting list is derived from this.
   const [roster, setRoster] = useState<Map<string, PeerInfo>>(new Map())
+  const [graceEndsAt, setGraceEndsAt] = useState<number | null>(null) // host-disconnect deadline
+  const hadHost = useRef(false)
 
   const rtc = useRef<CallRoom | null>(null)
   const [local, setLocal] = useState<MediaStream | null>(null)
@@ -190,6 +198,7 @@ export default function CallsTool() {
         const who = targetIsMe ? s.you : (rosterRef.current.get(targetId)?.name || '•')
         setToast(`${by} ${s.mutedBy} ${who}`); setTimeout(() => setToast(''), 3500)
       },
+      onClosed: () => { rtc.current = null; setPhase('ended') },
     })
     rtc.current = r
     return r
@@ -198,18 +207,18 @@ export default function CallsTool() {
   // Put the room code in the URL so it's shareable and rooms are distinguishable.
   function reflectRoom(code: string) { history.replaceState(null, '', `${localePath(locale, '/apps/calls')}?room=${code}`) }
 
+  function rememberHost(code: string) { try { localStorage.setItem(NAME_KEY, name); localStorage.setItem(HOST_KEY, code) } catch { /* */ } }
+
   // Host: start the call right away (others still need to be let in).
   async function startHost() {
-    try { localStorage.setItem(NAME_KEY, name) } catch { /* */ }
     setBusy(true)
-    const code = room || code6(); setRoom(code); reflectRoom(code)
+    const code = room || code6(); setRoom(code); reflectRoom(code); rememberHost(code)
     const r = ensureRoom(code); r.enterLobby(name || s.you, true)
     try { await r.enableMedia(); setPhase('live') } catch { mediaError() } finally { setBusy(false) }
   }
   // Host: create + share the link without joining yet; wait to let people in.
   async function shareHost() {
-    try { localStorage.setItem(NAME_KEY, name) } catch { /* */ }
-    const code = room || code6(); setRoom(code); reflectRoom(code)
+    const code = room || code6(); setRoom(code); reflectRoom(code); rememberHost(code)
     const r = ensureRoom(code); r.enterLobby(name || s.you, true)
     setPhase('hosting')
     await shareInvite(code)
@@ -228,7 +237,31 @@ export default function CallsTool() {
 
   useEffect(() => () => { rtc.current?.leave() }, [])
 
-  function hangup() { rtc.current?.leave(); rtc.current = null; setPhase('lobby'); setPeers(new Map()); setLocal(null); setChat([]); setRoster(new Map()); history.replaceState(null, '', localePath(locale, '/apps/calls')) }
+  function hangup() {
+    if (!isGuest) { rtc.current?.close(); try { localStorage.removeItem(HOST_KEY) } catch { /* */ } } // host ends → nuke the room
+    else rtc.current?.leave()
+    rtc.current = null; setPhase('lobby'); setPeers(new Map()); setLocal(null); setChat([]); setRoster(new Map()); setGraceEndsAt(null); setFiles([]); setSelected(''); setView('board')
+    history.replaceState(null, '', localePath(locale, '/apps/calls'))
+  }
+  const newCall = () => window.location.assign(localePath(locale, '/apps/calls'))
+
+  // Host-disconnect grace (guests only): if the host vanishes, count down 2 minutes
+  // — a returning host cancels it; on expiry the meeting is nuked for everyone.
+  const [, setGraceTick] = useState(0)
+  useEffect(() => {
+    if (phase !== 'live') return
+    const hasHost = [...roster].some(([, i]) => i.role === 'host' && i.inCall)
+    if (hasHost) { hadHost.current = true; setGraceEndsAt((g) => (g ? null : g)) }
+    else if (isGuest && hadHost.current) setGraceEndsAt((g) => g ?? Date.now() + 120_000)
+  }, [roster, isGuest, phase])
+  useEffect(() => {
+    if (graceEndsAt == null) return
+    const iv = window.setInterval(() => {
+      if (Date.now() >= graceEndsAt) { window.clearInterval(iv); rtc.current?.close(); rtc.current = null; setGraceEndsAt(null); setPhase('ended') }
+      else setGraceTick((t) => t + 1)
+    }, 1000)
+    return () => window.clearInterval(iv)
+  }, [graceEndsAt])
 
   function toggleMic() { const v = !mic; setMic(v); rtc.current?.toggleMic(v) }
   function toggleCam() { const v = !cam; setCam(v); rtc.current?.toggleCam(v) }
@@ -283,6 +316,17 @@ export default function CallsTool() {
   }
   const invite = () => shareInvite()
 
+  if (phase === 'ended') {
+    return (
+      <Stack data-testid="calls">
+        <div className="max-w-[30rem] rounded-lg border border-[color:var(--line)] bg-[var(--surface)] p-6 flex flex-col items-start gap-4" data-testid="call-ended">
+          <p className="text-[1.05rem] text-ink">{s.ended}</p>
+          <Button variant="primary" onClick={newCall}>{s.newCall}</Button>
+        </div>
+      </Stack>
+    )
+  }
+
   if (phase !== 'live') {
     return (
       <Stack data-testid="calls">
@@ -335,6 +379,8 @@ export default function CallsTool() {
 
   const selectedFile = files.find((f) => f.id === selected)
   const participantCount = 1 + inCallPeers.length
+  const graceLeft = graceEndsAt ? Math.max(0, graceEndsAt - Date.now()) : 0
+  const graceMMSS = `${Math.floor(graceLeft / 60000)}:${String(Math.floor((graceLeft % 60000) / 1000)).padStart(2, '0')}`
 
   // Portal to <body> so `fixed inset-0` truly covers the viewport (an animated/
   // transformed ancestor would otherwise become its containing block).
@@ -365,6 +411,12 @@ export default function CallsTool() {
         <IconBtn onClick={toggleMic} active={mic} danger={!mic} title={mic ? s.muteMe : s.unmuteMe} testid="call-mic">{mic ? <MicIcon /> : <MicOffIcon />}</IconBtn>
         <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => { pickFiles(e.target.files); e.target.value = '' }} />
       </header>
+
+      {graceEndsAt && (
+        <div className="flex items-center justify-center gap-2 px-3 py-1.5 text-[0.85rem] font-medium text-white bg-[var(--danger)] border-b border-black/10" data-testid="call-grace">
+          <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse" /> {s.hostGone} — {s.endsIn} <span className="font-mono tabular-nums">{graceMMSS}</span>
+        </div>
+      )}
 
       {/* ---- body ---- */}
       <div className="flex-1 flex min-h-0">

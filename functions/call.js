@@ -41,18 +41,30 @@ http('callSignal', async (req, res) => {
     const ref = db.collection(ROOMS).doc(room)
     const now = Date.now()
 
+    // Host (or the last guest after a disconnect grace) nukes the meeting. We keep
+    // a short-lived tombstone so anyone still on the link learns it's over.
+    if (b.action === 'close') {
+      await ref.set({ closed: true, expiresAt: new Date(now + 15 * 60000), msgs: [] }, { merge: true }).catch(() => {})
+      return res.json({ ok: true, closed: true })
+    }
+
     if (b.action === 'poll') {
       const since = Number(b.since) || 0
       const snap = await ref.get()
       if (!snap.exists) return res.json({ ok: true, seq: 0, msgs: [] })
       const d = snap.data()
       if ((d.expiresAt && d.expiresAt.toMillis() < now)) { ref.delete().catch(() => {}); return res.json({ ok: true, seq: 0, msgs: [] }) }
+      if (d.closed) return res.json({ ok: true, closed: true, seq: 0, msgs: [] })
       const all = d.msgs || []
       const msgs = all.filter((m) => m.seq > since && m.from !== from && (m.to === 'all' || m.to === from))
       return res.json({ ok: true, seq: d.count || 0, msgs })
     }
 
     // default: send
+    {
+      const snapPre = await ref.get()
+      if (snapPre.exists && snapPre.data().closed) return res.json({ ok: true, closed: true })
+    }
     const to = clean(b.to, 40) || 'all'
     const type = clean(b.type, 24)
     const payload = typeof b.payload === 'string' ? clean(b.payload, MAX_PAYLOAD) : b.payload
