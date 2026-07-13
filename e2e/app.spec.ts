@@ -495,6 +495,19 @@ test.describe('tools', () => {
     await expect(page.getByTestId('tt-wpm')).toBeVisible()
   })
 
+  test('image tools: ascii/meme/favicon/steganography render a dropzone', async ({ page }) => {
+    await page.goto('/en/apps/image-to-ascii')
+    await expect(page.getByTestId('ascii-drop')).toBeVisible()
+    await page.goto('/en/apps/meme-generator')
+    await expect(page.getByTestId('meme-drop')).toBeVisible()
+    await page.goto('/en/apps/favicon-generator')
+    await expect(page.getByTestId('favicon-drop')).toBeVisible()
+    await page.goto('/en/apps/steganography')
+    await expect(page.getByTestId('stego-drop')).toBeVisible()
+    await page.getByTestId('stego-reveal').click()
+    await expect(page.getByTestId('stego-drop')).toBeVisible()
+  })
+
   test('adhkar: lists remembrances and counts on tap', async ({ page }) => {
     await page.goto('/en/tools/adhkar')
     const kursi = page.getByTestId('dhikr-kursi')

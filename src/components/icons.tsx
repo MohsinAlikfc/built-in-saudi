@@ -778,3 +778,39 @@ export function KeyboardIcon({ className }: P) {
     </svg>
   )
 }
+
+export function AsciiIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M7 8v8M7 8h2v3H7M13 8l2 8M13 8l-1 4h3M18 8v8" />
+    </svg>
+  )
+}
+
+export function MemeIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M8 9h.01M16 9h.01M8 15c1.2 1.3 2.6 2 4 2s2.8-.7 4-2" />
+    </svg>
+  )
+}
+
+export function FaviconIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <rect x="4" y="4" width="16" height="16" rx="3" />
+      <path d="M12 8.2l1.1 2.3 2.5.3-1.8 1.7.5 2.5-2.3-1.2-2.3 1.2.5-2.5-1.8-1.7 2.5-.3z" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+export function StegoIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7a11 11 0 0 1-4-.8" />
+      <circle cx="12" cy="12" r="3" /><path d="M3 3l18 18" />
+    </svg>
+  )
+}

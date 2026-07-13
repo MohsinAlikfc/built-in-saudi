@@ -70,6 +70,10 @@ import { randomPickerTool } from './random-picker/meta'
 import { diceRollerTool } from './dice-roller/meta'
 import { countdownTool } from './countdown/meta'
 import { typingTestTool } from './typing-test/meta'
+import { imageToAsciiTool } from './image-to-ascii/meta'
+import { memeGeneratorTool } from './meme-generator/meta'
+import { faviconGeneratorTool } from './favicon-generator/meta'
+import { steganographyTool } from './steganography/meta'
 
 /**
  * The tool catalog. Stable/beta tools render inside the app at /tools/:id.
@@ -110,6 +114,10 @@ export const tools: Tool[] = [
   diceRollerTool,
   countdownTool,
   typingTestTool,
+  imageToAsciiTool,
+  memeGeneratorTool,
+  faviconGeneratorTool,
+  steganographyTool,
   cvGeneratorTool,
   linkShortenerTool,
   qrCodeTool,

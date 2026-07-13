@@ -194,6 +194,26 @@ export const liveToolSeo: ToolSeo[] = [
     ar: { name: 'اختبار سرعة الكتابة', description: 'اكتب المقطع المعروض لقياس سرعة كتابتك بالكلمات في الدقيقة ودقّتك، مع تمييز كل حرف صحيحًا أو خاطئًا لحظيًا. يعمل بالكامل في متصفحك.' },
   },
   {
+    id: 'image-to-ascii',
+    en: { name: 'Image to ASCII', description: 'Drop an image and convert it into ASCII art — choose the width, character set and light/dark inversion, then copy the text or download it. Processed entirely on your device and never uploaded.' },
+    ar: { name: 'صورة إلى ASCII', description: 'أفلت صورة وحوّلها إلى فنّ ASCII — اختر العرض ومجموعة الرموز وعكس الفاتح/الداكن، ثم انسخ النص أو نزّله. تُعالَج بالكامل على جهازك ولا تُرفع أبدًا.' },
+  },
+  {
+    id: 'meme-generator',
+    en: { name: 'Meme Generator', description: 'Drop an image, add bold top and bottom captions in the classic meme style, tweak the font size, and download the result as a PNG. Drawn on your device — the image is never uploaded.' },
+    ar: { name: 'مولّد الميمز', description: 'أفلت صورة، وأضِف تعليقين علوي وسفلي بالنمط الكلاسيكي للميمز، واضبط حجم الخط، ونزّل الناتج كـPNG. تُرسم على جهازك — لا تُرفع الصورة أبدًا.' },
+  },
+  {
+    id: 'favicon-generator',
+    en: { name: 'Favicon Generator', description: 'Drop a square image or logo and generate crisp favicon and app-icon PNGs at every common size (16 to 512, plus the Apple touch icon), with ready-to-paste HTML link tags. Generated on your device — nothing is uploaded.' },
+    ar: { name: 'مولّد الأيقونات', description: 'أفلت صورة مربّعة أو شعارًا وأنشئ أيقونات favicon وتطبيقات واضحة بكل المقاسات الشائعة (من 16 إلى 512، مع أيقونة Apple)، مع وسوم HTML الجاهزة للّصق. تُنشأ على جهازك — لا يُرفع أي شيء.' },
+  },
+  {
+    id: 'steganography',
+    en: { name: 'Hide Text in Image', description: 'Hide a text message inside an image by tweaking the least-significant bits of its pixels — the picture looks unchanged — then reveal it later from the saved PNG. Everything happens on your device; nothing is uploaded.' },
+    ar: { name: 'إخفاء نص في صورة', description: 'أخفِ رسالة نصية داخل صورة بتعديل البتات الأقل أهمية في بكسلاتها — تبدو الصورة دون تغيير — ثم اكشفها لاحقًا من ملف PNG المحفوظ. كل شيء يجري على جهازك؛ لا يُرفع أي شيء.' },
+  },
+  {
     id: 'book-me',
     en: { name: 'Book Me', description: 'A free, no-sign-up scheduling link — paint your weekly availability, set the meeting length with gaps and buffers, and share one link. People self-book an open slot without the email back-and-forth; you get a push, a Telegram DM and an email when they book.' },
     ar: { name: 'احجز معي', description: 'رابط جدولة مجاني بلا تسجيل — ارسم أوقات فراغك الأسبوعية، وحدِّد مدة الاجتماع بفواصل ومهل، وشارك رابطًا واحدًا. يحجز الناس وقتًا متاحًا دون تبادل رسائل، وتصلك إشعارات ورسالة تيليجرام وبريد عند الحجز.' },
