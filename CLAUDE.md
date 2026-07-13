@@ -33,9 +33,9 @@ src/
     types.ts          Tool interface (the plugin contract)
     index.ts          the registry (live + coming-soon)
     <id>/             one folder per real tool: meta.ts + <Name>Tool.tsx
-  components/         Layout, Header, Footer, ToolCard, SaduDivider, icons
+  components/         Layout, Header, Footer, ToolCard, ToolCatalog, AppLauncher, SaduDivider, icons
   pages/              HomePage (catalog + fuzzy search), ToolPage, NotFoundPage
-  lib/                fuzzy.ts, useDocumentMeta.ts
+  lib/                fuzzy.ts, useDocumentMeta.ts, lazyTool.tsx, toolSections.ts
   i18n/               en.ts, ar.ts, index.tsx, seo.ts (pure prerender data)
   styles/             theme.css (tokens/base), app.css (components)
 vite.config.ts        includes the build-time prerender plugin (SSG)
@@ -57,7 +57,17 @@ docs/                 ROADMAP.md, tools/<id>.md specs, BACKEND.md
    `src/i18n/seo.ts` so the prerender plugin emits static `/<locale>/apps/<id>/`
    HTML with correct head + content. Add its `/en` + `/ar` URLs to
    `public/sitemap.xml`.
-5. Work from its spec in `docs/tools/<id>.md`; keep the spec's checklist honest.
+5. Add a Playwright case to `e2e/app.spec.ts` (drive the `data-testid`s you
+   expose). For a **substantial** tool, also work from a spec in
+   `docs/tools/<id>.md`; the many small single-purpose utilities are built
+   straight from the checklist above without their own spec file.
+
+**Catalog rendering:** the home catalog and the 9-dot `AppLauncher` share
+`components/ToolCatalog.tsx`, fed by `lib/toolSections.ts` (the `RECOMMENDED`
+list + category grouping). The **Recommended** section renders as full
+`ToolCard`s; every other section renders as **compact icon+name tiles** (max 3
+columns on desktop, the description un-truncates on hover; a 4-up icon grid on
+mobile). Search results always use full cards.
 
 **External/showcase tools:** omit `component`, set `href` — the catalog links out
 instead of routing in.
