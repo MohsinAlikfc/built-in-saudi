@@ -6,9 +6,10 @@ import { ToolCard } from './ToolCard'
 import { useLocale, localePath, localizeTool } from '../i18n'
 
 export const TOOL_GRID = 'grid grid-cols-[repeat(auto-fill,minmax(255px,1fr))] gap-[1.1rem] max-[560px]:grid-cols-4 max-[560px]:gap-[0.9rem_0.5rem]'
-// Denser grid for non-recommended sections: small row tiles on desktop, the
-// same 4-up icon grid on mobile.
-export const COMPACT_GRID = 'grid grid-cols-[repeat(auto-fill,minmax(178px,1fr))] gap-[0.5rem] max-[560px]:grid-cols-4 max-[560px]:gap-[0.9rem_0.5rem]'
+// Denser grid for non-recommended sections: small row tiles on desktop (capped
+// at 4 columns so titles + a short description have room), the same 4-up icon
+// grid on mobile.
+export const COMPACT_GRID = 'grid grid-cols-4 gap-[0.9rem_0.5rem] min-[560px]:grid-cols-2 min-[560px]:gap-[0.55rem] sm:grid-cols-3 lg:grid-cols-4'
 
 // Close the launcher (or run any nav side-effect) once a card link is followed.
 function linkClick(onNavigate?: () => void) {
@@ -47,11 +48,14 @@ function CompactToolCard({ tool }: { tool: Tool }) {
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[var(--gold-500)] ring-2 ring-[var(--surface)] max-[560px]:ring-[var(--sand-50)] max-[560px]:right-0 max-[560px]:top-0" />
         )}
       </span>
-      <span className={`min-w-0 flex-1 text-[0.9rem] font-medium leading-tight truncate max-[560px]:flex-none max-[560px]:text-center max-[560px]:text-[0.72rem] max-[560px]:leading-[1.2] max-[560px]:whitespace-normal ${comingSoon ? 'text-ink-faint' : 'text-ink'}`}>{l.name}</span>
+      <span className="min-w-0 flex-1 flex flex-col gap-[0.1rem] max-[560px]:flex-none max-[560px]:w-full max-[560px]:items-center">
+        <span className={`block truncate max-w-full text-[0.9rem] font-medium leading-tight max-[560px]:text-[0.72rem] max-[560px]:text-center max-[560px]:whitespace-normal ${comingSoon ? 'text-ink-faint' : 'text-ink'}`}>{l.name}</span>
+        <span className="block truncate max-w-full text-[0.72rem] leading-tight text-ink-faint max-[560px]:hidden">{l.tagline}</span>
+      </span>
     </>
   )
 
-  const base = 'group flex items-center gap-[0.6rem] rounded-md p-[0.45rem_0.6rem] no-underline max-[560px]:flex-col max-[560px]:gap-[0.45rem] max-[560px]:p-[0.4rem_0.2rem] max-[560px]:bg-transparent max-[560px]:border-none max-[560px]:shadow-none'
+  const base = 'group flex items-center gap-[0.6rem] rounded-md p-[0.5rem_0.65rem] no-underline max-[560px]:flex-col max-[560px]:gap-[0.45rem] max-[560px]:p-[0.4rem_0.2rem] max-[560px]:bg-transparent max-[560px]:border-none max-[560px]:shadow-none'
 
   if (comingSoon) {
     return (
