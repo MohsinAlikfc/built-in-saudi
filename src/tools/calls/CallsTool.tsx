@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocale, localePath } from '../../i18n'
 import { Stack, Button, Input } from '../../components/ui'
-import { DownloadIcon, UploadIcon, ShareIcon, TrashIcon, RefreshIcon, PhoneIcon, EndCallIcon, UsersIcon, ChatIcon, MicIcon, MicOffIcon, CameraIcon, CamOffIcon, WhiteboardIcon, ScreenShareIcon, FileIcon, EraserIcon, UndoIcon } from '../../components/icons'
+import { DownloadIcon, UploadIcon, ShareIcon, TrashIcon, RefreshIcon, PhoneIcon, EndCallIcon, UsersIcon, ChatIcon, MicIcon, MicOffIcon, CameraIcon, CamOffIcon, WhiteboardIcon, ScreenShareIcon, FileIcon, EraserIcon, UndoIcon, ChevronDownIcon } from '../../components/icons'
 import type { ReactNode } from 'react'
 import { CallRoom, type DataMsg, type PeerInfo, type WbObj } from './rtc'
 
@@ -95,6 +95,30 @@ function IconBtn({ onClick, title, active, danger, children, testid, badge, big 
     </button>
   )
 }
+
+// A dropdown: a trigger button + a floating panel that closes on outside click.
+function Menu({ trigger, triggerClass, children, align = 'start', up, testid }: { trigger: ReactNode; triggerClass?: string; children: ReactNode; align?: 'start' | 'end'; up?: boolean; testid?: string }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => { if (!open) return; const h = (e: Event) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }; document.addEventListener('pointerdown', h); return () => document.removeEventListener('pointerdown', h) }, [open])
+  return (
+    <div ref={ref} className="relative">
+      <button type="button" onClick={() => setOpen((v) => !v)} data-testid={testid} className={triggerClass}>{trigger}</button>
+      {open && (
+        <div onClick={() => setOpen(false)} className={`absolute z-40 min-w-[11rem] bg-[var(--surface)] border border-[color:var(--line)] rounded-lg shadow-[var(--shadow-md)] p-1 ${up ? 'bottom-full mb-1' : 'top-full mt-1'} ${align === 'end' ? 'end-0' : 'start-0'}`}>{children}</div>
+      )}
+    </div>
+  )
+}
+function MenuItem({ icon, label, onClick, active, testid }: { icon?: ReactNode; label: string; onClick: () => void; active?: boolean; testid?: string }) {
+  return (
+    <button type="button" onClick={onClick} data-testid={testid}
+      className={`flex items-center gap-2.5 w-full px-3 py-2 rounded-md text-start text-[0.88rem] bg-transparent border-0 cursor-pointer whitespace-nowrap hover:bg-[color-mix(in_srgb,var(--ink)_7%,transparent)] [&_svg]:w-[18px] [&_svg]:h-[18px] ${active ? 'text-green-700 font-semibold' : 'text-ink'}`}>
+      {icon}{label}
+    </button>
+  )
+}
+const dropTrigger = 'flex items-center gap-1.5 h-9 px-2.5 rounded-md border-0 bg-transparent text-ink-soft hover:bg-[color-mix(in_srgb,var(--ink)_8%,transparent)] hover:text-ink cursor-pointer text-[0.9rem] font-medium [&_svg]:w-[18px] [&_svg]:h-[18px]'
 
 // A participant square. The <video> stays mounted whenever there's a stream (so
 // audio always plays even with the camera off); the avatar just overlays it.
@@ -567,21 +591,29 @@ export default function CallsTool() {
             </div>
           : <button type="button" onClick={() => setEditingName(true)} title={s.editName} data-testid="call-name-display"
               className="h-9 max-w-[10rem] px-2.5 rounded-md bg-transparent border-0 text-[0.9rem] font-medium text-ink truncate hover:bg-[color-mix(in_srgb,var(--ink)_8%,transparent)] cursor-text text-start">{name || '—'}</button>}
-        <IconBtn onClick={hangup} title={isGuest ? s.hangUp : s.endMeeting} danger big testid="call-hangup">{isGuest ? <PhoneIcon /> : <EndCallIcon />}</IconBtn>
         <IconBtn onClick={invite} title={s.shareInvite} testid="call-invite"><ShareIcon /></IconBtn>
 
         <div className="flex-1" />
 
-        <IconBtn onClick={() => setView('board')} active={view === 'board'} title={s.board} testid="call-board"><WhiteboardIcon /></IconBtn>
+        {/* main-view dropdown (whiteboard / share screen / send file) */}
+        <Menu testid="call-view" triggerClass={dropTrigger}
+          trigger={<>{presenting ? <ScreenShareIcon /> : view === 'file' ? <FileIcon /> : <WhiteboardIcon />}<span className="max-[420px]:hidden">{presenting ? s.screen : view === 'file' ? s.filesTitle : s.board}</span><ChevronDownIcon className="w-3.5 h-3.5 opacity-60" /></>}>
+          <MenuItem icon={<WhiteboardIcon />} label={s.board} onClick={() => setView('board')} active={view === 'board' && !presenting} testid="view-board" />
+          <MenuItem icon={<ScreenShareIcon />} label={sharing ? s.stopScreen : s.screen} onClick={toggleScreen} active={sharing} />
+          <MenuItem icon={<UploadIcon />} label={s.sendFiles} onClick={() => fileRef.current?.click()} />
+        </Menu>
         {files.length > 0 && <IconBtn onClick={toggleFiles} active={showFiles} title={s.filesTitle} testid="call-files-btn" badge={unseen.f || undefined}><FileIcon /></IconBtn>}
-        <IconBtn onClick={toggleScreen} active={sharing} title={s.screen}><ScreenShareIcon /></IconBtn>
-        <IconBtn onClick={() => fileRef.current?.click()} title={s.sendFiles} testid="call-files"><UploadIcon /></IconBtn>
-        <span className="w-px h-6 bg-[color:var(--line)] mx-0.5" />
-        <IconBtn onClick={toggleParticipants} active={showParticipants} title={s.participants} testid="call-participants" badge={unseen.p || undefined}><UsersIcon /></IconBtn>
-        <IconBtn onClick={toggleChat} active={showChat} title={s.chat} badge={unseen.c || undefined}><ChatIcon /></IconBtn>
-        <span className="w-px h-6 bg-[color:var(--line)] mx-0.5" />
-        <IconBtn onClick={toggleCam} active={cam} title={cam ? s.camOff : s.camOn}>{cam ? <CameraIcon /> : <CamOffIcon />}</IconBtn>
-        <IconBtn onClick={toggleMic} active={mic} danger={!mic} title={mic ? s.muteMe : s.unmuteMe} testid="call-mic">{mic ? <MicIcon /> : <MicOffIcon />}</IconBtn>
+
+        {/* participants / chat / call controls — top on desktop, bottom bar on mobile */}
+        <span className="w-px h-6 bg-[color:var(--line)] mx-0.5 max-[640px]:hidden" />
+        <span className="max-[640px]:hidden flex items-center gap-1.5">
+          <IconBtn onClick={toggleParticipants} active={showParticipants} title={s.participants} testid="call-participants" badge={unseen.p || undefined}><UsersIcon /></IconBtn>
+          <IconBtn onClick={toggleChat} active={showChat} title={s.chat} badge={unseen.c || undefined}><ChatIcon /></IconBtn>
+          <span className="w-px h-6 bg-[color:var(--line)] mx-0.5" />
+          <IconBtn onClick={toggleCam} active={cam} title={cam ? s.camOff : s.camOn}>{cam ? <CameraIcon /> : <CamOffIcon />}</IconBtn>
+          <IconBtn onClick={toggleMic} active={mic} danger={!mic} title={mic ? s.muteMe : s.unmuteMe} testid="call-mic">{mic ? <MicIcon /> : <MicOffIcon />}</IconBtn>
+          <IconBtn onClick={hangup} title={isGuest ? s.hangUp : s.endMeeting} danger big testid="call-hangup">{isGuest ? <PhoneIcon /> : <EndCallIcon />}</IconBtn>
+        </span>
         <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => { pickFiles(e.target.files); e.target.value = '' }} />
       </header>
 
@@ -640,10 +672,15 @@ export default function CallsTool() {
               </button>
             ))}
             <span className="w-px h-5 bg-[color:var(--line)] mx-0.5 shrink-0" />
-            {WB_COLORS.map((col) => (
-              <button key={col} type="button" onClick={() => setPenColor(col)} aria-label={col} title={col}
-                className={`w-6 h-6 rounded-full cursor-pointer border-2 shrink-0 ${penColor === col ? 'border-[color:var(--ink)]' : 'border-transparent'}`} style={{ background: col }} />
-            ))}
+            <Menu align="start" testid="wb-color" triggerClass="flex items-center gap-1 grid place-items-center h-8 px-1.5 rounded-full border-0 bg-transparent hover:bg-[color-mix(in_srgb,var(--ink)_7%,transparent)] cursor-pointer shrink-0"
+              trigger={<><span className="w-5 h-5 rounded-full border border-[color:var(--line)]" style={{ background: penColor }} /><ChevronDownIcon className="w-3 h-3 text-ink-faint" /></>}>
+              <div className="grid grid-cols-5 gap-1">
+                {WB_COLORS.map((col) => (
+                  <button key={col} type="button" onClick={() => setPenColor(col)} aria-label={col} title={col}
+                    className={`w-7 h-7 rounded-full cursor-pointer border-2 ${penColor === col ? 'border-[color:var(--ink)]' : 'border-transparent'}`} style={{ background: col }} />
+                ))}
+              </div>
+            </Menu>
             <span className="w-px h-5 bg-[color:var(--line)] mx-0.5 shrink-0" />
             <button type="button" onClick={() => setTool('eraser')} title="Eraser" aria-label="Eraser" data-testid="wb-eraser"
               className={`grid place-items-center w-8 h-8 rounded-full border-0 cursor-pointer shrink-0 [&_svg]:w-[18px] [&_svg]:h-[18px] ${tool === 'eraser' ? 'bg-[color-mix(in_srgb,var(--ink)_14%,transparent)] text-ink' : 'text-ink-soft hover:bg-[color-mix(in_srgb,var(--ink)_7%,transparent)]'}`}><EraserIcon /></button>
@@ -689,7 +726,20 @@ export default function CallsTool() {
         )}
       </div>
 
-      {toast && <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[90] bg-green-700 text-sand-100 px-4 py-2 rounded-md shadow-[var(--shadow-md)] text-[0.9rem]">{toast}</div>}
+      {/* ---- mobile bottom bar ---- */}
+      <footer className="hidden max-[640px]:flex items-center gap-1.5 px-2 py-2 border-t border-[color:var(--line)] bg-[var(--surface)]">
+        <Menu up testid="call-panels" triggerClass={dropTrigger}
+          trigger={<>{showChat ? <ChatIcon /> : <UsersIcon />}<span>{showChat ? s.chat : s.participants}</span>{(unseen.p + unseen.c) > 0 && <span className="w-1.5 h-1.5 rounded-full bg-gold-500" />}<ChevronDownIcon className="w-3.5 h-3.5 opacity-60" /></>}>
+          <MenuItem icon={<UsersIcon />} label={`${s.participants} · ${participantCount}`} onClick={() => { setShowParticipants(true); setShowChat(false); setUnseen((u) => ({ ...u, p: 0 })) }} active={showParticipants} />
+          <MenuItem icon={<ChatIcon />} label={s.chat} onClick={() => { setShowChat(true); setShowParticipants(false); setUnseen((u) => ({ ...u, c: 0 })) }} active={showChat} />
+        </Menu>
+        <div className="flex-1" />
+        <IconBtn onClick={toggleCam} active={cam} title={cam ? s.camOff : s.camOn}>{cam ? <CameraIcon /> : <CamOffIcon />}</IconBtn>
+        <IconBtn onClick={toggleMic} active={mic} danger={!mic} title={mic ? s.muteMe : s.unmuteMe}>{mic ? <MicIcon /> : <MicOffIcon />}</IconBtn>
+        <IconBtn onClick={hangup} title={isGuest ? s.hangUp : s.endMeeting} danger big>{isGuest ? <PhoneIcon /> : <EndCallIcon />}</IconBtn>
+      </footer>
+
+      {toast && <div className="fixed bottom-16 max-[640px]:bottom-20 left-1/2 -translate-x-1/2 z-[90] bg-green-700 text-sand-100 px-4 py-2 rounded-md shadow-[var(--shadow-md)] text-[0.9rem]">{toast}</div>}
     </div>,
     document.body,
   )

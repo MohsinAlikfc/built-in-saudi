@@ -923,6 +923,12 @@ export function SlugIcon({ className }: P) {
   )
 }
 
+export function ChevronDownIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+  )
+}
+
 export function EraserIcon({ className }: P) {
   return (
     <svg {...base} className={className} aria-hidden="true">
