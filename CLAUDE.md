@@ -232,12 +232,19 @@ from the URL) to make that a config flip, not a rewrite. Trend home toward a
   `OPENAI_API_KEY` secret + GIS client ID; no new deps. Covered by `my-data`.
 - **Calls signaling** (`functions/call.js`): `call-signal` — a metadata-only relay
   for the P2P **Private Call** tool (`src/tools/calls/`). It only shuttles the WebRTC
-  handshake (offer/answer/ICE + join/leave) between peers in an ephemeral Firestore
+  handshake (offer/answer/ICE + join/leave) **plus lobby control** (knock/admit/
+  host-here/lobby-leave) between peers in an ephemeral Firestore
   `callRooms/{code}` doc (2h TTL, polled); it **never sees audio/video/whiteboard/
   chat/files** — those flow directly peer-to-peer. No auth (public by random code),
   no per-user storage (so `my-data` untouched). STUN is public; **no TURN** (strict
   NATs can't connect). Media/data via WebRTC (mesh, small groups); the invite is a
   shareable image (QR + code + PNG-metadata) from `src/tools/calls/invite.ts`.
+  **Waiting room:** `rtc.ts` separates a signaling-only lobby (`enterLobby`) from
+  the media call (`startCall`, gated by an `inCall` flag so un-admitted guests
+  never form peer connections). The host can **share the link without joining**
+  (stays in a `hosting` phase); guests **knock** and wait; the host sees the
+  waiting list (names relayed over signaling, not a new backend) and **admits**
+  each one, which starts their media and connects them.
 - **Functions deploy = CI** (not manual gcloud): `.github/workflows/deploy-functions.yml`
   deploys all twenty-seven functions on any `functions/**` change, authenticating **keylessly
   via Workload Identity Federation** (pool `github` in `blitz-ksa`, deploy SA

@@ -42,7 +42,7 @@ async function ctx(browser: Browser, signal: string) {
   return c
 }
 
-test('two peers connect P2P and exchange a chat message', async ({ browser }) => {
+test('guest waits in the lobby, host admits, then they connect and chat', async ({ browser }) => {
   const a = await ctx(browser, base), b = await ctx(browser, base)
   const pa = await a.newPage(), pb = await b.newPage()
 
@@ -54,10 +54,18 @@ test('two peers connect P2P and exchange a chat message', async ({ browser }) =>
   const room = (await pa.locator('.font-mono').first().textContent())!.trim()
   expect(room.length).toBeGreaterThan(4)
 
-  // B joins that room
+  // B asks to join → lands in the waiting lobby, NOT in the call yet
   await pb.goto(`/en/apps/calls?room=${room}`)
   await pb.getByTestId('call-name').fill('Bob')
   await pb.getByTestId('call-join').click()
+  await expect(pb.getByTestId('call-waiting')).toBeVisible({ timeout: 10_000 })
+  await expect(pb.getByTestId('calls-live')).toHaveCount(0)
+
+  // A (host) sees Bob knocking and lets him in
+  await expect(pa.getByTestId('call-lobby-live')).toContainText('Bob', { timeout: 15_000 })
+  await pa.getByTestId('call-admit').click()
+
+  // now B is admitted into the call
   await expect(pb.getByTestId('calls-live')).toBeVisible({ timeout: 15_000 })
 
   // both should see 2 video tiles (their own + the peer) once connected

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useLocale, localePath } from '../../i18n'
 import { Stack, Button, Input } from '../../components/ui'
-import { DownloadIcon, UploadIcon, ShareIcon, TrashIcon } from '../../components/icons'
+import { DownloadIcon, UploadIcon, ShareIcon, TrashIcon, RefreshIcon } from '../../components/icons'
 import { CallRoom, type DataMsg } from './rtc'
 
 const SITE = 'https://built-in-saudi.com'
@@ -21,19 +21,21 @@ const randName = (ar: boolean) => { const b = crypto.getRandomValues(new Uint8Ar
 
 const STR = {
   en: {
-    title: 'Private call', lead: 'True peer-to-peer meetings — video, whiteboard, chat and files go straight between browsers. Only the initial handshake, never any data, touches our server.',
-    yourName: 'Your name', start: 'Start a call', joinCode: 'Join call', shuffle: 'Random name', joining: 'Connecting…',
+    title: 'Private call', lead: 'Secure meetings — video, whiteboard, chat and files go straight between browsers. Only the initial handshake, never any data, touches our server.',
+    yourName: 'Your name', start: 'Start a call', askJoin: 'Ask to join', shuffle: 'Random name', joining: 'Connecting…', shareInvite: 'Share invite',
     mic: 'Mic', cam: 'Camera', screen: 'Share screen', stopScreen: 'Stop sharing', board: 'Whiteboard', chat: 'Chat', invite: 'Invite', leave: 'Leave',
     you: 'You', waiting: 'Waiting for others to join — share the invite.', clear: 'Clear', typeMsg: 'Message…', send: 'Send', dropFiles: 'Drop files to send, or tap',
-    copied: 'Invite link copied', copyLink: 'Copy link', shareImg: 'Share invite image', inviteHint: 'Share the image (QR + link) or copy the link.',
+    copied: 'Invite link copied', shareHint: 'Share the link — people who open it appear here for you to let in.',
+    lobbyList: 'Waiting in the lobby', admit: 'Let in', waitingHost: 'Waiting for the host to let you in…', cancel: 'Cancel',
     privacy: 'All data is peer-to-peer, only the handshake uses the server.',
   },
   ar: {
-    title: 'مكالمة خاصة', lead: 'اجتماعات مباشرة بين الأجهزة فعليًا — الفيديو والسبورة والدردشة والملفات تنتقل مباشرةً بين المتصفحات. فقط المصافحة الأولى، ولا أي بيانات، تمر بخادمنا.',
-    yourName: 'اسمك', start: 'ابدأ مكالمة', joinCode: 'انضم للمكالمة', shuffle: 'اسم عشوائي', joining: 'جارٍ الاتصال…',
+    title: 'مكالمة خاصة', lead: 'اجتماعات آمنة — الفيديو والسبورة والدردشة والملفات تنتقل مباشرةً بين المتصفحات. فقط المصافحة الأولى، ولا أي بيانات، تمر بخادمنا.',
+    yourName: 'اسمك', start: 'ابدأ مكالمة', askJoin: 'اطلب الانضمام', shuffle: 'اسم عشوائي', joining: 'جارٍ الاتصال…', shareInvite: 'مشاركة الدعوة',
     mic: 'المايك', cam: 'الكاميرا', screen: 'مشاركة الشاشة', stopScreen: 'إيقاف المشاركة', board: 'السبورة', chat: 'الدردشة', invite: 'دعوة', leave: 'مغادرة',
     you: 'أنت', waiting: 'بانتظار انضمام آخرين — شارك الدعوة.', clear: 'مسح', typeMsg: 'رسالة…', send: 'إرسال', dropFiles: 'أفلت ملفات للإرسال أو اضغط',
-    copied: 'تم نسخ رابط الدعوة', copyLink: 'نسخ الرابط', shareImg: 'مشاركة صورة الدعوة', inviteHint: 'شارك الصورة (رمز + رابط) أو انسخ الرابط.',
+    copied: 'تم نسخ رابط الدعوة', shareHint: 'شارك الرابط — يظهر من يفتحه هنا لتسمح له بالدخول.',
+    lobbyList: 'في غرفة الانتظار', admit: 'اسمح بالدخول', waitingHost: 'بانتظار أن يسمح لك المضيف بالدخول…', cancel: 'إلغاء',
     privacy: 'كل البيانات مباشرة بين الأجهزة، فقط المصافحة تستخدم الخادم.',
   },
 }
@@ -56,9 +58,11 @@ export default function CallsTool() {
   const s = STR[locale]
   const initialRoom = new URLSearchParams(window.location.search).get('room') || ''
   const [name, setName] = useState(() => { try { return localStorage.getItem(NAME_KEY) || randName(locale === 'ar') } catch { return randName(locale === 'ar') } })
-  const [phase, setPhase] = useState<'lobby' | 'live'>('lobby')
+  const [phase, setPhase] = useState<'lobby' | 'hosting' | 'waiting' | 'live'>('lobby')
   const [room, setRoom] = useState(initialRoom)
   const [busy, setBusy] = useState(false)
+  const isGuest = !!initialRoom
+  const [waitingLobby, setWaitingLobby] = useState<Map<string, string>>(new Map())
 
   const rtc = useRef<CallRoom | null>(null)
   const [local, setLocal] = useState<MediaStream | null>(null)
@@ -93,27 +97,55 @@ export default function CallsTool() {
   // most recent file-start id per peer receives the chunks (channels are ordered)
   function onFileChunk(id: string, chunk: ArrayBuffer) { const last = [...incoming.current.values()].pop(); void id; if (last) last.parts.push(chunk) }
 
-  async function go(join: boolean) {
-    try { localStorage.setItem(NAME_KEY, name) } catch { /* */ }
-    setBusy(true)
-    const code = join ? room.trim() : code6()
-    setRoom(code)
+  function ensureRoom(code: string): CallRoom {
+    if (rtc.current) return rtc.current
     const r = new CallRoom(code, {
       onLocal: (st) => setLocal(st),
       onPeerStream: (pid, st) => setPeers((p) => new Map(p).set(pid, st)),
       onPeer: (_pid, state) => { if (state === 'connected') r.broadcast({ t: 'name', name: name || s.you }) },
       onLeave: (pid) => { setPeers((p) => { const n = new Map(p); n.delete(pid); return n }); setNames((n) => { const m = new Map(n); m.delete(pid); return m }) },
       onData, onFileChunk,
+      onKnock: (id, nm) => setWaitingLobby((w) => new Map(w).set(id, nm || '•')),
+      onKnockLeave: (id) => setWaitingLobby((w) => { const m = new Map(w); m.delete(id); return m }),
+      onAdmitted: () => { rtc.current?.startCall().then(() => setPhase('live')).catch(mediaError) },
     })
     rtc.current = r
-    try { await r.start(); setPhase('live') }
-    catch { setToast('Camera/mic permission needed'); setTimeout(() => setToast(''), 3000) }
-    finally { setBusy(false) }
+    return r
+  }
+  function mediaError() { setToast('Camera/mic permission needed'); setTimeout(() => setToast(''), 3000) }
+
+  // Host: start the call right away (others still need to be let in).
+  async function startHost() {
+    try { localStorage.setItem(NAME_KEY, name) } catch { /* */ }
+    setBusy(true)
+    const code = room || code6(); setRoom(code)
+    const r = ensureRoom(code); r.enterLobby(name || s.you, true)
+    try { await r.startCall(); setPhase('live') } catch { mediaError() } finally { setBusy(false) }
+  }
+  // Host: create + share the link without joining yet; wait to let people in.
+  async function shareHost() {
+    try { localStorage.setItem(NAME_KEY, name) } catch { /* */ }
+    const code = room || code6(); setRoom(code)
+    const r = ensureRoom(code); r.enterLobby(name || s.you, true)
+    setPhase('hosting')
+    await shareInvite(code)
+  }
+  // Guest: knock and wait for the host to admit.
+  function askToJoin() {
+    try { localStorage.setItem(NAME_KEY, name) } catch { /* */ }
+    const code = room.trim(); if (!code) return
+    const r = ensureRoom(code); r.enterLobby(name || s.you, false)
+    setPhase('waiting')
+  }
+  // Host: let a specific waiting guest into the call (going live if needed).
+  async function admit(id: string) {
+    setWaitingLobby((w) => { const m = new Map(w); m.delete(id); return m })
+    try { await rtc.current?.admit(id); setPhase('live') } catch { mediaError() }
   }
 
   useEffect(() => () => { rtc.current?.leave() }, [])
 
-  function hangup() { rtc.current?.leave(); rtc.current = null; setPhase('lobby'); setPeers(new Map()); setLocal(null); setChat([]); history.replaceState(null, '', localePath(locale, '/apps/calls')) }
+  function hangup() { rtc.current?.leave(); rtc.current = null; setPhase('lobby'); setPeers(new Map()); setLocal(null); setChat([]); setWaitingLobby(new Map()); history.replaceState(null, '', localePath(locale, '/apps/calls')) }
 
   function toggleMic() { const v = !mic; setMic(v); rtc.current?.toggleMic(v) }
   function toggleCam() { const v = !cam; setCam(v); rtc.current?.toggleCam(v) }
@@ -137,38 +169,81 @@ export default function CallsTool() {
   function clearBoard(broadcast = true) { const c = wbRef.current; c?.getContext('2d')?.clearRect(0, 0, c.width, c.height); if (broadcast) rtc.current?.broadcast({ t: 'wb', op: 'clear' }) }
   useEffect(() => { if (panel !== 'board') return; const c = wbRef.current; if (c) { c.width = c.clientWidth; c.height = c.clientHeight } }, [panel])
 
-  async function invite() {
-    const url = `${SITE}${localePath(locale, '/apps/calls')}?room=${room}`
+  async function shareInvite(code = room) {
+    const url = `${SITE}${localePath(locale, '/apps/calls')}?room=${code}`
     try { await navigator.clipboard.writeText(url); setToast(s.copied); setTimeout(() => setToast(''), 2500) } catch { /* */ }
     try {
       const { makeInvite } = await import('./invite')
-      const blob = await makeInvite(url, room, locale === 'ar')
-      const file = new File([blob], `call-${room}.png`, { type: 'image/png' })
+      const blob = await makeInvite(url, code, locale === 'ar')
+      const file = new File([blob], `call-${code}.png`, { type: 'image/png' })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const nav = navigator as any
       if (nav.canShare && nav.canShare({ files: [file] })) await nav.share({ files: [file], text: url })
       else { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; a.click() }
     } catch { /* share cancelled */ }
   }
+  const invite = () => shareInvite()
 
-  if (phase === 'lobby') {
+  if (phase !== 'live') {
+    const showIntro = waitingLobby.size === 0 && phase !== 'waiting'
     return (
       <Stack data-testid="calls">
         <div className="max-w-[30rem] rounded-lg border border-green-900/40 bg-green-950 text-sand-100 p-5 sm:p-6 flex flex-col gap-4">
-          <p className="text-[0.95rem] leading-relaxed text-sand-100/90">{s.lead}</p>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-[0.82rem] font-medium text-sand-100/70">{s.yourName}</span>
-            <div className="flex gap-2">
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="—" data-testid="call-name" className="flex-1" />
-              <button type="button" onClick={() => setName(randName(locale === 'ar'))} title={s.shuffle} aria-label={s.shuffle}
-                className="shrink-0 px-3 rounded-md border border-sand-100/25 bg-transparent text-[1.05rem] text-sand-100 hover:bg-sand-100/10">🎲</button>
-            </div>
-          </label>
-          {initialRoom
-            ? <Button variant="primary" disabled={busy} onClick={() => go(true)} data-testid="call-join">{busy ? s.joining : `${s.joinCode} · ${initialRoom}`}</Button>
-            : <Button variant="primary" disabled={busy} onClick={() => go(false)} data-testid="call-start">{busy ? s.joining : s.start}</Button>}
+          {phase === 'waiting' ? (
+            <>
+              <p className="text-[0.95rem] leading-relaxed text-sand-100/90 flex items-center gap-2" data-testid="call-waiting">
+                <span className="inline-block w-2 h-2 rounded-full bg-[var(--gold-500)] animate-pulse" /> {s.waitingHost}
+              </p>
+              <p className="font-mono text-[0.8rem] text-sand-100/60">{room}</p>
+              <Button onClick={hangup} data-testid="call-cancel">{s.cancel}</Button>
+            </>
+          ) : (
+            <>
+              {showIntro && <p className="text-[0.95rem] leading-relaxed text-sand-100/90">{s.lead}</p>}
+
+              {phase === 'hosting' && (waitingLobby.size > 0 ? (
+                <div className="flex flex-col gap-2">
+                  <p className="text-[0.82rem] font-semibold text-sand-100/80">{s.lobbyList}</p>
+                  <ul className="flex flex-col gap-1.5 m-0 p-0 list-none" data-testid="call-lobby">
+                    {[...waitingLobby].map(([id, nm]) => (
+                      <li key={id} className="flex items-center justify-between gap-2 bg-sand-100/10 rounded-md px-3 py-2">
+                        <span className="text-[0.9rem] text-sand-100 truncate">{nm}</span>
+                        <Button variant="primary" onClick={() => admit(id)} data-testid="call-admit" className="!py-1 !px-3 text-[0.8rem] shrink-0">{s.admit}</Button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : <p className="text-[0.85rem] text-sand-100/70">{s.shareHint}</p>)}
+
+              <label className="flex flex-col gap-1.5">
+                <span className="text-[0.82rem] font-medium text-sand-100/70">{s.yourName}</span>
+                <div className="relative">
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="—" data-testid="call-name" className="pe-10" />
+                  <button type="button" onClick={() => setName(randName(locale === 'ar'))} title={s.shuffle} aria-label={s.shuffle} data-testid="call-shuffle"
+                    className="absolute inset-y-0 end-1.5 my-auto h-8 w-8 grid place-items-center rounded-md bg-transparent border-0 text-ink-faint hover:text-ink hover:bg-black/5 cursor-pointer">
+                    <RefreshIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              </label>
+
+              <div className="flex gap-2">
+                <Button variant="primary" disabled={busy} className="flex-1"
+                  onClick={isGuest ? askToJoin : startHost}
+                  data-testid={isGuest ? 'call-join' : 'call-start'}>
+                  {busy ? s.joining : isGuest ? `${s.askJoin} · ${room}` : s.start}
+                </Button>
+                {!isGuest && (
+                  <Button onClick={shareHost} title={s.shareInvite} aria-label={s.shareInvite} className="!px-3" data-testid="call-share">
+                    <ShareIcon className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            </>
+          )}
+
           <p className="text-[0.78rem] text-sand-100/70 flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
         </div>
+        {toast && <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] bg-green-600 text-sand-100 px-4 py-2 rounded-md shadow-[var(--shadow-md)] text-[0.9rem]">{toast}</div>}
       </Stack>
     )
   }
@@ -182,6 +257,19 @@ export default function CallsTool() {
         {tiles.map((t) => <Video key={t.id} stream={t.stream} muted={t.me} mirror={t.me && !sharing} label={t.me ? (name ? `${name} · ${s.you}` : s.you) : nameOf(t.id)} />)}
       </div>
       {tiles.length <= 1 && <p className="text-[0.85rem] text-ink-faint text-center">{s.waiting}</p>}
+
+      {/* Host: people knocking while the call is live (only the host gets these). */}
+      {waitingLobby.size > 0 && (
+        <div className="border border-[color:color-mix(in_srgb,var(--gold-400)_45%,transparent)] bg-[color-mix(in_srgb,var(--gold-400)_12%,transparent)] rounded-md p-3 flex flex-col gap-2" data-testid="call-lobby-live">
+          <p className="text-[0.82rem] font-semibold text-ink">{s.lobbyList}</p>
+          {[...waitingLobby].map(([id, nm]) => (
+            <div key={id} className="flex items-center justify-between gap-2">
+              <span className="text-[0.9rem] text-ink truncate">{nm}</span>
+              <Button variant="primary" onClick={() => admit(id)} data-testid="call-admit" className="!py-1 !px-3 text-[0.8rem] shrink-0">{s.admit}</Button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* controls */}
       <div className="flex items-center justify-center gap-2 flex-wrap">

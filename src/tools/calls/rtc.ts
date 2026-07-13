@@ -26,6 +26,12 @@ export interface CallHandlers {
   onLeave?(id: string): void
   onData?(id: string, msg: DataMsg): void
   onFileChunk?(id: string, chunk: ArrayBuffer): void
+  /** Host only: a guest is knocking at the lobby (waiting to be admitted). */
+  onKnock?(id: string, name: string): void
+  /** Host only: a waiting guest left before being admitted. */
+  onKnockLeave?(id: string): void
+  /** Guest only: the host admitted us — the app should now start the call. */
+  onAdmitted?(): void
 }
 
 interface Peer { pc: RTCPeerConnection; dc?: RTCDataChannel; stream?: MediaStream; pending: RTCIceCandidateInit[] }
@@ -39,23 +45,51 @@ export class CallRoom {
   private h: CallHandlers
   private peers = new Map<string, Peer>()
   private since = -1 // highest signaling seq seen; -1 so we also get seq 0
-  private live = false
+  private active = false // the poll loop is running (lobby and/or call)
+  private inCall = false // media acquired + peer connections allowed
+  private isHost = false
+  private name = ''
+  private knockTimer: number | undefined
   local: MediaStream | null = null
   private camTrack: MediaStreamTrack | null = null
   private screen: MediaStream | null = null
 
   constructor(room: string, handlers: CallHandlers) { this.room = room; this.h = handlers }
 
-  async start(): Promise<void> {
+  /** Enter the room's lobby over signaling only — no media, no peer connections.
+   *  Hosts listen for knocks; guests knock and wait to be admitted. */
+  enterLobby(name: string, asHost: boolean): void {
+    this.name = name; this.isHost = asHost
+    if (!this.active) { this.active = true; this.pollLoop() }
+    if (asHost) {
+      this.send('host-here', 'all', { name })
+    } else {
+      this.knock()
+      // Re-announce periodically so a host who opens later still sees us.
+      this.knockTimer = window.setInterval(() => { if (!this.inCall) this.knock() }, 4000)
+    }
+  }
+  private knock() { this.send('knock', 'all', { name: this.name }) }
+
+  /** Host: let a specific waiting guest in (going live ourselves if needed). */
+  async admit(id: string): Promise<void> {
+    if (!this.inCall) await this.startCall()
+    this.send('admit', id, { name: this.name })
+  }
+
+  /** Begin the media call: host on "Start", or guest once admitted. */
+  async startCall(): Promise<void> {
+    if (this.inCall) return
     this.local = await navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 1280, height: 720 } })
     this.camTrack = this.local.getVideoTracks()[0] || null
     // Privacy-first: join muted with the camera off — the user turns each on.
     this.local.getAudioTracks().forEach((t) => (t.enabled = false))
     this.local.getVideoTracks().forEach((t) => (t.enabled = false))
     this.h.onLocal?.(this.local)
-    this.live = true
-    await this.post('send', { to: 'all', type: 'join' })
-    this.pollLoop()
+    this.inCall = true
+    window.clearInterval(this.knockTimer)
+    if (!this.active) { this.active = true; this.pollLoop() }
+    this.send('join', 'all')
   }
 
   // ---- signaling relay -------------------------------------------------------
@@ -66,7 +100,7 @@ export class CallRoom {
   private send(type: string, to: string, payload?: unknown) { this.post('send', { to, type, payload }).catch(() => {}) }
 
   private async pollLoop() {
-    while (this.live) {
+    while (this.active) {
       try {
         const d = await this.post('poll', { since: this.since })
         for (const m of d.msgs || []) { await this.onSignal(m.from, m.type, m.payload); if (m.seq > this.since) this.since = m.seq }
@@ -78,6 +112,13 @@ export class CallRoom {
 
   private async onSignal(from: string, type: string, payload: unknown) {
     if (from === this.me) return
+    // ---- lobby (pre-call) signaling ----
+    if (type === 'knock') { if (this.isHost) this.h.onKnock?.(from, ((payload as { name?: string })?.name) || '') ; return }
+    if (type === 'lobby-leave') { this.h.onKnockLeave?.(from); return }
+    if (type === 'admit') { if (!this.inCall) this.h.onAdmitted?.(); return } // guest: host let us in
+    if (type === 'host-here') return // informational
+    // ---- media signaling — only once we've actually joined the call ----
+    if (!this.inCall) return
     if (type === 'join') { this.send('hello', from); this.maybeOffer(from) }
     else if (type === 'hello') this.maybeOffer(from)
     else if (type === 'offer') await this.onOffer(from, payload as RTCSessionDescriptionInit)
@@ -159,5 +200,13 @@ export class CallRoom {
   stopScreen() { this.screen?.getTracks().forEach((t) => t.stop()); this.screen = null; this.replaceVideo(this.camTrack) }
 
   private drop(id: string) { const p = this.peers.get(id); if (!p) return; try { p.pc.close() } catch { /* */ } this.peers.delete(id); this.h.onLeave?.(id) }
-  leave() { this.live = false; this.send('leave', 'all'); this.stopScreen(); this.peers.forEach((p) => { try { p.pc.close() } catch { /* */ } }); this.peers.clear(); this.local?.getTracks().forEach((t) => t.stop()) }
+  leave() {
+    if (this.inCall) this.send('leave', 'all')
+    else if (this.active && !this.isHost) this.send('lobby-leave', 'all')
+    this.active = false; this.inCall = false
+    window.clearInterval(this.knockTimer)
+    this.stopScreen()
+    this.peers.forEach((p) => { try { p.pc.close() } catch { /* */ } }); this.peers.clear()
+    this.local?.getTracks().forEach((t) => t.stop())
+  }
 }
