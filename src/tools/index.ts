@@ -90,6 +90,8 @@ import { readmeGeneratorTool } from './readme-generator/meta'
 import { markdownTableTool } from './markdown-table/meta'
 import { fakeDataTool } from './fake-data/meta'
 import { slugifyTool } from './slugify/meta'
+import { lineBreaksTool } from './line-breaks/meta'
+import { pasteToMarkdownTool } from './paste-to-markdown/meta'
 
 /**
  * The tool catalog. Stable/beta tools render inside the app at /tools/:id.
@@ -177,6 +179,8 @@ export const tools: Tool[] = [
   uuidGeneratorTool,
   wordCounterTool,
   caseConverterTool,
+  lineBreaksTool,
+  pasteToMarkdownTool,
   poetryTool,
   languageDetectTool,
   hashGeneratorTool,

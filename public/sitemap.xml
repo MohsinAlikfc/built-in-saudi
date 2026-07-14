@@ -1052,6 +1052,34 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/apps/case-converter"/>
   </url>
   <url>
+    <loc>https://built-in-saudi.com/en/apps/line-breaks</loc>
+    <lastmod>2026-07-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/apps/line-breaks"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/apps/line-breaks"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/apps/line-breaks"/>
+  </url>
+  <url>
+    <loc>https://built-in-saudi.com/ar/apps/line-breaks</loc>
+    <lastmod>2026-07-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/apps/line-breaks"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/apps/line-breaks"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/apps/line-breaks"/>
+  </url>
+  <url>
+    <loc>https://built-in-saudi.com/en/apps/paste-to-markdown</loc>
+    <lastmod>2026-07-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/apps/paste-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/apps/paste-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/apps/paste-to-markdown"/>
+  </url>
+  <url>
+    <loc>https://built-in-saudi.com/ar/apps/paste-to-markdown</loc>
+    <lastmod>2026-07-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/apps/paste-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/apps/paste-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/apps/paste-to-markdown"/>
+  </url>
+  <url>
     <loc>https://built-in-saudi.com/en/apps/unit-converter</loc>
     <lastmod>2026-07-02</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/apps/unit-converter"/>

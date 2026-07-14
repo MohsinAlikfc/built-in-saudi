@@ -629,6 +629,50 @@ test.describe('shell', () => {
   })
 })
 
+test.describe('line break converter', () => {
+  test('single-spaced lines become double-spaced', async ({ page }) => {
+    await page.goto('/en/apps/line-breaks')
+    await page.getByTestId('newline-input').fill('one\ntwo\nthree')
+    await expect(page.getByTestId('newline-output')).toHaveValue('one\n\ntwo\n\nthree')
+    await expect(page.getByTestId('newline-message')).toContainText('single line breaks')
+  })
+
+  test('double-spaced lines collapse to single', async ({ page }) => {
+    await page.goto('/en/apps/line-breaks')
+    await page.getByTestId('newline-input').fill('one\n\ntwo\n\nthree')
+    await expect(page.getByTestId('newline-output')).toHaveValue('one\ntwo\nthree')
+    await expect(page.getByTestId('newline-message')).toContainText('double line breaks')
+  })
+
+  test('mixed spacing normalises to double', async ({ page }) => {
+    await page.goto('/en/apps/line-breaks')
+    await page.getByTestId('newline-input').fill('one\ntwo\n\nthree')
+    await expect(page.getByTestId('newline-output')).toHaveValue('one\n\ntwo\n\nthree')
+    await expect(page.getByTestId('newline-message')).toContainText('mixed spacing')
+  })
+})
+
+test.describe('paste to markdown', () => {
+  test('converts pasted HTML to Markdown', async ({ page }) => {
+    await page.goto('/en/apps/paste-to-markdown')
+    const box = page.getByTestId('md-input')
+    await expect(box).toBeVisible()
+    // Simulate a rich-text paste (clipboardData with text/html).
+    await box.evaluate((el) => {
+      const html = '<h1>Title</h1><p>Some <strong>bold</strong> and a <a href="https://x.com">link</a>.</p><ul><li>a</li><li>b</li></ul>'
+      const dt = new DataTransfer()
+      dt.setData('text/html', html)
+      el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }))
+    })
+    const out = page.getByTestId('md-output')
+    await expect(out).toHaveValue(/# Title/)
+    await expect(out).toHaveValue(/\*\*bold\*\*/)
+    await expect(out).toHaveValue(/\[link\]\(https:\/\/x\.com\)/)
+    await expect(out).toHaveValue(/- a\n- b/)
+    await expect(page.getByTestId('md-message')).toContainText('Converted to Markdown')
+  })
+})
+
 test.describe('pdf sign + fill', () => {
   test('sign: loads with a signature pad and a document dropzone', async ({ page }) => {
     await page.goto('/en/tools/pdf-sign')

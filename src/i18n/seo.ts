@@ -499,6 +499,16 @@ export const liveToolSeo: ToolSeo[] = [
     ar: { name: 'محوّل حالة الأحرف', description: 'حوّل النص بين الحالات — كبيرة/صغيرة/أول الكلمة/أول الجملة وcamelCase وsnake_case وkebab وCONSTANT — مباشرةً مع النسخ. العربية دون تغيير.' },
   },
   {
+    id: 'line-breaks',
+    en: { name: 'Line Break Converter', description: 'Auto-flip line spacing — single-spaced lines become double-spaced, double becomes single, mixed normalises to double. Result box with copy and share, all in your browser.' },
+    ar: { name: 'محوّل فواصل الأسطر', description: 'تبديل تلقائي لتباعد الأسطر — المفردة تصبح مزدوجة والمزدوجة مفردة والمختلطة تُوحَّد إلى مزدوجة. صندوق ناتج مع نسخ ومشاركة، داخل متصفحك.' },
+  },
+  {
+    id: 'paste-to-markdown',
+    en: { name: 'Paste Markdown', description: 'Paste from Word, a web page or WordPad and get clean Markdown — line breaks, bold, italics, links, headings, lists, quotes, code and tables. Copy or share; nothing uploaded.' },
+    ar: { name: 'لصق ماركداون', description: 'الصق من وورد أو صفحة ويب أو WordPad واحصل على ماركداون نظيف — فواصل أسطر وخط عريض ومائل وروابط وعناوين وقوائم واقتباسات وشيفرة وجداول. انسخ أو شارك؛ لا يُرفع شيء.' },
+  },
+  {
     id: 'hash-generator',
     en: { name: 'Hash Generator', description: 'Compute SHA-1/256/384/512 of any text or file — hex and Base64. Files are hashed locally and never uploaded.' },
     ar: { name: 'مولّد البصمة (Hash)', description: 'احسب SHA-1/256/384/512 لأي نص أو ملف — ست عشري وBase64. تُحسب الملفات محليًا ولا تُرفع.' },
