@@ -716,18 +716,21 @@ export default function CallsTool() {
 
   const shareModal = shareOpen ? createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 p-4 max-[520px]:p-0" onClick={() => setShareOpen(false)} data-testid="call-share-modal">
-      <div className="relative w-full max-w-[23rem] max-[520px]:max-w-none max-[520px]:h-full max-[520px]:rounded-none rounded-2xl bg-green-700 text-sand-100 shadow-[var(--shadow-lg)] p-6 flex flex-col gap-4 items-center max-[520px]:justify-center" onClick={(e) => e.stopPropagation()}>
+      <div className="relative w-full max-w-[23rem] max-[520px]:max-w-none max-[520px]:h-full max-[520px]:rounded-none rounded-2xl bg-green-700 text-sand-100 shadow-[var(--shadow-lg)] p-6 flex flex-col gap-4 items-center" onClick={(e) => e.stopPropagation()}>
         <button type="button" onClick={() => setShareOpen(false)} aria-label={s.leave} data-testid="call-share-close" className="absolute top-3 end-3 w-9 h-9 grid place-items-center rounded-md bg-transparent border-0 text-sand-100/70 hover:text-sand-100 hover:bg-white/10 cursor-pointer text-[1.25rem] leading-none">✕</button>
         <h3 className="w-full font-display text-[1.15rem] text-sand-100 pe-8">{s.shareInvite}</h3>
-        <div className="w-56 h-56 grid place-items-center rounded-xl bg-white p-2.5 shadow-inner">
-          {shareQr ? <img src={shareQr} alt="QR" className="w-full h-full" data-testid="call-share-qr" /> : <span className="text-ink-faint text-[0.85rem]">…</span>}
+        {/* On mobile fullscreen, centre the QR + actions below the top-pinned header. */}
+        <div className="w-full flex flex-col items-center gap-4 max-[520px]:flex-1 max-[520px]:justify-center">
+          <div className="w-56 h-56 grid place-items-center rounded-xl bg-white p-2.5 shadow-inner">
+            {shareQr ? <img src={shareQr} alt="QR" className="w-full h-full" data-testid="call-share-qr" /> : <span className="text-ink-faint text-[0.85rem]">…</span>}
+          </div>
+          <button type="button" onClick={copyShareUrl} data-testid="call-share-copy"
+            className="w-full h-11 rounded-md bg-white/10 text-sand-100 font-medium text-[0.9rem] flex items-center justify-center gap-2 hover:bg-white/20 border border-sand-100/25 cursor-pointer [&_svg]:w-4 [&_svg]:h-4">
+            {copiedShare ? <span className="text-green-400 font-bold" aria-hidden="true">✓</span> : <CopyIcon />} {copiedShare ? s.copyDone : s.copy}
+          </button>
+          <button type="button" onClick={() => shareInvite()} data-testid="call-share-do"
+            className="w-full h-11 rounded-md bg-sand-100 text-green-700 font-semibold flex items-center justify-center gap-2 hover:bg-white border-0 cursor-pointer [&_svg]:w-4 [&_svg]:h-4"><ShareIcon /> {s.shareQrUrl}</button>
         </div>
-        <button type="button" onClick={copyShareUrl} data-testid="call-share-copy"
-          className="w-full h-11 rounded-md bg-white/10 text-sand-100 font-medium text-[0.9rem] flex items-center justify-center gap-2 hover:bg-white/20 border border-sand-100/25 cursor-pointer [&_svg]:w-4 [&_svg]:h-4">
-          {copiedShare ? <span className="text-green-400 font-bold" aria-hidden="true">✓</span> : <CopyIcon />} {copiedShare ? s.copyDone : s.copy}
-        </button>
-        <button type="button" onClick={() => shareInvite()} data-testid="call-share-do"
-          className="w-full h-11 rounded-md bg-sand-100 text-green-700 font-semibold flex items-center justify-center gap-2 hover:bg-white border-0 cursor-pointer [&_svg]:w-4 [&_svg]:h-4"><ShareIcon /> {s.shareQrUrl}</button>
       </div>
     </div>, document.body) : null
 
@@ -736,10 +739,12 @@ export default function CallsTool() {
   const cream = 'w-full h-12 rounded-md bg-sand-100 text-green-700 font-semibold text-[0.95rem] flex items-center justify-center gap-2 hover:bg-white disabled:opacity-60 disabled:hover:bg-sand-100 border-0 cursor-pointer transition-colors'
   const ghost = 'w-full h-11 rounded-md bg-white/10 text-sand-100 font-medium text-[0.9rem] flex items-center justify-center gap-2 hover:bg-white/20 border border-sand-100/25 cursor-pointer transition-colors'
   const phoneLogo = <EndCallIcon className="w-24 h-24 text-green-500 shrink-0" />
+  const greenNav = <div className="absolute top-0 inset-x-0 px-5 py-3.5 text-[0.82rem] font-medium text-sand-100/55 select-none pointer-events-none">{locale === 'ar' ? 'مكالمات' : 'Calls'} <span className="text-sand-100/35">— Built in Saudi</span></div>
 
   if (phase === 'ended') {
     return createPortal(
       <div className={greenWrap} data-testid="calls">
+        {greenNav}
         <div className="w-full max-w-[22rem] flex flex-col items-center gap-5 text-center" data-testid="call-ended">
           {phoneLogo}
           {ended.reason === 'left' ? (
@@ -764,6 +769,7 @@ export default function CallsTool() {
   if (phase !== 'live') {
     return createPortal(
       <div className={greenWrap} data-testid="calls">
+        {greenNav}
         <div className="w-full max-w-[22rem] flex flex-col items-center gap-5">
           {phoneLogo}
           {checking ? (
@@ -822,13 +828,9 @@ export default function CallsTool() {
             </>
           )}
 
-          {/* Host waiting list (people knocking), or a hint while nobody's here yet. */}
-          {!isGuest && phase === 'hosting' && (
-            <div className="w-full">
-              {waiting.length > 0
-                ? <LobbyList waiting={waiting} admit={admit} hint="" title={s.lobbyList} admitLabel={s.admit} staleIds={staleIds} live />
-                : <p className="text-center text-[0.85rem] text-sand-100/70">{s.shareHint}</p>}
-            </div>
+          {/* Host waiting list (people knocking). */}
+          {!isGuest && phase === 'hosting' && waiting.length > 0 && (
+            <div className="w-full"><LobbyList waiting={waiting} admit={admit} hint="" title={s.lobbyList} admitLabel={s.admit} staleIds={staleIds} live /></div>
           )}
         </div>
 
