@@ -50,6 +50,25 @@ const KUNYA: [string, string][] = [
 const randName = (ar: boolean) => { const b = crypto.getRandomValues(new Uint8Array(1)); const p = KUNYA[b[0] % KUNYA.length]; return ar ? `أبو ${p[1]}` : `Abu ${p[0]}` }
 const isDefaultName = (n: string) => KUNYA.some(([en, ar]) => n === `Abu ${en}` || n === `أبو ${ar}`)
 
+// A short two-note chime (Web Audio — no asset) for when someone knocks to join.
+let _ac: AudioContext | null = null
+function chime() {
+  try {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+    if (!AC) return
+    if (!_ac) _ac = new AC()
+    if (_ac.state === 'suspended') _ac.resume()
+    const ctx = _ac, t0 = ctx.currentTime
+    for (const [i, f] of [880, 1174].entries()) {
+      const o = ctx.createOscillator(), g = ctx.createGain()
+      o.type = 'sine'; o.frequency.value = f; o.connect(g); g.connect(ctx.destination)
+      const t = t0 + i * 0.13
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.18, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0008, t + 0.26)
+      o.start(t); o.stop(t + 0.28)
+    }
+  } catch { /* audio unavailable */ }
+}
+
 const STR = {
   en: {
     title: 'Private call', lead: 'Secure meetings — video, whiteboard, chat and files go straight between browsers. Only the initial handshake, never any data, touches our server.',
@@ -57,7 +76,7 @@ const STR = {
     mic: 'Mic', cam: 'Camera', screen: 'Share screen', stopScreen: 'Stop sharing', board: 'Whiteboard', chat: 'Chat', invite: 'Invite', leave: 'Leave',
     you: 'You', waiting: 'Waiting for others to join — share the invite.', clear: 'Clear', typeMsg: 'Message…', send: 'Send', noMessages: 'No messages yet', close: 'Close', reconnecting: 'Quiet — reconnecting…', dropFiles: 'Drop files to send, or tap',
     copied: 'Invite link copied', copy: 'Copy link', copyDone: 'Copied!', shareQrUrl: 'Share QR + URL', shareHint: 'Share the link — people who open it appear here for you to let in.',
-    lobbyList: 'Waiting in the lobby', admit: 'Let in', waitingHost: 'Waiting for the host to let you in…', cancel: 'Cancel',
+    lobbyList: 'Waiting in the lobby', admit: 'Let in', leftLobby: 'left', waitingHost: 'Waiting for the host to let you in…', cancel: 'Cancel',
     participants: 'Participants', endMeeting: 'End meeting', hangUp: 'Leave', sendFiles: 'Drop files', dropHere: 'Drop files to share with everyone', muteMe: 'Mute me', unmuteMe: 'Unmute',
     camOn: 'Turn camera on', camOff: 'Turn camera off', mutedBy: 'muted', muteThem: 'Mute for everyone', filesTitle: 'Files', noPreview: 'No preview — download to open', download: 'Download',
     hostGone: 'The host disconnected', endsIn: 'meeting ends in', ended: 'This meeting has ended or can’t be found.', newCall: 'Start a new call',
@@ -72,7 +91,7 @@ const STR = {
     mic: 'المايك', cam: 'الكاميرا', screen: 'مشاركة الشاشة', stopScreen: 'إيقاف المشاركة', board: 'السبورة', chat: 'الدردشة', invite: 'دعوة', leave: 'مغادرة',
     you: 'أنت', waiting: 'بانتظار انضمام آخرين — شارك الدعوة.', clear: 'مسح', typeMsg: 'رسالة…', send: 'إرسال', noMessages: 'لا رسائل بعد', close: 'إغلاق', reconnecting: 'صامت — إعادة الاتصال…', dropFiles: 'أفلت ملفات للإرسال أو اضغط',
     copied: 'تم نسخ رابط الدعوة', copy: 'نسخ الرابط', copyDone: 'تم النسخ!', shareQrUrl: 'مشاركة الرمز والرابط', shareHint: 'شارك الرابط — يظهر من يفتحه هنا لتسمح له بالدخول.',
-    lobbyList: 'في غرفة الانتظار', admit: 'اسمح بالدخول', waitingHost: 'بانتظار أن يسمح لك المضيف بالدخول…', cancel: 'إلغاء',
+    lobbyList: 'في غرفة الانتظار', admit: 'اسمح بالدخول', leftLobby: 'غادر', waitingHost: 'بانتظار أن يسمح لك المضيف بالدخول…', cancel: 'إلغاء',
     participants: 'المشاركون', endMeeting: 'إنهاء الاجتماع', hangUp: 'مغادرة', sendFiles: 'أفلت الملفات', dropHere: 'أفلت الملفات لمشاركتها مع الجميع', muteMe: 'اكتم صوتي', unmuteMe: 'ألغِ الكتم',
     camOn: 'تشغيل الكاميرا', camOff: 'إيقاف الكاميرا', mutedBy: 'كتم', muteThem: 'اكتم للجميع', filesTitle: 'الملفات', noPreview: 'لا معاينة — نزّل للفتح', download: 'تنزيل',
     hostGone: 'انقطع اتصال المضيف', endsIn: 'ينتهي الاجتماع خلال', ended: 'انتهى هذا الاجتماع أو تعذّر العثور عليه.', newCall: 'ابدأ مكالمة جديدة',
@@ -92,8 +111,9 @@ function StreamVideo({ stream, className, muted, mirror }: { stream: MediaStream
 }
 
 // The host's "Waiting in the lobby" list — a card of guests with a Let-in button.
-function LobbyList({ waiting, admit, hint, title, admitLabel, live, staleIds }: { waiting: [string, PeerInfo][]; admit: (id: string) => void; hint: string; title: string; admitLabel: string; live?: boolean; staleIds?: Set<string> }) {
-  if (waiting.length === 0) return live ? null : <p className="max-w-[30rem] text-[0.85rem] text-ink-faint">{hint}</p>
+function LobbyList({ waiting, admit, hint, title, admitLabel, leftLabel, left, live, staleIds }: { waiting: [string, PeerInfo][]; admit: (id: string) => void; hint: string; title: string; admitLabel: string; leftLabel: string; left?: { id: string; name: string }[]; live?: boolean; staleIds?: Set<string> }) {
+  const gone = left || []
+  if (waiting.length === 0 && gone.length === 0) return live ? null : <p className="max-w-[30rem] text-[0.85rem] text-ink-faint">{hint}</p>
   return (
     <div className="max-w-[30rem] rounded-lg border border-[color:var(--line)] bg-[var(--surface)] p-4 flex flex-col gap-2.5" data-testid={live ? 'call-lobby-live' : 'call-lobby'}>
       <p className="text-[0.82rem] font-semibold text-ink-soft flex items-center justify-between">{title} <span className="font-mono text-ink-faint">{waiting.length}</span></p>
@@ -102,6 +122,13 @@ function LobbyList({ waiting, admit, hint, title, admitLabel, live, staleIds }: 
           <span className="w-8 h-8 rounded-full bg-[color-mix(in_srgb,var(--color-green-400)_22%,transparent)] text-green-700 grid place-items-center text-[0.78rem] font-semibold shrink-0" aria-hidden="true">{initials(info.name)}</span>
           <span className="flex-1 text-[0.92rem] text-ink truncate">{info.name || '•'}</span>
           <Button variant="primary" onClick={() => admit(id)} data-testid="call-admit" className="!py-1 !px-3 text-[0.8rem] shrink-0">{admitLabel}</Button>
+        </div>
+      ))}
+      {gone.map((w) => (
+        <div key={w.id} className="flex items-center gap-3 opacity-55" data-testid="call-lobby-left">
+          <span className="w-8 h-8 rounded-full bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] text-ink-faint grid place-items-center text-[0.78rem] font-semibold shrink-0" aria-hidden="true">{initials(w.name)}</span>
+          <span className="flex-1 text-[0.92rem] text-ink-soft truncate line-through decoration-1">{w.name || '•'}</span>
+          <span className="text-[0.78rem] text-ink-faint italic shrink-0">{leftLabel}</span>
         </div>
       ))}
     </div>
@@ -280,7 +307,12 @@ export default function CallsTool() {
       const now = Date.now()
       setRoster((r) => {
         let changed = false; const m = new Map(r)
-        for (const id of [...m.keys()]) if ((seen.current.get(id) || 0) < now - GONE_MS) { m.delete(id); seen.current.delete(id); changed = true }
+        for (const id of [...m.keys()]) if ((seen.current.get(id) || 0) < now - GONE_MS) {
+          const info = m.get(id)
+          // A guest who went quiet while still waiting → keep them listed, marked "left".
+          if (info && info.role === 'guest' && !info.inCall) setLeftWaiters((l) => l.some((w) => w.id === id) ? l : [...l, { id, name: info.name }])
+          m.delete(id); seen.current.delete(id); changed = true
+        }
         return changed ? m : r
       })
       const stale = new Set<string>()
@@ -295,8 +327,20 @@ export default function CallsTool() {
   const nameOf = useCallback((id: string) => roster.get(id)?.name || '•', [roster])
   // The people the host still needs to let in (guests who haven't joined yet).
   const waiting = [...roster].filter(([, i]) => i.role === 'guest' && !i.inCall)
-  // Someone showed up in the waiting list → close the Share invite so the host sees them.
-  useEffect(() => { if (waiting.length > 0) setShareOpen(false) }, [waiting.length])
+  // Guests who left while still waiting — kept in the list, shown as "left".
+  const [leftWaiters, setLeftWaiters] = useState<{ id: string; name: string }[]>([])
+  const knockSeen = useRef<Set<string>>(new Set())
+  // A new knocker → close the Share invite, chime, and (host) let it be seen.
+  useEffect(() => {
+    let fresh = false
+    for (const [id] of waiting) if (!knockSeen.current.has(id)) { knockSeen.current.add(id); fresh = true }
+    if (fresh) {
+      setShareOpen(false); if (!isGuest) chime()
+      // A returning guest (same name) supersedes their old "left" entry.
+      const names = new Set(waiting.map(([, i]) => i.name))
+      setLeftWaiters((l) => l.filter((w) => !names.has(w.name)))
+    }
+  }, [waiting, isGuest])
   // In-call participants (excludes those still knocking in the lobby).
   const inCallPeers = [...roster].filter(([, i]) => i.inCall)
   // When a peer joins the call, the host sends the current whiteboard(s) so they
@@ -349,6 +393,11 @@ export default function CallsTool() {
         // Only announce join/leave once WE'RE in the call (a waiting guest shouldn't
         // hear about the meeting's comings and goings).
         if (knownInCall.current.has(pid)) { knownInCall.current.delete(pid); if (rtc.current?.inCall) notify('p', `${rosterRef.current.get(pid)?.name || '•'} ${s.left}`) }
+        else {
+          // A guest who left while still waiting — keep them in the list, marked "left".
+          const info = rosterRef.current.get(pid)
+          if (info && info.role === 'guest') setLeftWaiters((l) => l.some((w) => w.id === pid) ? l : [...l, { id: pid, name: info.name }])
+        }
         setPeers((p) => { const n = new Map(p); n.delete(pid); return n }); setRoster((n) => { const m = new Map(n); m.delete(pid); return m })
       },
       onData, onFileChunk,
@@ -448,7 +497,7 @@ export default function CallsTool() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function resetLive() { setPeers(new Map()); setLocal(null); setChat([]); setRoster(new Map()); setGraceEndsAt(null); setFiles([]); setSelected(''); setView('board'); setSharing(false); setScreenStream(null); setShareOpen(false); knownInCall.current.clear(); objects.current.clear(); myStack.current.clear() }
+  function resetLive() { setPeers(new Map()); setLocal(null); setChat([]); setRoster(new Map()); setGraceEndsAt(null); setFiles([]); setSelected(''); setView('board'); setSharing(false); setScreenStream(null); setShareOpen(false); knownInCall.current.clear(); objects.current.clear(); myStack.current.clear(); setLeftWaiters([]); knockSeen.current.clear() }
   function hangup() {
     if (!isGuest) {
       // Host leaving ends the meeting for everyone (the relay is marked closed, so
@@ -782,7 +831,6 @@ export default function CallsTool() {
               <p className="text-center text-[1rem] leading-relaxed text-sand-100/90 flex items-center gap-2" data-testid="call-waiting">
                 <span className="inline-block w-2 h-2 rounded-full bg-[var(--gold-500)] animate-pulse" /> {s.waitingHost}
               </p>
-              <p className="font-mono text-[1.1rem] tracking-[0.15em] text-sand-100/70">{room}</p>
               <button className={ghost} onClick={hangup} data-testid="call-cancel">{s.cancel}</button>
             </>
           ) : (
@@ -830,7 +878,7 @@ export default function CallsTool() {
 
           {/* Host waiting list (people knocking). */}
           {!isGuest && phase === 'hosting' && waiting.length > 0 && (
-            <div className="w-full"><LobbyList waiting={waiting} admit={admit} hint="" title={s.lobbyList} admitLabel={s.admit} staleIds={staleIds} live /></div>
+            <div className="w-full"><LobbyList waiting={waiting} admit={admit} hint="" title={s.lobbyList} admitLabel={s.admit} leftLabel={s.leftLobby} left={leftWaiters} staleIds={staleIds} live /></div>
           )}
         </div>
 
@@ -1045,7 +1093,7 @@ export default function CallsTool() {
               <p className="text-[0.72rem] font-semibold uppercase tracking-wide text-ink-faint">{s.participants} · {participantCount}</p>
               <button type="button" onClick={() => setShowParticipants(false)} aria-label="Close" data-testid="call-participants-close" className="hidden max-[640px]:grid place-items-center w-8 h-8 -me-1 rounded-md text-ink-soft hover:bg-[color-mix(in_srgb,var(--ink)_8%,transparent)] bg-transparent border-0 cursor-pointer text-[1.15rem] leading-none">✕</button>
             </div>
-            {!isGuest && waiting.length > 0 && <LobbyList waiting={waiting} admit={admit} hint={s.shareHint} title={s.lobbyList} admitLabel={s.admit} live staleIds={staleIds} />}
+            {!isGuest && (waiting.length > 0 || leftWaiters.length > 0) && <LobbyList waiting={waiting} admit={admit} hint={s.shareHint} title={s.lobbyList} admitLabel={s.admit} leftLabel={s.leftLobby} left={leftWaiters} live staleIds={staleIds} />}
             <div className="grid grid-cols-2 gap-2">
               <ParticipantTile name={name || s.you} stream={local} camOn={cam} muted={!mic} self muteLabel={s.muteThem} />
               {inCallPeers.map(([id, info]) => (

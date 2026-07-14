@@ -168,6 +168,24 @@ test('a waiting guest only knocks to the host — it cannot see the other partic
   await ca.close(); await cb.close(); await cc.close()
 })
 
+test('a guest who leaves the lobby stays in the list, marked "left" (no admit button)', async ({ browser }) => {
+  const ca = await ctx(browser, base), cb = await ctx(browser, base)
+  const pa = await ca.newPage(), pb = await cb.newPage()
+  await pa.goto('/en/apps/calls'); await pa.getByTestId('call-name').fill('Alice'); await pa.getByTestId('call-start').click()
+  await expect(pa.getByTestId('calls-live')).toBeVisible({ timeout: 15_000 }); await closeShare(pa)
+  const room = new URL(pa.url()).searchParams.get('code') || ''
+  // Bob knocks and appears in the host's lobby with an admit button.
+  await pb.goto(`/en/apps/calls?code=${room}`); await pb.getByTestId('call-name').fill('Bob'); await pb.getByTestId('call-join').click()
+  await expect(pa.getByTestId('call-lobby-live')).toContainText('Bob', { timeout: 15_000 })
+  await expect(pa.getByTestId('call-admit')).toBeVisible()
+  // Bob leaves the lobby (closes the tab). He stays listed, but marked "left" with no admit button.
+  await cb.close()
+  await expect(pa.getByTestId('call-lobby-left')).toContainText('Bob', { timeout: 20_000 })
+  await expect(pa.getByTestId('call-lobby-left')).toContainText('left')
+  await expect(pa.getByTestId('call-admit')).toHaveCount(0)
+  await ca.close()
+})
+
 test('guest waits in the lobby, host admits, then they connect and chat', async ({ browser }) => {
   const a = await ctx(browser, base), b = await ctx(browser, base)
   const pa = await a.newPage(), pb = await b.newPage()
