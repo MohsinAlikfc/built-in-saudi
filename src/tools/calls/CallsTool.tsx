@@ -50,7 +50,7 @@ const randName = (ar: boolean) => { const b = crypto.getRandomValues(new Uint8Ar
 const STR = {
   en: {
     title: 'Private call', lead: 'Secure meetings — video, whiteboard, chat and files go straight between browsers. Only the initial handshake, never any data, touches our server.',
-    yourName: 'Your name', start: 'Start a call', askJoin: 'Ask to join', shuffle: 'Random name', joining: 'Connecting…', shareInvite: 'Share invite',
+    yourName: 'Your name', start: 'Start a call', askJoin: 'Ask to join', startOwn: 'Start your own call instead', shuffle: 'Random name', joining: 'Connecting…', shareInvite: 'Share invite',
     mic: 'Mic', cam: 'Camera', screen: 'Share screen', stopScreen: 'Stop sharing', board: 'Whiteboard', chat: 'Chat', invite: 'Invite', leave: 'Leave',
     you: 'You', waiting: 'Waiting for others to join — share the invite.', clear: 'Clear', typeMsg: 'Message…', send: 'Send', dropFiles: 'Drop files to send, or tap',
     copied: 'Invite link copied', copy: 'Copy link', shareHint: 'Share the link — people who open it appear here for you to let in.',
@@ -65,7 +65,7 @@ const STR = {
   },
   ar: {
     title: 'مكالمة خاصة', lead: 'اجتماعات آمنة — الفيديو والسبورة والدردشة والملفات تنتقل مباشرةً بين المتصفحات. فقط المصافحة الأولى، ولا أي بيانات، تمر بخادمنا.',
-    yourName: 'اسمك', start: 'ابدأ مكالمة', askJoin: 'اطلب الانضمام', shuffle: 'اسم عشوائي', joining: 'جارٍ الاتصال…', shareInvite: 'مشاركة الدعوة',
+    yourName: 'اسمك', start: 'ابدأ مكالمة', askJoin: 'اطلب الانضمام', startOwn: 'ابدأ مكالمتك الخاصة بدلًا من ذلك', shuffle: 'اسم عشوائي', joining: 'جارٍ الاتصال…', shareInvite: 'مشاركة الدعوة',
     mic: 'المايك', cam: 'الكاميرا', screen: 'مشاركة الشاشة', stopScreen: 'إيقاف المشاركة', board: 'السبورة', chat: 'الدردشة', invite: 'دعوة', leave: 'مغادرة',
     you: 'أنت', waiting: 'بانتظار انضمام آخرين — شارك الدعوة.', clear: 'مسح', typeMsg: 'رسالة…', send: 'إرسال', dropFiles: 'أفلت ملفات للإرسال أو اضغط',
     copied: 'تم نسخ رابط الدعوة', copy: 'نسخ الرابط', shareHint: 'شارك الرابط — يظهر من يفتحه هنا لتسمح له بالدخول.',
@@ -181,7 +181,8 @@ export default function CallsTool() {
   const [phase, setPhase] = useState<'lobby' | 'hosting' | 'waiting' | 'live' | 'ended'>('lobby')
   const [room, setRoom] = useState(initialRoom)
   const [busy, setBusy] = useState(false)
-  const isGuest = !!initialRoom && !isHostReturn
+  const [forceHost, setForceHost] = useState(false) // escape a stale ?room= guest lobby
+  const isGuest = !!initialRoom && !isHostReturn && !forceHost
   // Everyone we've connected to (data channel), with the name/role/lobby state
   // they told us peer-to-peer. The host's waiting list is derived from this.
   const [roster, setRoster] = useState<Map<string, PeerInfo>>(new Map())
@@ -334,6 +335,8 @@ export default function CallsTool() {
     const r = ensureRoom(code); r.enterLobby(name || s.you, true)
     try { await r.enableMedia(); setPhase('live') } catch { mediaError() } finally { setBusy(false) }
   }
+  // Escape a stale ?room= link: drop the room, become a host, clean the URL.
+  function startOwnCall() { setForceHost(true); setRoom(''); try { history.replaceState(null, '', localePath(locale, '/apps/calls')) } catch { /* */ } }
   // Guest: knock and wait for the host to admit.
   function askToJoin() {
     try { localStorage.setItem(NAME_KEY, name) } catch { /* */ }
@@ -674,6 +677,10 @@ export default function CallsTool() {
                   </Button>
                 )}
               </div>
+              {isGuest && (
+                <button type="button" onClick={startOwnCall} data-testid="call-start-own"
+                  className="self-start text-[0.82rem] text-sand-100/70 hover:text-sand-100 bg-transparent border-0 cursor-pointer underline underline-offset-2">{s.startOwn}</button>
+              )}
               <p className="text-[0.78rem] text-sand-100/70 flex items-center gap-[0.4rem]"><span aria-hidden="true">🔒</span> {s.privacy}</p>
             </>
           )}

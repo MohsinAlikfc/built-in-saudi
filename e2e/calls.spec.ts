@@ -54,6 +54,21 @@ test('share button opens a modal with a QR before joining a call', async ({ brow
   await c.close()
 })
 
+test('a stale ?room= guest lobby can escape by starting its own call', async ({ browser }) => {
+  const c = await ctx(browser, base)
+  const p = await c.newPage()
+  await p.goto('/en/apps/calls?room=deadroom')
+  await p.getByTestId('call-name').fill('Stuck')
+  // Guest lobby (no host will answer). The escape switches to host mode.
+  await expect(p.getByTestId('call-join')).toBeVisible()
+  await p.getByTestId('call-start-own').click()
+  await expect(p.getByTestId('call-start')).toBeVisible()
+  await p.getByTestId('call-start').click()
+  await expect(p.getByTestId('calls-live')).toBeVisible({ timeout: 15_000 })
+  expect(new URL(p.url()).searchParams.get('room')).not.toBe('deadroom')
+  await c.close()
+})
+
 test('guest waits in the lobby, host admits, then they connect and chat', async ({ browser }) => {
   const a = await ctx(browser, base), b = await ctx(browser, base)
   const pa = await a.newPage(), pb = await b.newPage()
