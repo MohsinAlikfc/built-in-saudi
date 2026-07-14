@@ -27,11 +27,12 @@ export type WbObj =
 // App data messages (JSON, `t`) sent over the channel between in-call peers.
 export type DataMsg =
   | { t: 'chat'; name: string; text: string }
-  | { t: 'wb'; op: 'start'; id: string; pt: number[]; color: string; width: number; erase: boolean; w?: number }
-  | { t: 'wb'; op: 'point'; id: string; pt: number[]; w?: number }
-  | { t: 'wb'; op: 'text'; obj: WbObj }
-  | { t: 'wb'; op: 'remove'; id: string }
-  | { t: 'wb'; op: 'clear' }
+  // `b` is the board key (pure whiteboard / a file / a screen-share); absent = 'board'.
+  | { t: 'wb'; op: 'start'; id: string; pt: number[]; color: string; width: number; erase: boolean; w?: number; b?: string }
+  | { t: 'wb'; op: 'point'; id: string; pt: number[]; w?: number; b?: string }
+  | { t: 'wb'; op: 'text'; obj: WbObj; b?: string }
+  | { t: 'wb'; op: 'remove'; id: string; b?: string }
+  | { t: 'wb'; op: 'clear'; b?: string }
   | { t: 'file-start'; id: string; name: string; size: number; mime: string }
   | { t: 'file-end'; id: string }
 

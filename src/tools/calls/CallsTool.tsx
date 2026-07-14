@@ -198,7 +198,6 @@ export default function CallsTool() {
   const [editingName, setEditingName] = useState(false)
   const [showParticipants, setShowParticipants] = useState(() => (typeof window !== 'undefined' ? window.innerWidth > 640 : true))
   const [showChat, setShowChat] = useState(false)
-  const [showFiles, setShowFiles] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const dragDepth = useRef(0) // enter/leave fire per child; count to know when we've truly left
   const [shareOpen, setShareOpen] = useState(false)
@@ -218,11 +217,13 @@ export default function CallsTool() {
   const fileRef = useRef<HTMLInputElement>(null)
   const rosterRef = useRef<Map<string, PeerInfo>>(new Map())
 
-  // whiteboard (object model synced P2P)
+  // whiteboard (object model synced P2P). Each context — the pure board, each
+  // shared file, and a screen-share — has its OWN board, keyed below.
   const wbRef = useRef<HTMLCanvasElement>(null)
-  const objects = useRef<WbObj[]>([]) // all drawable objects, in z-order
-  const myStack = useRef<string[]>([]) // ids I added, for per-user undo
-  const drawing = useRef<WbObj | null>(null) // stroke currently being drawn
+  const objects = useRef<Map<string, WbObj[]>>(new Map()) // board key → objects (z-order)
+  const myStack = useRef<Map<string, string[]>>(new Map()) // board key → ids I added (undo)
+  const drawing = useRef<{ board: string; obj: Extract<WbObj, { kind: 'stroke' }> } | null>(null)
+  const boardKeyRef = useRef('board') // the active board, set each render from the current view
   const lastPt = useRef<{ x: number; y: number; t: number } | null>(null) // last pointer sample (screen px) for velocity
   const [tool, setTool] = useState<'pen' | 'eraser' | 'text'>('pen')
   const [penColor, setPenColor] = useState(WB_COLORS[0])
@@ -241,7 +242,7 @@ export default function CallsTool() {
   const seen = useRef<Map<string, number>>(new Map()) // id → last heartbeat (ms)
   const panelRef = useRef({ p: true, c: false, f: false }) // which panels are open (for notify)
   const knownInCall = useRef<Set<string>>(new Set()) // ids currently in the call (join/leave detection)
-  panelRef.current = { p: showParticipants, c: showChat, f: showFiles }
+  panelRef.current = { p: showParticipants, c: showChat, f: false }
 
   // Fire a toast for new activity when its panel is closed, and mark a badge. The
   // toast is suppressed while you're actively drawing; the badge persists.
@@ -276,11 +277,12 @@ export default function CallsTool() {
   function onData(id: string, m: DataMsg) {
     if (m.t === 'chat') { setChat((c) => [...c, { from: id, name: m.name, text: m.text }]); notify('c', `${m.name}: ${m.text}`) }
     else if (m.t === 'wb') {
-      if (m.op === 'clear') { objects.current = []; redraw() }
-      else if (m.op === 'start') { objects.current.push({ id: m.id, kind: 'stroke', pts: [...m.pt], color: m.color, width: m.width, erase: m.erase, wds: [m.w ?? m.width] }) }
-      else if (m.op === 'point') { const o = objects.current.find((x) => x.id === m.id); if (o && o.kind === 'stroke') { o.pts.push(...m.pt); (o.wds ||= []).push(m.w ?? o.width); drawLastSeg(o) } }
-      else if (m.op === 'text') { objects.current.push(m.obj); redraw() }
-      else if (m.op === 'remove') { objects.current = objects.current.filter((x) => x.id !== m.id); redraw() }
+      const bk = m.b || 'board'; const active = bk === boardKeyRef.current
+      if (m.op === 'clear') { objects.current.set(bk, []); if (active) redraw() }
+      else if (m.op === 'start') { boardOf(bk).push({ id: m.id, kind: 'stroke', pts: [...m.pt], color: m.color, width: m.width, erase: m.erase, wds: [m.w ?? m.width] }); if (active) redraw() }
+      else if (m.op === 'point') { const o = boardOf(bk).find((x) => x.id === m.id); if (o && o.kind === 'stroke') { o.pts.push(...m.pt); (o.wds ||= []).push(m.w ?? o.width); if (active) drawLastSeg(o) } }
+      else if (m.op === 'text') { boardOf(bk).push(m.obj); if (active) redraw() }
+      else if (m.op === 'remove') { objects.current.set(bk, boardOf(bk).filter((x) => x.id !== m.id)); if (active) redraw() }
     }
     else if (m.t === 'file-start') incoming.current.set(m.id, { name: m.name, mime: m.mime, parts: [] })
     else if (m.t === 'file-end') {
@@ -383,7 +385,7 @@ export default function CallsTool() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function resetLive() { setPeers(new Map()); setLocal(null); setChat([]); setRoster(new Map()); setGraceEndsAt(null); setFiles([]); setSelected(''); setView('board'); setSharing(false); setScreenStream(null); knownInCall.current.clear() }
+  function resetLive() { setPeers(new Map()); setLocal(null); setChat([]); setRoster(new Map()); setGraceEndsAt(null); setFiles([]); setSelected(''); setView('board'); setSharing(false); setScreenStream(null); knownInCall.current.clear(); objects.current.clear(); myStack.current.clear() }
   function hangup() {
     const others = inCallPeers.length
     if (!isGuest) {
@@ -442,16 +444,16 @@ export default function CallsTool() {
     }
     if (lastId) openFile(lastId) // show it to me; peers auto-open it on receipt too
   }
-  function openFile(id: string) { setSelected(id); setView('file'); setShowFiles(true) }
+  function openFile(id: string) { setSelected(id); setView('file'); setUnseen((u) => ({ ...u, f: 0 })) }
   function forceMute(id: string) { rtc.current?.forceMute(id); setToast(`${name || s.you} ${s.mutedBy} ${nameOf(id)}`); setTimeout(() => setToast(''), 3500) }
   function toggleParticipants() { setShowParticipants((v) => { if (!v) { setShowChat(false); setUnseen((u) => ({ ...u, p: 0 })) } return !v }) }
   function toggleChat() { setShowChat((v) => { if (!v) { setShowParticipants(false); setUnseen((u) => ({ ...u, c: 0 })) } return !v }) }
-  function toggleFiles() { setShowFiles((v) => { if (!v) setUnseen((u) => ({ ...u, f: 0 })); return !v }) }
   function deleteFile(id: string) {
     const gone = files.find((f) => f.id === id); if (gone) URL.revokeObjectURL(gone.url)
+    objects.current.delete(`f:${id}`); myStack.current.delete(`f:${id}`) // drop its whiteboard
     const rest = files.filter((f) => f.id !== id)
     setFiles(rest)
-    if (rest.length === 0) { setView('board'); setShowFiles(false); setSelected('') } // last file → back to whiteboard
+    if (rest.length === 0) { setView('board'); setSelected('') } // last file → back to whiteboard
     else if (selected === id) setSelected(rest[0].id)
   }
 
@@ -507,18 +509,22 @@ export default function CallsTool() {
     x.strokeStyle = o.color; x.lineCap = 'round'; x.lineJoin = 'round'
     strokeSeg(x, m, o, n - 1); x.restore()
   }
+  // Per-board object/undo lists (created on first use).
+  const boardOf = (key: string) => { let a = objects.current.get(key); if (!a) { a = []; objects.current.set(key, a) } return a }
+  const stackOf = (key: string) => { let a = myStack.current.get(key); if (!a) { a = []; myStack.current.set(key, a) } return a }
   function redraw() {
     const c = wbRef.current; if (!c) return; const x = c.getContext('2d'); if (!x) return
-    const m = mapper(c); x.clearRect(0, 0, c.width, c.height); for (const o of objects.current) drawObj(x, m, o)
+    const m = mapper(c); x.clearRect(0, 0, c.width, c.height); for (const o of boardOf(boardKeyRef.current)) drawObj(x, m, o)
   }
   function wbDown(e: React.PointerEvent) {
     if (tool === 'text') { const p = wbPt(e); finishDraft(); setDraft({ u: p.x, v: p.y, size: textSize, rot: 0, w: DEFAULT_TW, text: '' }); return }
     ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+    const board = boardKeyRef.current
     const p = wbPt(e); const id = oid(); const erase = tool === 'eraser'
     const o: Extract<WbObj, { kind: 'stroke' }> = { id, kind: 'stroke', pts: [p.x, p.y], color: erase ? '#000' : penColor, width: penW, erase, wds: [penW] }
-    objects.current.push(o); myStack.current.push(id); drawing.current = o
+    boardOf(board).push(o); stackOf(board).push(id); drawing.current = { board, obj: o }
     lastPt.current = { x: e.clientX, y: e.clientY, t: e.timeStamp }
-    rtc.current?.broadcast({ t: 'wb', op: 'start', id, pt: [p.x, p.y], color: o.color, width: penW, erase, w: penW })
+    rtc.current?.broadcast({ t: 'wb', op: 'start', id, pt: [p.x, p.y], color: o.color, width: penW, erase, w: penW, b: board })
   }
   // Taper the brush with pointer speed (px/ms): slow = thick (up to 1.25× base),
   // fast = thin (down to 0.4× base) — the "living pen" feel from the signature pad.
@@ -529,16 +535,17 @@ export default function CallsTool() {
     return base * mul
   }
   function wbMove(e: React.PointerEvent) {
-    const o = drawing.current; if (!o || o.kind !== 'stroke') return
+    const d = drawing.current; if (!d) return; const o = d.obj
     const p = wbPt(e); const w = speedWidth(e, o.width)
     o.pts.push(p.x, p.y); (o.wds ||= []).push(w); lastPt.current = { x: e.clientX, y: e.clientY, t: e.timeStamp }
-    drawLastSeg(o); rtc.current?.broadcast({ t: 'wb', op: 'point', id: o.id, pt: [p.x, p.y], w })
+    drawLastSeg(o); rtc.current?.broadcast({ t: 'wb', op: 'point', id: o.id, pt: [p.x, p.y], w, b: d.board })
   }
   function wbUp() { drawing.current = null }
   function commitDraft(d: TextDraft) {
     const t = d.text.trim(); if (!t) return
+    const board = boardKeyRef.current
     const o: WbObj = { id: oid(), kind: 'text', u: d.u, v: d.v, text: t, color: penColor, size: d.size, rot: d.rot, w: d.w }
-    objects.current.push(o); myStack.current.push(o.id); rtc.current?.broadcast({ t: 'wb', op: 'text', obj: o }); redraw()
+    boardOf(board).push(o); stackOf(board).push(o.id); rtc.current?.broadcast({ t: 'wb', op: 'text', obj: o, b: board }); redraw()
   }
   // Commit the current draft (if it has text) and close it. Called on blur / new box.
   function finishDraft() { const d = draftRef.current; draftRef.current = null; if (d) { commitDraft(d); setDraft(null) } }
@@ -569,8 +576,8 @@ export default function CallsTool() {
     const d = draftRef.current; if (!d) return
     const size = Math.min(0.14, Math.max(0.014, d.size + delta)); setTextSize(size); upd({ size })
   }
-  function undo() { const id = myStack.current.pop(); if (!id) return; objects.current = objects.current.filter((o) => o.id !== id); redraw(); rtc.current?.broadcast({ t: 'wb', op: 'remove', id }) }
-  function clearBoard(broadcast = true) { objects.current = []; myStack.current = []; redraw(); if (broadcast) rtc.current?.broadcast({ t: 'wb', op: 'clear' }) }
+  function undo() { const board = boardKeyRef.current; const id = stackOf(board).pop(); if (!id) return; objects.current.set(board, boardOf(board).filter((o) => o.id !== id)); redraw(); rtc.current?.broadcast({ t: 'wb', op: 'remove', id, b: board }) }
+  function clearBoard(broadcast = true) { const board = boardKeyRef.current; objects.current.set(board, []); myStack.current.set(board, []); redraw(); if (broadcast) rtc.current?.broadcast({ t: 'wb', op: 'clear', b: board }) }
   // Size the whiteboard to its container in the live layout, and on resize.
   useEffect(() => {
     if (phase !== 'live') return
@@ -578,7 +585,7 @@ export default function CallsTool() {
     const t = window.setTimeout(fit, 30); window.addEventListener('resize', fit)
     return () => { window.clearTimeout(t); window.removeEventListener('resize', fit) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, view, showParticipants, showChat, showFiles, files.length])
+  }, [phase, view, selected, sharing, roster, showParticipants, showChat, files.length])
 
   useEffect(() => { draftRef.current = draft }, [draft])
   // Auto-grow the text box to fit its wrapped content (on text/width/size change).
@@ -594,8 +601,8 @@ export default function CallsTool() {
 
   // A screen-share gets a fresh annotation whiteboard on top (and back to a clean
   // board when it ends). Everyone observes the same share state, so all clear.
-  const anyoneSharing = sharing || [...roster].some(([, i]) => i.inCall && i.sharing)
-  useEffect(() => { clearBoard(false) /* eslint-disable-line react-hooks/exhaustive-deps */ }, [anyoneSharing])
+  // (Per-board whiteboards mean a screen-share gets its own 'screen' board; no need
+  // to wipe the pure board when sharing starts.)
 
   async function shareInvite(code = room) {
     const url = `${SITE}${joinPath(code)}`
@@ -726,6 +733,8 @@ export default function CallsTool() {
   const presenterPeer = inCallPeers.find(([, i]) => i.sharing)
   const presenterStream = sharing ? screenStream : (presenterPeer ? peers.get(presenterPeer[0]) : null)
   const presenting = !!presenterStream
+  // The active whiteboard follows the stage: a screen-share, a file, or the pure board.
+  boardKeyRef.current = presenting ? 'screen' : view === 'file' && selected ? `f:${selected}` : 'board'
   // Whiteboard: fade the part of our canvas that isn't in everyone's common view.
   const selfHx = 0.5 * Math.max(selfAspect, 1), selfHy = 0.5 * Math.max(1 / selfAspect, 1)
   const asp = [selfAspect, ...inCallPeers.map(([, i]) => i.aspect || 1)]
@@ -743,16 +752,6 @@ export default function CallsTool() {
       onDragOver={(e) => { if (e.dataTransfer.types.includes('Files')) e.preventDefault() }}
       onDragLeave={() => { dragDepth.current = Math.max(0, dragDepth.current - 1); if (dragDepth.current === 0) setDragOver(false) }}
       onDrop={(e) => { e.preventDefault(); dragDepth.current = 0; setDragOver(false); pickFiles(e.dataTransfer.files) }}>
-      {dragOver && (
-        <div className="absolute inset-0 z-[90] p-4 pointer-events-none" data-testid="call-dropzone">
-          <div className="w-full h-full grid place-items-center rounded-xl border-2 border-dashed border-green-500 bg-[color-mix(in_srgb,var(--green-400)_16%,var(--bg))]">
-            <div className="flex flex-col items-center gap-2 text-green-800">
-              <UploadIcon className="w-9 h-9" />
-              <span className="font-semibold text-[1rem]">{s.dropHere}</span>
-            </div>
-          </div>
-        </div>
-      )}
       {shareModal}
       {/* ---- sticky toolbar (replaces the site navbar during a call) ---- */}
       <header className="flex items-center gap-1.5 px-2 sm:px-3 py-2 border-b border-[color:var(--line)] bg-[var(--surface)] flex-wrap">
@@ -770,14 +769,29 @@ export default function CallsTool() {
 
         <div className="flex-1" />
 
-        {/* main-view dropdown (whiteboard / share screen / send file) */}
+        {/* main-view dropdown (whiteboard / share screen) */}
         <Menu testid="call-view" triggerClass={dropTrigger}
-          trigger={<>{presenting ? <ScreenShareIcon /> : view === 'file' ? <FileIcon /> : <WhiteboardIcon />}<span className="max-[420px]:hidden">{presenting ? s.screen : view === 'file' ? s.filesTitle : s.board}</span><ChevronDownIcon className="w-3.5 h-3.5 opacity-60" /></>}>
-          <MenuItem icon={<WhiteboardIcon />} label={s.board} onClick={() => setView('board')} active={view === 'board' && !presenting} testid="view-board" />
+          trigger={<>{presenting ? <ScreenShareIcon /> : view === 'file' ? <FileIcon /> : <WhiteboardIcon />}<span className="max-[420px]:hidden">{presenting ? s.screen : view === 'file' ? (selectedFile?.name || s.filesTitle) : s.board}</span><ChevronDownIcon className="w-3.5 h-3.5 opacity-60" /></>}>
+          <MenuItem icon={<WhiteboardIcon />} label={s.board} onClick={() => { setView('board'); setSelected('') }} active={view === 'board' && !presenting} testid="view-board" />
           <MenuItem icon={<ScreenShareIcon />} label={sharing ? s.stopScreen : s.screen} onClick={toggleScreen} active={sharing} />
-          <MenuItem icon={<UploadIcon />} label={s.sendFiles} onClick={() => fileRef.current?.click()} />
         </Menu>
-        {files.length > 0 && <IconBtn onClick={toggleFiles} active={showFiles} title={s.filesTitle} testid="call-files-btn" badge={unseen.f || undefined}><FileIcon /></IconBtn>}
+        {/* files dropdown: upload + the shared-file list (each file has its own board) */}
+        <Menu testid="call-files" triggerClass={dropTrigger} align="start"
+          trigger={<><FileIcon /><span className="max-[420px]:hidden">{s.filesTitle}{files.length > 0 ? ` · ${files.length}` : ''}</span>{unseen.f > 0 && <span className="w-1.5 h-1.5 rounded-full bg-gold-500" />}<ChevronDownIcon className="w-3.5 h-3.5 opacity-60" /></>}>
+          <MenuItem icon={<UploadIcon />} label={s.sendFiles} onClick={() => fileRef.current?.click()} />
+          {files.length > 0 && <div className="my-1 border-t border-[color:var(--line)]" />}
+          {files.map((f) => (
+            <div key={f.id} className={`group flex items-center rounded-md ${selected === f.id && view === 'file' ? 'bg-[color-mix(in_srgb,var(--ink)_12%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--ink)_6%,transparent)]'}`}>
+              <button type="button" onClick={() => openFile(f.id)} data-testid="call-file-open" className="flex-1 min-w-0 text-start px-2 py-1.5 text-[0.82rem] bg-transparent border-0 cursor-pointer text-ink truncate">
+                {f.name}<span className="block text-[0.66rem] text-ink-faint truncate">{f.from}</span>
+              </button>
+              <a href={f.url} download={f.name} title={s.download} aria-label={s.download} data-testid="call-file-dl"
+                className="grid place-items-center w-7 h-7 rounded bg-transparent text-ink-faint hover:text-green-700 cursor-pointer shrink-0"><DownloadIcon className="w-4 h-4" /></a>
+              <button type="button" onClick={() => deleteFile(f.id)} title={s.clear} aria-label={s.clear} data-testid="call-file-del"
+                className="grid place-items-center w-7 h-7 me-1 rounded bg-transparent border-0 text-ink-faint hover:text-[var(--danger)] cursor-pointer shrink-0"><TrashIcon className="w-4 h-4" /></button>
+            </div>
+          ))}
+        </Menu>
 
         {/* participants / chat / call controls — top on desktop, bottom bar on mobile */}
         <span className="w-px h-6 bg-[color:var(--line)] mx-0.5 max-[640px]:hidden" />
@@ -800,26 +814,15 @@ export default function CallsTool() {
 
       {/* ---- body ---- */}
       <div className="flex-1 flex min-h-0 relative">
-        {/* files list (left) — shown only when the Files panel is toggled open */}
-        {showFiles && files.length > 0 && (
-          <aside className="w-48 sm:w-56 shrink-0 border-e border-[color:var(--line)] bg-[var(--surface)] overflow-y-auto p-2 flex flex-col gap-0.5 max-[640px]:absolute max-[640px]:inset-0 max-[640px]:w-full max-[640px]:z-30" data-testid="call-filelist">
-            <p className="text-[0.72rem] font-semibold uppercase tracking-wide text-ink-faint px-1 py-1">{s.filesTitle} · {files.length}</p>
-            {files.map((f) => (
-              <div key={f.id} className={`group flex items-center rounded-md ${selected === f.id && view === 'file' ? 'bg-[color-mix(in_srgb,var(--ink)_12%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--ink)_6%,transparent)]'}`}>
-                <button type="button" onClick={() => openFile(f.id)} className="flex-1 min-w-0 text-start px-2 py-1.5 text-[0.82rem] bg-transparent border-0 cursor-pointer text-ink truncate">
-                  {f.name}<span className="block text-[0.68rem] text-ink-faint truncate">{f.from}</span>
-                </button>
-                <a href={f.url} download={f.name} title={s.download} aria-label={s.download} data-testid="call-file-dl"
-                  className="opacity-0 group-hover:opacity-100 grid place-items-center w-7 h-7 rounded bg-transparent text-ink-faint hover:text-green-700 cursor-pointer shrink-0"><DownloadIcon className="w-4 h-4" /></a>
-                <button type="button" onClick={() => deleteFile(f.id)} title={s.clear} aria-label={s.clear} data-testid="call-file-del"
-                  className="opacity-0 group-hover:opacity-100 grid place-items-center w-7 h-7 me-1 rounded bg-transparent border-0 text-ink-faint hover:text-[var(--danger)] cursor-pointer shrink-0"><TrashIcon className="w-4 h-4" /></button>
-              </div>
-            ))}
-          </aside>
-        )}
-
         {/* main stage: screen-share or file preview (behind) + whiteboard on top */}
         <main className={`flex-1 relative min-w-0 overflow-hidden ${presenting || view === 'file' ? 'bg-[color-mix(in_srgb,var(--ink)_90%,black)]' : 'bg-white'}`}>
+          {dragOver && (
+            <div className="absolute inset-0 z-40 p-4 pointer-events-none" data-testid="call-dropzone">
+              <div className="w-full h-full grid place-items-center rounded-xl border-2 border-dashed border-green-500 bg-[color-mix(in_srgb,var(--green-400)_18%,transparent)]">
+                <div className="flex flex-col items-center gap-2 text-green-700"><UploadIcon className="w-9 h-9" /><span className="font-semibold text-[1rem]">{s.dropHere}</span></div>
+              </div>
+            </div>
+          )}
           {presenting && presenterStream && (
             <StreamVideo stream={presenterStream} muted className="absolute inset-0 w-full h-full object-contain" />
           )}

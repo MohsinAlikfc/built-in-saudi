@@ -85,6 +85,37 @@ test('a stale ?room= guest lobby can escape by starting its own call', async ({ 
   await c.close()
 })
 
+test('each shared file gets its own whiteboard (separate from the pure board)', async ({ browser }) => {
+  const c = await ctx(browser, base)
+  const p = await c.newPage()
+  await p.goto('/en/apps/calls')
+  await p.getByTestId('call-name').fill('Host')
+  await p.getByTestId('call-start').click()
+  await expect(p.getByTestId('calls-live')).toBeVisible({ timeout: 15_000 })
+  // Inject a tiny PNG through the hidden file input → opens in the file view.
+  await p.evaluate(() => {
+    const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+    const bytes = Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0))
+    const dt = new DataTransfer(); dt.items.add(new File([bytes], 'p.png', { type: 'image/png' }))
+    const inp = document.querySelector('input[type=file]') as HTMLInputElement
+    inp.files = dt.files; inp.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+  await expect(p.locator('[data-testid=calls-live] main img')).toBeVisible()
+  const ink = () => p.evaluate(() => {
+    const cv = document.querySelector('[data-testid=calls-live] canvas') as HTMLCanvasElement
+    const d = cv.getContext('2d')!.getImageData(0, 0, cv.width, cv.height).data
+    let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 10) n++; return n
+  })
+  const box = (await p.locator('[data-testid=calls-live] canvas').boundingBox())!
+  await p.mouse.move(box.x + 80, box.y + 80); await p.mouse.down(); await p.mouse.move(box.x + 180, box.y + 150); await p.mouse.up()
+  expect(await ink()).toBeGreaterThan(0) // drew on the file's board
+  await p.getByTestId('call-view').click(); await p.getByTestId('view-board').click()
+  await expect.poll(ink).toBe(0) // pure whiteboard is a separate, empty board
+  await p.getByTestId('call-files').click(); await p.getByTestId('call-file-open').click()
+  await expect.poll(ink).toBeGreaterThan(0) // back on the file → its drawing persists
+  await c.close()
+})
+
 test('guest waits in the lobby, host admits, then they connect and chat', async ({ browser }) => {
   const a = await ctx(browser, base), b = await ctx(browser, base)
   const pa = await a.newPage(), pb = await b.newPage()
