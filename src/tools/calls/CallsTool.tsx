@@ -377,7 +377,8 @@ export default function CallsTool() {
     setBusy(true)
     const code = room || code6(); setRoom(code); rememberHost(code)
     const r = ensureRoom(code); r.enterLobby(name || s.you, true)
-    try { await r.enableMedia(); setPhase('live'); if (!sharedRef.current) openShareModal(code) } catch { mediaError() } finally { setBusy(false) }
+    // Desktop: auto-open the Share dialog on start; mobile goes straight to the call.
+    try { await r.enableMedia(); setPhase('live'); if (!sharedRef.current && window.innerWidth > 640) openShareModal(code) } catch { mediaError() } finally { setBusy(false) }
   }
   // Escape a stale ?room= link: drop the room, become a host, clean the URL.
   function startOwnCall() { setForceHost(true); setRoom(''); try { history.replaceState(null, '', lobbyPath()) } catch { /* */ } }
