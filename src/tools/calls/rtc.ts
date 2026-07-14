@@ -108,9 +108,10 @@ export class CallRoom {
   enterLobby(name: string, asHost: boolean): void {
     this.name = name; this.role = asHost ? 'host' : 'guest'
     if (!this.active) { this.active = true; this.pollLoop() }
-    this.send('join', 'all')
-    // Heartbeat: re-announce presence over the data channels so peers can expire
-    // anyone who goes quiet (closed tab) instead of leaving them stuck in the lobby.
+    // A guest only KNOCKS (only the host answers) — so a waiting guest is connected
+    // to the host alone and never sees the other participants until admitted. The
+    // host announces itself with JOIN, and admitted peers JOIN to mesh (enableMedia).
+    this.send(asHost ? 'join' : 'knock', 'all')
     this.heartbeat = window.setInterval(() => this.broadcastInfo(), 2000)
   }
 
@@ -120,6 +121,7 @@ export class CallRoom {
     if (this.inCall) return
     this.local = new MediaStream()
     this.inCall = true
+    this.send('join', 'all') // now admitted → invite the other in-call peers to mesh
     this.h.onLocal?.(this.local)
     for (const p of this.peers.values()) this.linkMedia(p)
     this.broadcastInfo()
@@ -160,7 +162,11 @@ export class CallRoom {
 
   private async onSignal(from: string, type: string, payload: unknown) {
     if (from === this.me) return
-    if (type === 'join') { this.send('hello', from); this.connect(from) }
+    // Only the host answers a knock; only the host / already-admitted peers answer a
+    // join. A waiting guest (not host, not in-call) ignores both → it connects to the
+    // host alone and can't discover or reach the other participants.
+    if (type === 'knock') { if (this.role === 'host') { this.send('hello', from); this.connect(from) } }
+    else if (type === 'join') { if (this.role === 'host' || this.inCall) { this.send('hello', from); this.connect(from) } }
     else if (type === 'hello') this.connect(from)
     else if (type === 'offer' || type === 'answer') await this.onDesc(from, payload as RTCSessionDescriptionInit, type)
     else if (type === 'ice') { const c = payload as RTCIceCandidateInit; const p = this.peers.get(from); if (p?.pc.remoteDescription) await p.pc.addIceCandidate(c).catch(() => {}); else p?.pending.push(c) }

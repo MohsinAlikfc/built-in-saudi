@@ -151,6 +151,27 @@ test('mobile: file bar docks under the toolbar and the view dropdown stays on sc
   await c.close()
 })
 
+test('a waiting guest only knocks to the host — it cannot see the other participants', async ({ browser }) => {
+  const ca = await ctx(browser, base), cb = await ctx(browser, base), cc = await ctx(browser, base)
+  const pa = await ca.newPage(), pb = await cb.newPage(), pc = await cc.newPage()
+  await pa.goto('/en/apps/calls'); await pa.getByTestId('call-name').fill('Alice'); await pa.getByTestId('call-start').click()
+  await expect(pa.getByTestId('calls-live')).toBeVisible({ timeout: 15_000 }); await closeShare(pa)
+  const room = new URL(pa.url()).searchParams.get('code') || ''
+  // Bob joins and is admitted.
+  await pb.goto(`/en/apps/calls?code=${room}`); await pb.getByTestId('call-name').fill('Bob'); await pb.getByTestId('call-join').click()
+  await expect(pa.getByTestId('call-lobby-live')).toContainText('Bob', { timeout: 15_000 })
+  await pa.getByTestId('call-admit').click()
+  await expect(pb.getByTestId('calls-live')).toBeVisible({ timeout: 15_000 })
+  // Carol joins → waits. She must NOT learn that Bob is in the meeting.
+  await pc.goto(`/en/apps/calls?code=${room}`); await pc.getByTestId('call-name').fill('Carol'); await pc.getByTestId('call-join').click()
+  await expect(pc.getByTestId('call-waiting')).toBeVisible({ timeout: 10_000 })
+  await pc.waitForTimeout(3000) // allow any (leaked) presence to arrive
+  expect(await pc.evaluate(() => document.body.innerText.includes('Bob'))).toBe(false)
+  // …but the host DOES see Carol knocking.
+  await expect(pa.getByTestId('call-lobby-live')).toContainText('Carol', { timeout: 10_000 })
+  await ca.close(); await cb.close(); await cc.close()
+})
+
 test('guest waits in the lobby, host admits, then they connect and chat', async ({ browser }) => {
   const a = await ctx(browser, base), b = await ctx(browser, base)
   const pa = await a.newPage(), pb = await b.newPage()

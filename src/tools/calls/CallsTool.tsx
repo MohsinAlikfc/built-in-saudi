@@ -341,13 +341,15 @@ export default function CallsTool() {
       onLocal: (st) => setLocal(st),
       onPeerStream: (pid, st) => setPeers((p) => new Map(p).set(pid, st)),
       onLeave: (pid) => {
-        if (knownInCall.current.has(pid)) { knownInCall.current.delete(pid); notify('p', `${rosterRef.current.get(pid)?.name || '•'} ${s.left}`) }
+        // Only announce join/leave once WE'RE in the call (a waiting guest shouldn't
+        // hear about the meeting's comings and goings).
+        if (knownInCall.current.has(pid)) { knownInCall.current.delete(pid); if (rtc.current?.inCall) notify('p', `${rosterRef.current.get(pid)?.name || '•'} ${s.left}`) }
         setPeers((p) => { const n = new Map(p); n.delete(pid); return n }); setRoster((n) => { const m = new Map(n); m.delete(pid); return m })
       },
       onData, onFileChunk,
       onPeerInfo: (id, info) => {
         seen.current.set(id, Date.now())
-        if (info.inCall && !knownInCall.current.has(id)) { knownInCall.current.add(id); notify('p', `${info.name || '•'} ${s.joined}`) }
+        if (info.inCall && !knownInCall.current.has(id)) { knownInCall.current.add(id); if (rtc.current?.inCall) notify('p', `${info.name || '•'} ${s.joined}`) }
         setRoster((r2) => new Map(r2).set(id, info))
       },
       onAdmitted: () => setPhase('live'), // rtc enables our media itself
@@ -435,11 +437,15 @@ export default function CallsTool() {
       rtc.current?.close(); try { localStorage.removeItem(HOST_KEY) } catch { /* */ }
       setEnded({ reason: 'ended', count: 0 }); rtc.current = null; resetLive(); setPhase('ended')
     } else {
-      rtc.current?.leave(); rtc.current = null; resetLive(); setPhase('lobby')
+      // Guest leaving: show the "you left" screen (with a way back in), not a
+      // confusing "ask to join" for the room you just left.
+      const others = inCallPeers.length
+      rtc.current?.leave(); rtc.current = null; resetLive()
+      setEnded({ reason: 'left', count: others }); setPhase('ended')
       history.replaceState(null, '', lobbyPath())
     }
   }
-  function rejoin() { setEnded({ reason: 'gone', count: 0 }); setPhase('lobby'); startHost() }
+  function rejoin() { setEnded({ reason: 'gone', count: 0 }); setPhase('lobby'); if (isGuest) askToJoin(); else startHost() }
   const newCall = () => window.location.assign(localePath(locale, '/apps/calls'))
 
   // Host-disconnect grace (guests only): if the host vanishes, count down 2 minutes
