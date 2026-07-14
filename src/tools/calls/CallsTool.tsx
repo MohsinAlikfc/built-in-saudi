@@ -9,6 +9,7 @@ import { setInCall } from '../../lib/inCall'
 
 const oid = () => Math.random().toString(36).slice(2, 10)
 const WB_COLORS = ['#e11', '#151515', '#1f7a3f', '#2563eb', '#f59e0b']
+const WB_FONT = 'Arial, Helvetica, sans-serif' // safe font shared by the editor + canvas render
 const TXT_PAD = 5 // px inset of text inside the box (matches the editor's padding+border)
 // Word-wrap `text` to `maxW` px using the ctx's current font. Honours explicit
 // newlines and breaks over-long tokens by character.
@@ -526,7 +527,7 @@ export default function CallsTool() {
     } else {
       x.save(); x.translate(m.px(o.u), m.py(o.v)); x.rotate(((o.rot || 0) * Math.PI) / 180)
       const fs = Math.max(10, o.size * m.sc)
-      x.fillStyle = o.color; x.font = `600 ${fs}px 'Hanken Grotesk', system-ui, sans-serif`; x.textBaseline = 'top'
+      x.fillStyle = o.color; x.font = `600 ${fs}px ${WB_FONT}`; x.textBaseline = 'top'
       const maxW = o.w ? o.w * m.sc : Infinity
       const lines = wrapLines(x, o.text, maxW)
       lines.forEach((ln, i) => x.fillText(ln, TXT_PAD, TXT_PAD + i * fs * 1.3)) // TXT_PAD matches the editor's inset
@@ -547,8 +548,10 @@ export default function CallsTool() {
     const c = wbRef.current; if (!c) return; const x = c.getContext('2d'); if (!x) return
     const m = mapper(c); x.clearRect(0, 0, c.width, c.height); for (const o of boardOf(boardKeyRef.current)) drawObj(x, m, o)
   }
+  // Drop an editable text box on the board (commit any open one first).
+  function placeText(u: number, v: number) { finishDraft(); setTool('text'); setDraft({ u, v, size: textSize, rot: 0, w: DEFAULT_TW, text: '' }) }
   function wbDown(e: React.PointerEvent) {
-    if (tool === 'text') { const p = wbPt(e); finishDraft(); setDraft({ u: p.x, v: p.y, size: textSize, rot: 0, w: DEFAULT_TW, text: '' }); return }
+    if (tool === 'text') { const p = wbPt(e); placeText(p.x, p.y); return }
     ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
     const board = boardKeyRef.current
     const p = wbPt(e); const id = oid(); const erase = tool === 'eraser'
@@ -597,7 +600,7 @@ export default function CallsTool() {
     const rad = (d0.rot * Math.PI) / 180
     const move = (ev: PointerEvent) => {
       if (mode === 'move') upd({ u: d0.u + (ev.clientX - sx) / sc, v: d0.v + (ev.clientY - sy) / sc })
-      else if (mode === 'rotate') { const raw = (Math.atan2(ev.clientY - cy, ev.clientX - cx) * 180) / Math.PI + 90; upd({ rot: Math.round(raw / 45) * 45 }) }
+      else if (mode === 'rotate') { const raw = (Math.atan2(ev.clientY - cy, ev.clientX - cx) * 180) / Math.PI + 90; const near = Math.round(raw / 45) * 45; upd({ rot: Math.abs(raw - near) <= 5 ? near : raw }) } // snap only within 5° of a 45° angle
       else { const localDx = (ev.clientX - sx) * Math.cos(rad) + (ev.clientY - sy) * Math.sin(rad); upd({ w: Math.max(0.08, Math.min(1.6, d0.w + localDx / sc)) }) }
     }
     const up = () => { document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up) }
@@ -915,7 +918,7 @@ export default function CallsTool() {
                 <textarea ref={textInputRef} value={draft.text} rows={1}
                   onChange={(e) => upd({ text: e.target.value })} onBlur={() => { if (textReady.current) finishDraft() }}
                   onKeyDown={(e) => { if (e.key === 'Escape') { draftRef.current = null; setDraft(null) } }} data-testid="wb-textinput"
-                  style={{ width: boxW + 2 * TXT_PAD, fontSize: fontPx, color: penColor, lineHeight: 1.3 }}
+                  style={{ width: boxW + 2 * TXT_PAD, fontSize: fontPx, color: penColor, lineHeight: 1.3, fontFamily: WB_FONT }}
                   className="block box-border resize-none overflow-hidden bg-[color-mix(in_srgb,var(--surface)_60%,transparent)] rounded-[2px] outline-none font-semibold p-1 border border-dashed border-[color-mix(in_srgb,var(--ink)_45%,transparent)]" />
                 {/* font size, kept upright */}
                 <div className="absolute top-full mt-3 left-0 flex items-center gap-0.5 bg-[var(--surface)] border border-[color:var(--line)] rounded-full px-1 py-0.5 shadow-sm" style={{ transform: `rotate(${-draft.rot}deg)`, transformOrigin: 'top left' }} data-testid="wb-text-size">
@@ -948,7 +951,7 @@ export default function CallsTool() {
             <span className="w-px h-5 bg-[color:var(--line)] mx-0.5 shrink-0" />
             <button type="button" onClick={() => setTool('eraser')} title="Eraser" aria-label="Eraser" data-testid="wb-eraser"
               className={`grid place-items-center w-8 h-8 rounded-full border-0 cursor-pointer shrink-0 [&_svg]:w-[18px] [&_svg]:h-[18px] ${tool === 'eraser' ? 'bg-[color-mix(in_srgb,var(--ink)_14%,transparent)] text-ink' : 'text-ink-soft hover:bg-[color-mix(in_srgb,var(--ink)_7%,transparent)]'}`}><EraserIcon /></button>
-            <button type="button" onClick={() => setTool('text')} title="Text" aria-label="Text" data-testid="wb-text"
+            <button type="button" onClick={() => placeText(-0.15, -0.06)} title="Text" aria-label="Text" data-testid="wb-text"
               className={`grid place-items-center w-8 h-8 rounded-full border-0 cursor-pointer shrink-0 font-display font-bold text-[1.05rem] ${tool === 'text' ? 'bg-[color-mix(in_srgb,var(--ink)_14%,transparent)] text-ink' : 'text-ink-soft hover:bg-[color-mix(in_srgb,var(--ink)_7%,transparent)]'}`}>T</button>
             <button type="button" onClick={undo} title="Undo" aria-label="Undo" data-testid="wb-undo"
               className="grid place-items-center w-8 h-8 rounded-full border-0 cursor-pointer shrink-0 text-ink-soft hover:bg-[color-mix(in_srgb,var(--ink)_7%,transparent)] [&_svg]:w-[18px] [&_svg]:h-[18px]"><UndoIcon /></button>
