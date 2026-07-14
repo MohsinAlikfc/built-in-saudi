@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocale, localePath } from '../../i18n'
 import { Stack, Button, Input } from '../../components/ui'
-import { DownloadIcon, UploadIcon, ShareIcon, TrashIcon, RefreshIcon, GripIcon, PhoneIcon, EndCallIcon, UsersIcon, ChatIcon, MicIcon, MicOffIcon, CameraIcon, CamOffIcon, WhiteboardIcon, ScreenShareIcon, FileIcon, EraserIcon, UndoIcon, ChevronDownIcon } from '../../components/icons'
+import { DownloadIcon, UploadIcon, ShareIcon, TrashIcon, RefreshIcon, GripIcon, PhoneIcon, EndCallIcon, UsersIcon, UserPlusIcon, ChatIcon, MicIcon, MicOffIcon, CameraIcon, CamOffIcon, WhiteboardIcon, ScreenShareIcon, FileIcon, EraserIcon, UndoIcon, ChevronDownIcon, CopyIcon } from '../../components/icons'
 import type { ReactNode } from 'react'
 import { CallRoom, type DataMsg, type PeerInfo, type WbObj } from './rtc'
 
@@ -32,7 +32,7 @@ const STR = {
     yourName: 'Your name', start: 'Start a call', askJoin: 'Ask to join', shuffle: 'Random name', joining: 'Connecting…', shareInvite: 'Share invite',
     mic: 'Mic', cam: 'Camera', screen: 'Share screen', stopScreen: 'Stop sharing', board: 'Whiteboard', chat: 'Chat', invite: 'Invite', leave: 'Leave',
     you: 'You', waiting: 'Waiting for others to join — share the invite.', clear: 'Clear', typeMsg: 'Message…', send: 'Send', dropFiles: 'Drop files to send, or tap',
-    copied: 'Invite link copied', shareHint: 'Share the link — people who open it appear here for you to let in.',
+    copied: 'Invite link copied', copy: 'Copy link', shareHint: 'Share the link — people who open it appear here for you to let in.',
     lobbyList: 'Waiting in the lobby', admit: 'Let in', waitingHost: 'Waiting for the host to let you in…', cancel: 'Cancel',
     participants: 'Participants', endMeeting: 'End meeting', hangUp: 'Leave', sendFiles: 'Drop files', dropHere: 'Drop files to share with everyone', muteMe: 'Mute me', unmuteMe: 'Unmute',
     camOn: 'Turn camera on', camOff: 'Turn camera off', mutedBy: 'muted', muteThem: 'Mute for everyone', filesTitle: 'Files', noPreview: 'No preview — download to open', download: 'Download',
@@ -47,7 +47,7 @@ const STR = {
     yourName: 'اسمك', start: 'ابدأ مكالمة', askJoin: 'اطلب الانضمام', shuffle: 'اسم عشوائي', joining: 'جارٍ الاتصال…', shareInvite: 'مشاركة الدعوة',
     mic: 'المايك', cam: 'الكاميرا', screen: 'مشاركة الشاشة', stopScreen: 'إيقاف المشاركة', board: 'السبورة', chat: 'الدردشة', invite: 'دعوة', leave: 'مغادرة',
     you: 'أنت', waiting: 'بانتظار انضمام آخرين — شارك الدعوة.', clear: 'مسح', typeMsg: 'رسالة…', send: 'إرسال', dropFiles: 'أفلت ملفات للإرسال أو اضغط',
-    copied: 'تم نسخ رابط الدعوة', shareHint: 'شارك الرابط — يظهر من يفتحه هنا لتسمح له بالدخول.',
+    copied: 'تم نسخ رابط الدعوة', copy: 'نسخ الرابط', shareHint: 'شارك الرابط — يظهر من يفتحه هنا لتسمح له بالدخول.',
     lobbyList: 'في غرفة الانتظار', admit: 'اسمح بالدخول', waitingHost: 'بانتظار أن يسمح لك المضيف بالدخول…', cancel: 'إلغاء',
     participants: 'المشاركون', endMeeting: 'إنهاء الاجتماع', hangUp: 'مغادرة', sendFiles: 'أفلت الملفات', dropHere: 'أفلت الملفات لمشاركتها مع الجميع', muteMe: 'اكتم صوتي', unmuteMe: 'ألغِ الكتم',
     camOn: 'تشغيل الكاميرا', camOff: 'إيقاف الكاميرا', mutedBy: 'كتم', muteThem: 'اكتم للجميع', filesTitle: 'الملفات', noPreview: 'لا معاينة — نزّل للفتح', download: 'تنزيل',
@@ -179,6 +179,10 @@ export default function CallsTool() {
   const [showFiles, setShowFiles] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const dragDepth = useRef(0) // enter/leave fire per child; count to know when we've truly left
+  const [shareOpen, setShareOpen] = useState(false)
+  const [shareUrl, setShareUrl] = useState('')
+  const [shareQr, setShareQr] = useState('')
+  const [copiedShare, setCopiedShare] = useState(false)
   const [view, setView] = useState<'board' | 'file'>('board')
   const [files, setFiles] = useState<{ id: string; name: string; url: string; mime: string; from: string }[]>([])
   const [selected, setSelected] = useState<string>('')
@@ -304,13 +308,6 @@ export default function CallsTool() {
     const code = room || code6(); setRoom(code); reflectRoom(code); rememberHost(code)
     const r = ensureRoom(code); r.enterLobby(name || s.you, true)
     try { await r.enableMedia(); setPhase('live') } catch { mediaError() } finally { setBusy(false) }
-  }
-  // Host: create + share the link without joining yet; wait to let people in.
-  async function shareHost() {
-    const code = room || code6(); setRoom(code); reflectRoom(code); rememberHost(code)
-    const r = ensureRoom(code); r.enterLobby(name || s.you, true)
-    setPhase('hosting')
-    await shareInvite(code)
   }
   // Guest: knock and wait for the host to admit.
   function askToJoin() {
@@ -547,7 +544,36 @@ export default function CallsTool() {
       else { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; a.click() }
     } catch { /* share cancelled */ }
   }
-  const invite = () => shareInvite()
+  // Open the share modal (QR + link + native share). Works before a call too: if
+  // there's no room yet we quietly become the host (sharing without joining).
+  async function openShareModal() {
+    let code = room
+    if (!code) { code = code6(); setRoom(code); reflectRoom(code); rememberHost(code); ensureRoom(code).enterLobby(name || s.you, true); setPhase('hosting') }
+    const url = `${SITE}${localePath(locale, '/apps/calls')}?room=${code}`
+    setShareUrl(url); setShareQr(''); setCopiedShare(false); setShareOpen(true)
+    try { const QR = (await import('qrcode')).default; setShareQr(await QR.toDataURL(url, { margin: 1, width: 320, color: { dark: '#0e5a3f', light: '#ffffff' } })) } catch { /* offline */ }
+  }
+  async function copyShareUrl() { try { await navigator.clipboard.writeText(shareUrl); setCopiedShare(true); setTimeout(() => setCopiedShare(false), 1500) } catch { /* */ } }
+  const invite = () => openShareModal()
+
+  const shareModal = shareOpen ? createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 max-[520px]:p-0" onClick={() => setShareOpen(false)} data-testid="call-share-modal">
+      <div className="w-full max-w-[23rem] max-[520px]:max-w-none max-[520px]:h-full max-[520px]:rounded-none rounded-lg bg-[var(--surface)] shadow-[var(--shadow-lg)] p-5 flex flex-col gap-4 items-center max-[520px]:justify-center" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center w-full">
+          <h3 className="flex-1 font-display text-[1.1rem] text-ink">{s.shareInvite}</h3>
+          <button type="button" onClick={() => setShareOpen(false)} aria-label={s.leave} className="w-8 h-8 -me-1 grid place-items-center rounded-md bg-transparent border-0 text-ink-soft hover:bg-[color-mix(in_srgb,var(--ink)_8%,transparent)] cursor-pointer text-[1.2rem] leading-none">✕</button>
+        </div>
+        <div className="w-56 h-56 grid place-items-center rounded-md bg-white border border-[color:var(--line-soft)] p-2">
+          {shareQr ? <img src={shareQr} alt="QR" className="w-full h-full" data-testid="call-share-qr" /> : <span className="text-ink-faint text-[0.85rem]">…</span>}
+        </div>
+        <p className="font-mono text-[1.3rem] tracking-[0.15em] text-green-800">{room}</p>
+        <div className="w-full flex items-center gap-1 rounded-md border border-[color:var(--line-soft)] bg-[var(--bg)] ps-2.5 pe-1 py-1">
+          <span className="flex-1 min-w-0 truncate text-[0.82rem] font-mono text-ink-soft" dir="ltr">{shareUrl.replace(/^https?:\/\//, '')}</span>
+          <button type="button" onClick={copyShareUrl} title={s.copy} aria-label={s.copy} className="grid place-items-center w-8 h-8 rounded bg-transparent border-0 text-ink-faint hover:text-green-700 cursor-pointer shrink-0">{copiedShare ? <span className="text-green-700 font-bold">✓</span> : <CopyIcon className="w-4 h-4" />}</button>
+        </div>
+        <Button variant="primary" className="w-full justify-center" onClick={() => shareInvite()} data-testid="call-share-do"><ShareIcon className="w-4 h-4" /> {s.shareInvite}</Button>
+      </div>
+    </div>, document.body) : null
 
   if (phase === 'ended') {
     return (
@@ -605,8 +631,8 @@ export default function CallsTool() {
                   {busy ? s.joining : isGuest ? `${s.askJoin} · ${room}` : s.start}
                 </Button>
                 {!isGuest && (
-                  <Button onClick={shareHost} title={s.shareInvite} aria-label={s.shareInvite} className="!px-3" data-testid="call-share">
-                    <ShareIcon className="w-4 h-4" />
+                  <Button onClick={openShareModal} title={s.shareInvite} aria-label={s.shareInvite} className="!px-3" data-testid="call-share">
+                    <UserPlusIcon className="w-4 h-4" />
                   </Button>
                 )}
               </div>
@@ -619,6 +645,7 @@ export default function CallsTool() {
         {!isGuest && phase === 'hosting' && <LobbyList waiting={waiting} admit={admit} hint={s.shareHint} title={s.lobbyList} admitLabel={s.admit} />}
 
         {toast && <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] bg-green-600 text-sand-100 px-4 py-2 rounded-md shadow-[var(--shadow-md)] text-[0.9rem]">{toast}</div>}
+        {shareModal}
       </Stack>
     )
   }
@@ -656,6 +683,7 @@ export default function CallsTool() {
           </div>
         </div>
       )}
+      {shareModal}
       {/* ---- sticky toolbar (replaces the site navbar during a call) ---- */}
       <header className="flex items-center gap-1.5 px-2 sm:px-3 py-2 border-b border-[color:var(--line)] bg-[var(--surface)] flex-wrap">
         {editingName
@@ -668,7 +696,7 @@ export default function CallsTool() {
           : <button type="button" onClick={() => setEditingName(true)} title={s.editName} data-testid="call-name-display"
               className="h-9 max-w-[12rem] px-2.5 rounded-md bg-transparent border-0 text-[0.9rem] font-medium text-ink hover:bg-[color-mix(in_srgb,var(--ink)_8%,transparent)] cursor-text text-start flex items-center gap-1">
               <span className="truncate">{name || '—'}</span>{inCallPeers.length > 0 && <span className="text-ink-faint shrink-0">+{inCallPeers.length}</span>}</button>}
-        <IconBtn onClick={invite} title={s.shareInvite} testid="call-invite"><ShareIcon /></IconBtn>
+        <IconBtn onClick={invite} title={s.shareInvite} testid="call-invite"><UserPlusIcon /></IconBtn>
 
         <div className="flex-1" />
 

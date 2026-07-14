@@ -972,6 +972,15 @@ export function UsersIcon({ className }: P) {
   )
 }
 
+export function UserPlusIcon({ className }: P) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <circle cx="9" cy="8" r="3.2" /><path d="M3.5 19a5.5 5.5 0 0 1 11 0" />
+      <path d="M18 7v6M15 10h6" />
+    </svg>
+  )
+}
+
 export function ChatIcon({ className }: P) {
   return (
     <svg {...base} className={className} aria-hidden="true">

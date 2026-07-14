@@ -42,6 +42,18 @@ async function ctx(browser: Browser, signal: string) {
   return c
 }
 
+test('share button opens a modal with a QR before joining a call', async ({ browser }) => {
+  const c = await ctx(browser, base)
+  const p = await c.newPage()
+  await p.goto('/en/apps/calls')
+  await p.getByTestId('call-name').fill('Host')
+  await p.getByTestId('call-share').click()
+  await expect(p.getByTestId('call-share-modal')).toBeVisible()
+  await expect(p.getByTestId('call-share-qr')).toBeVisible({ timeout: 10_000 })
+  await expect(p.getByTestId('call-share-do')).toBeVisible()
+  await c.close()
+})
+
 test('guest waits in the lobby, host admits, then they connect and chat', async ({ browser }) => {
   const a = await ctx(browser, base), b = await ctx(browser, base)
   const pa = await a.newPage(), pb = await b.newPage()
