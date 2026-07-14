@@ -54,6 +54,22 @@ test('share button opens a modal with a QR before joining a call', async ({ brow
   await c.close()
 })
 
+test('the browser Back button leaves an active call and returns to a clean lobby', async ({ browser }) => {
+  const c = await ctx(browser, base)
+  const p = await c.newPage()
+  await p.goto('/en/apps/calls?room=deadroom') // a stale room somewhere in history
+  await p.goto('/en/apps/calls')
+  await p.getByTestId('call-name').fill('Host')
+  await p.getByTestId('call-start').click()
+  await expect(p.getByTestId('calls-live')).toBeVisible({ timeout: 15_000 })
+  await p.goBack() // Back should LEAVE the call, not surface the stale ?room=
+  await expect(p.getByTestId('calls-live')).toHaveCount(0)
+  await expect(p.getByTestId('call-start')).toBeVisible()
+  await expect(p.getByTestId('call-join')).toHaveCount(0)
+  expect(new URL(p.url()).searchParams.get('room')).toBeNull()
+  await c.close()
+})
+
 test('a stale ?room= guest lobby can escape by starting its own call', async ({ browser }) => {
   const c = await ctx(browser, base)
   const p = await c.newPage()

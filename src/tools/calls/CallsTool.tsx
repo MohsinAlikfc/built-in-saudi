@@ -324,14 +324,12 @@ export default function CallsTool() {
   }
   function mediaError() { setToast('Camera/mic permission needed'); setTimeout(() => setToast(''), 3000) }
   // Put the room code in the URL so it's shareable and rooms are distinguishable.
-  function reflectRoom(code: string) { history.replaceState(null, '', `${localePath(locale, '/apps/calls')}?room=${code}`) }
-
   function rememberHost(code: string) { try { localStorage.setItem(NAME_KEY, name); localStorage.setItem(HOST_KEY, code) } catch { /* */ } }
 
   // Host: start the call right away (others still need to be let in).
   async function startHost() {
     setBusy(true)
-    const code = room || code6(); setRoom(code); reflectRoom(code); rememberHost(code)
+    const code = room || code6(); setRoom(code); rememberHost(code)
     const r = ensureRoom(code); r.enterLobby(name || s.you, true)
     try { await r.enableMedia(); setPhase('live') } catch { mediaError() } finally { setBusy(false) }
   }
@@ -355,6 +353,30 @@ export default function CallsTool() {
   const autoStarted = useRef(false)
   useEffect(() => {
     if (isHostReturn && !autoStarted.current) { autoStarted.current = true; startHost() }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Entering a call pushes ONE history entry (the room link), so the browser Back
+  // button LEAVES the call and returns to a clean lobby — never a stale ?room= trap.
+  const pushedCall = useRef(false)
+  useEffect(() => {
+    const inCall = phase === 'hosting' || phase === 'waiting' || phase === 'live'
+    if (inCall && !pushedCall.current && room) {
+      pushedCall.current = true
+      try { history.pushState({ bisCall: true }, '', `${localePath(locale, '/apps/calls')}?room=${room}`) } catch { /* */ }
+    } else if (!inCall) pushedCall.current = false
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, room])
+  useEffect(() => {
+    const onPop = () => {
+      if (!pushedCall.current) return // not in a call → let the browser navigate away normally
+      pushedCall.current = false
+      rtc.current?.leave(); rtc.current = null; resetLive()
+      setForceHost(true); setRoom(''); setPhase('lobby') // land on a clean host lobby
+      try { history.replaceState(null, '', localePath(locale, '/apps/calls')) } catch { /* */ }
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -589,7 +611,7 @@ export default function CallsTool() {
   // there's no room yet we quietly become the host (sharing without joining).
   async function openShareModal() {
     let code = room
-    if (!code) { code = code6(); setRoom(code); reflectRoom(code); rememberHost(code); ensureRoom(code).enterLobby(name || s.you, true); setPhase('hosting') }
+    if (!code) { code = code6(); setRoom(code); rememberHost(code); ensureRoom(code).enterLobby(name || s.you, true); setPhase('hosting') }
     const url = `${SITE}${localePath(locale, '/apps/calls')}?room=${code}`
     setShareUrl(url); setShareQr(''); setCopiedShare(false); setShareOpen(true)
     try { const QR = (await import('qrcode')).default; setShareQr(await QR.toDataURL(url, { margin: 1, width: 320, color: { dark: '#0e5a3f', light: '#ffffff' } })) } catch { /* offline */ }
