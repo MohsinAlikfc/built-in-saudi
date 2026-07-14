@@ -92,6 +92,7 @@ import { fakeDataTool } from './fake-data/meta'
 import { slugifyTool } from './slugify/meta'
 import { lineBreaksTool } from './line-breaks/meta'
 import { pasteToMarkdownTool } from './paste-to-markdown/meta'
+import { arabicVerbsTool } from './arabic-verbs/meta'
 
 /**
  * The tool catalog. Stable/beta tools render inside the app at /tools/:id.
@@ -174,6 +175,7 @@ export const tools: Tool[] = [
   hijriCalendarTool,
   ibanValidatorTool,
   tafqeetTool,
+  arabicVerbsTool,
   qiblaTool,
   passwordGeneratorTool,
   uuidGeneratorTool,

@@ -1066,6 +1066,20 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/apps/line-breaks"/>
   </url>
   <url>
+    <loc>https://built-in-saudi.com/en/apps/arabic-verbs</loc>
+    <lastmod>2026-07-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/apps/arabic-verbs"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/apps/arabic-verbs"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/apps/arabic-verbs"/>
+  </url>
+  <url>
+    <loc>https://built-in-saudi.com/ar/apps/arabic-verbs</loc>
+    <lastmod>2026-07-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/apps/arabic-verbs"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://built-in-saudi.com/ar/apps/arabic-verbs"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://built-in-saudi.com/en/apps/arabic-verbs"/>
+  </url>
+  <url>
     <loc>https://built-in-saudi.com/en/apps/paste-to-markdown</loc>
     <lastmod>2026-07-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://built-in-saudi.com/en/apps/paste-to-markdown"/>

@@ -504,6 +504,11 @@ export const liveToolSeo: ToolSeo[] = [
     ar: { name: 'محوّل فواصل الأسطر', description: 'تبديل تلقائي لتباعد الأسطر — المفردة تصبح مزدوجة والمزدوجة مفردة والمختلطة تُوحَّد إلى مزدوجة. صندوق ناتج مع نسخ ومشاركة، داخل متصفحك.' },
   },
   {
+    id: 'arabic-verbs',
+    en: { name: 'Arabic Verb Conjugator', description: 'Enter an Arabic root for the full conjugation — past, present (3 moods), imperative, passive across 13 pronouns, Forms I–X + quadriliteral, derived nouns and emphatics. Weak/irregular roots flagged. All in-browser.' },
+    ar: { name: 'مُصرِّف الأفعال العربية', description: 'أدخل جذرًا عربيًّا للتصريف الكامل — الماضي والمضارع (ثلاثة أوجه) والأمر والمجهول عبر ١٣ ضميرًا، الأوزان من فَعَلَ إلى استفعل والرباعي، مع المشتقات والتوكيد. تُنبَّه الجذور المعتلّة والشاذّة. داخل المتصفح.' },
+  },
+  {
     id: 'paste-to-markdown',
     en: { name: 'Paste Markdown', description: 'Paste from Word, a web page or WordPad and get clean Markdown — line breaks, bold, italics, links, headings, lists, quotes, code and tables. Copy or share; nothing uploaded.' },
     ar: { name: 'لصق ماركداون', description: 'الصق من وورد أو صفحة ويب أو WordPad واحصل على ماركداون نظيف — فواصل أسطر وخط عريض ومائل وروابط وعناوين وقوائم واقتباسات وشيفرة وجداول. انسخ أو شارك؛ لا يُرفع شيء.' },

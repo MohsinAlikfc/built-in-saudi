@@ -673,6 +673,35 @@ test.describe('paste to markdown', () => {
   })
 })
 
+test.describe('arabic verb conjugator', () => {
+  test('conjugates a triliteral Form I root', async ({ page }) => {
+    await page.goto('/en/apps/arabic-verbs')
+    await page.getByTestId('av-root').fill('كتب')
+    // past هو and present هو appear somewhere (stored on data-verb attributes)
+    await expect(page.locator('[data-verb="كَتَبَ"]').first()).toBeVisible()
+    await expect(page.locator('[data-verb="يَكْتُبُ"]').first()).toBeVisible()
+    // derived active participle
+    await expect(page.getByTestId('av-derived')).toContainText('كَاتِب')
+    // passive voice shows كُتِبَ
+    await page.getByTestId('av-passive').click()
+    await expect(page.locator('[data-verb="كُتِبَ"]').first()).toBeVisible()
+  })
+
+  test('flags a known irregular root', async ({ page }) => {
+    await page.goto('/en/apps/arabic-verbs')
+    await page.getByTestId('av-root').fill('وصل')
+    await expect(page.getByTestId('av-irregular')).toContainText('يَصِلُ')
+    await expect(page.getByTestId('av-weak')).toBeVisible()
+  })
+
+  test('switches to a quadriliteral form', async ({ page }) => {
+    await page.goto('/en/apps/arabic-verbs')
+    await page.getByTestId('av-root').fill('دحرج')
+    await expect(page.getByTestId('av-form-Q1')).toBeVisible()
+    await expect(page.locator('[data-verb="دَحْرَجَ"]').first()).toBeVisible()
+  })
+})
+
 test.describe('pdf sign + fill', () => {
   test('sign: loads with a signature pad and a document dropzone', async ({ page }) => {
     await page.goto('/en/tools/pdf-sign')
