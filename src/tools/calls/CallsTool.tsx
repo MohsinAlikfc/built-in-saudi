@@ -323,6 +323,22 @@ export default function CallsTool() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Keep the screen awake during a live call so the phone doesn't dim/lock and
+  // suspend the media. The OS releases the lock whenever the tab is hidden, so
+  // re-acquire it when we come back to the foreground. Auto-released on leave.
+  useEffect(() => {
+    if (phase !== 'live') return
+    let lock: WakeLockSentinel | null = null
+    let done = false
+    const acquire = async () => {
+      try { lock = (await navigator.wakeLock?.request('screen')) ?? null } catch { /* unsupported / denied */ }
+    }
+    acquire()
+    const onVisible = () => { if (!document.hidden && !done) acquire() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => { done = true; document.removeEventListener('visibilitychange', onVisible); lock?.release().catch(() => {}) }
+  }, [phase])
+
   rosterRef.current = roster
   const nameOf = useCallback((id: string) => roster.get(id)?.name || '•', [roster])
   // The people the host still needs to let in (guests who haven't joined yet).
