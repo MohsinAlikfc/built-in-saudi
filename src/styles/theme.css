@@ -130,6 +130,8 @@
 @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse { 50% { opacity: 0.3; } }
 @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+/* Calls: mic button "you're talking" flash — pulse the green speaking ring. */
+@keyframes mic-pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-green-500) 55%, transparent); } 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-green-500) 0%, transparent); } }
 /* A scanning beam sweeping down a document (CV "reading" state). */
 @keyframes cvscan {
   0% { transform: translateY(-6rem); opacity: 0; }

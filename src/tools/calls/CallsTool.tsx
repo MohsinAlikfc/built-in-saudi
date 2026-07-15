@@ -136,13 +136,14 @@ function LobbyList({ waiting, admit, hint, title, admitLabel, leftLabel, left, l
 }
 
 // A borderless toolbar icon button: shaded on hover, extra-shaded when active.
-function IconBtn({ onClick, title, active, danger, children, testid, badge, big }: { onClick: () => void; title: string; active?: boolean; danger?: boolean; children: ReactNode; testid?: string; badge?: number; big?: boolean }) {
+function IconBtn({ onClick, title, active, danger, children, testid, badge, big, flash }: { onClick: () => void; title: string; active?: boolean; danger?: boolean; children: ReactNode; testid?: string; badge?: number; big?: boolean; flash?: boolean }) {
   return (
     <button type="button" onClick={onClick} title={title} aria-label={title} data-testid={testid}
       className={`relative grid place-items-center h-9 min-w-9 px-2 rounded-md border-0 cursor-pointer transition-colors ${big ? '[&_svg]:w-[23px] [&_svg]:h-[23px]' : '[&_svg]:w-[18px] [&_svg]:h-[18px]'} ${
-        danger ? 'bg-transparent text-[var(--danger)] hover:bg-[color-mix(in_srgb,var(--danger)_15%,transparent)]'
-          : active ? 'bg-[color-mix(in_srgb,var(--ink)_15%,transparent)] text-ink'
-            : 'bg-transparent text-ink-soft hover:bg-[color-mix(in_srgb,var(--ink)_8%,transparent)] hover:text-ink'}`}>
+        flash ? 'bg-[color-mix(in_srgb,var(--color-green-500)_28%,transparent)] text-green-700 ring-2 ring-green-500 [animation:mic-pulse_0.9s_ease-in-out_infinite]'
+          : danger ? 'bg-transparent text-[var(--danger)] hover:bg-[color-mix(in_srgb,var(--danger)_15%,transparent)]'
+            : active ? 'bg-[color-mix(in_srgb,var(--ink)_15%,transparent)] text-ink'
+              : 'bg-transparent text-ink-soft hover:bg-[color-mix(in_srgb,var(--ink)_8%,transparent)] hover:text-ink'}`}>
       {children}
       {badge ? <span className="absolute -top-1 -end-1 min-w-[15px] h-[15px] px-1 rounded-full bg-gold-500 text-white text-[0.6rem] font-bold grid place-items-center">{badge}</span> : null}
     </button>
@@ -195,6 +196,42 @@ function PeerAudio({ stream }: { stream: MediaStream }) {
 }
 function AudioSinks({ streams }: { streams: [string, MediaStream][] }) {
   return <>{streams.map(([id, s]) => <PeerAudio key={id} stream={s} />)}</>
+}
+
+// Voice-activity detection: true while the stream's audio is above a speaking
+// threshold (with a short linger so it doesn't strobe). Taps the mic via a Web
+// Audio analyser — never connected to output, so it can't cause echo. `active`
+// gates it to when the mic is actually on.
+function useSpeaking(stream: MediaStream | null, active: boolean): boolean {
+  const [speaking, setSpeaking] = useState(false)
+  useEffect(() => {
+    const track = active ? stream?.getAudioTracks()[0] : null
+    if (!track) { setSpeaking(false); return }
+    let ctx: AudioContext | null = null
+    let iv = 0
+    let lastAbove = 0
+    try {
+      const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      if (!AC) return
+      ctx = new AC()
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize = 512
+      ctx.createMediaStreamSource(new MediaStream([track])).connect(analyser)
+      const data = new Uint8Array(analyser.frequencyBinCount)
+      iv = window.setInterval(() => {
+        analyser.getByteTimeDomainData(data)
+        let sum = 0
+        for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sum += v * v }
+        const rms = Math.sqrt(sum / data.length)
+        const now = ctx!.currentTime * 1000
+        if (rms > 0.035) lastAbove = now
+        const on = now - lastAbove < 350
+        setSpeaking((prev) => (prev === on ? prev : on))
+      }, 100)
+    } catch { /* audio unavailable */ }
+    return () => { window.clearInterval(iv); ctx?.close().catch(() => {}) }
+  }, [stream, active])
+  return speaking
 }
 
 // A live read-out of the call's connection + media state, so a tester can screenshot
@@ -618,6 +655,7 @@ export default function CallsTool() {
   // Acquire the device on turn-on and release it on turn-off (so the browser's
   // in-use indicator clears when muted/off). Revert the button if permission is denied.
   async function toggleMic() { const v = !mic; setMic(v); const ok = await rtc.current?.toggleMic(v); if (v && ok === false) setMic(false) }
+  const speaking = useSpeaking(local, mic) // flash the mic icon while the local user talks
   async function toggleCam() { const v = !cam; setCam(v); const ok = await rtc.current?.toggleCam(v); if (v && ok === false) setCam(false) }
   async function toggleScreen() {
     if (sharing) { rtc.current?.stopScreen(); setSharing(false); setScreenStream(null) }
@@ -1025,7 +1063,7 @@ export default function CallsTool() {
           <IconBtn onClick={toggleChat} active={showChat} title={s.chat} badge={unseen.c || undefined}><ChatIcon /></IconBtn>
           <span className="w-px h-6 bg-[color:var(--line)] mx-0.5" />
           <IconBtn onClick={toggleCam} active={cam} title={cam ? s.camOff : s.camOn} testid="call-cam">{cam ? <CameraIcon /> : <CamOffIcon />}</IconBtn>
-          <IconBtn onClick={toggleMic} active={mic} danger={!mic} title={mic ? s.muteMe : s.unmuteMe} testid="call-mic">{mic ? <MicIcon /> : <MicOffIcon />}</IconBtn>
+          <IconBtn onClick={toggleMic} active={mic} danger={!mic} flash={speaking} title={mic ? s.muteMe : s.unmuteMe} testid="call-mic">{mic ? <MicIcon /> : <MicOffIcon />}</IconBtn>
           <IconBtn onClick={hangup} title={isGuest ? s.hangUp : s.endMeeting} danger big testid="call-hangup">{isGuest ? <PhoneIcon /> : <EndCallIcon />}</IconBtn>
         </span>
         <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => { pickFiles(e.target.files); e.target.value = '' }} />
@@ -1229,7 +1267,7 @@ export default function CallsTool() {
         )}
         <div className="flex-1" />
         <IconBtn onClick={toggleCam} active={cam} title={cam ? s.camOff : s.camOn}>{cam ? <CameraIcon /> : <CamOffIcon />}</IconBtn>
-        <IconBtn onClick={toggleMic} active={mic} danger={!mic} title={mic ? s.muteMe : s.unmuteMe}>{mic ? <MicIcon /> : <MicOffIcon />}</IconBtn>
+        <IconBtn onClick={toggleMic} active={mic} danger={!mic} flash={speaking} title={mic ? s.muteMe : s.unmuteMe}>{mic ? <MicIcon /> : <MicOffIcon />}</IconBtn>
         <IconBtn onClick={hangup} title={isGuest ? s.hangUp : s.endMeeting} danger big>{isGuest ? <PhoneIcon /> : <EndCallIcon />}</IconBtn>
       </footer>
 
