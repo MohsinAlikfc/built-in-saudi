@@ -135,14 +135,8 @@ function homeContent(locale: Loc): string {
 function toolContent(locale: Loc, tool: ToolSeo): string {
   const t = dicts[locale]
   const ts = tool[locale]
-  const more = t.toolPage.moreTools
-  const others = liveToolSeo
-    .filter((x) => x.id !== tool.id)
-    .map((x) => `<li><a href="/${locale}/apps/${x.id}/">${esc(x[locale].name)}</a></li>`)
-    .join('')
   return `<main><nav><a href="/${locale}/">${esc(t.toolPage.breadcrumb)}</a> / ${esc(ts.name)}</nav>`
-    + `<h1>${esc(ts.name)}</h1><p>${esc(ts.description)}</p>`
-    + `<h2>${esc(more)}</h2><ul>${others}</ul></main>`
+    + `<h1>${esc(ts.name)}</h1><p>${esc(ts.description)}</p></main>`
 }
 
 /**
