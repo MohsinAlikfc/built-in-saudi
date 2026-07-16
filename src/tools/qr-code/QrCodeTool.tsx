@@ -174,7 +174,7 @@ export default function QrCodeTool() {
       <div className="mx-[calc(50%-50vw)] w-screen max-w-[100vw] mt-[calc(clamp(1.5rem,4vw,2.5rem)*-1)] bg-green-600 text-sand-100">
         <div className="wrap py-[clamp(1.4rem,4vw,2rem)] flex flex-col gap-4 items-start max-w-[44rem]">
           <div className="flex flex-col gap-1">
-            <h1 className="font-display rtl:font-ar text-[clamp(1.4rem,4vw,1.9rem)] font-bold leading-tight" style={{ color: 'var(--sand-100)' }}>{L.title}</h1>
+            <h2 className="font-display rtl:font-ar text-[clamp(1.4rem,4vw,1.9rem)] font-bold leading-tight" style={{ color: 'var(--sand-100)' }}>{L.title}</h2>
           </div>
           <input
             type="url" inputMode="url" placeholder={q.placeholderUrl} data-testid="qr-url" value={link} autoComplete="off"

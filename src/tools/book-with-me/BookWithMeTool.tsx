@@ -556,7 +556,7 @@ export default function BookWithMeTool() {
       {/* Intro hero — Publish (white) + Preview (text link), inside the box */}
       <div className="mx-[calc(50%-50vw)] w-screen max-w-[100vw] mt-[calc(clamp(1.5rem,4vw,2.5rem)*-1)] bg-green-600 text-sand-100">
         <div className="wrap py-[clamp(1.3rem,4vw,1.8rem)] flex flex-col gap-3 max-w-[44rem]">
-          <h1 className="font-display rtl:font-ar text-[clamp(1.4rem,4vw,1.9rem)] font-bold leading-tight" style={{ color: 'var(--sand-100)' }}>{s.heroTitle}</h1>
+          <h2 className="font-display rtl:font-ar text-[clamp(1.4rem,4vw,1.9rem)] font-bold leading-tight" style={{ color: 'var(--sand-100)' }}>{s.heroTitle}</h2>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <span className="text-[0.82rem] font-semibold opacity-90">{s.meetingTypes}</span>

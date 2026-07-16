@@ -29,7 +29,7 @@ function hreflangs(sub: string): string {
   return links.join('')
 }
 
-interface Head { locale: Loc; dir: string; title: string; desc: string; canonical: string; sub: string }
+interface Head { locale: Loc; dir: string; title: string; desc: string; canonical: string; sub: string; type: 'WebSite' | 'WebApplication' | 'WebPage' }
 
 // Replace a meta tag's content regardless of attribute order or line wrapping
 // (index.html wraps some tags across lines, which a single-line regex misses —
@@ -40,13 +40,67 @@ function setContent(html: string, matchAttr: string, value: string): string {
 }
 
 function applyHead(html: string, h: Head): string {
+  const homeName = h.locale === 'ar' ? 'الرئيسية' : 'Home'
+  const cleanTitle = h.title.split(' — ')[0]
+  
+  let schemaData: any
+  if (h.type === 'WebApplication') {
+    schemaData = [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": homeName, "item": `${ORIGIN}/${h.locale}/` },
+          { "@type": "ListItem", "position": 2, "name": cleanTitle, "item": h.canonical }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": cleanTitle,
+        "description": h.desc,
+        "url": h.canonical,
+        "applicationCategory": "BrowserApplication",
+        "operatingSystem": "Any"
+      }
+    ]
+  } else if (h.type === 'WebPage') {
+    schemaData = [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": homeName, "item": `${ORIGIN}/${h.locale}/` },
+          { "@type": "ListItem", "position": 2, "name": cleanTitle, "item": h.canonical }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": cleanTitle,
+        "description": h.desc,
+        "url": h.canonical
+      }
+    ]
+  } else {
+    schemaData = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": h.title,
+      "description": h.desc,
+      "url": h.canonical
+    }
+  }
+
+  const ldJson = `<script type="application/ld+json">${JSON.stringify(schemaData)}</script>`
+
   html = html
     .replace(/<html[^>]*>/, `<html lang="${h.locale}" dir="${h.dir}" translate="no">`)
     .replace(/<title>[^<]*<\/title>/, `<title>${esc(h.title)}</title>`)
     .replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${h.canonical}$2`)
     .replace(/(<meta property="og:url" content=")[^"]*(")/, `$1${h.canonical}$2`)
     .replace(/(<meta property="og:locale" content=")[^"]*(")/, `$1${h.locale === 'ar' ? 'ar_SA' : 'en_US'}$2`)
-    .replace(/<\/head>/, `${hreflangs(h.sub)}</head>`)
+    .replace(/<\/head>/, `${ldJson}${hreflangs(h.sub)}</head>`)
   html = setContent(html, 'name="description"', h.desc)
   html = setContent(html, 'property="og:title"', h.title)
   html = setContent(html, 'property="og:description"', h.desc)
@@ -134,14 +188,14 @@ function prerenderPlugin(): Plugin {
         const dir = dicts[locale].dir
         const site = siteMeta[locale]
 
-        let home = applyHead(shell, { locale, dir, title: site.title, desc: site.description, canonical: `${ORIGIN}/${locale}/`, sub: '' })
+        let home = applyHead(shell, { locale, dir, title: site.title, desc: site.description, canonical: `${ORIGIN}/${locale}/`, sub: '', type: 'WebSite' })
         home = injectContent(home, homeContent(locale))
         write(locale, home)
 
         for (const tool of liveToolSeo) {
           const ts = tool[locale]
           const sub = `/apps/${tool.id}`
-          let page = applyHead(shell, { locale, dir, title: `${ts.name}${suffix[locale]}`, desc: ts.description, canonical: `${ORIGIN}/${locale}${sub}/`, sub })
+          let page = applyHead(shell, { locale, dir, title: `${ts.name}${suffix[locale]}`, desc: ts.description, canonical: `${ORIGIN}/${locale}${sub}/`, sub, type: 'WebApplication' })
           page = injectContent(page, toolContent(locale, tool))
           write(`${locale}${sub}`, page)
         }
@@ -151,14 +205,14 @@ function prerenderPlugin(): Plugin {
         for (const page of staticPageSeo) {
           const ps = page[locale]
           const sub = `/${page.id}`
-          let html = applyHead(shell, { locale, dir, title: `${ps.name}${suffix[locale]}`, desc: ps.description, canonical: `${ORIGIN}/${locale}${sub}/`, sub })
+          let html = applyHead(shell, { locale, dir, title: `${ps.name}${suffix[locale]}`, desc: ps.description, canonical: `${ORIGIN}/${locale}${sub}/`, sub, type: 'WebPage' })
           html = injectContent(html, `<main><h1>${esc(ps.name)}</h1><p>${esc(ps.description)}</p></main>`)
           write(`${locale}${sub}`, html)
         }
       }
 
       // Root shell: English-default head + hreflang + language links (it redirects client-side).
-      let root = applyHead(shell, { locale: 'en', dir: 'ltr', title: siteMeta.en.title, desc: siteMeta.en.description, canonical: `${ORIGIN}/en/`, sub: '' })
+      let root = applyHead(shell, { locale: 'en', dir: 'ltr', title: siteMeta.en.title, desc: siteMeta.en.description, canonical: `${ORIGIN}/en/`, sub: '', type: 'WebSite' })
       root = injectContent(root, `<main><h1>${esc(siteMeta.en.title)}</h1><p><a href="/en">English</a> · <a href="/ar">العربية</a></p></main>`)
       writeFileSync(join(dist, 'index.html'), root)
 

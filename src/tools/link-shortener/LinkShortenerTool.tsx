@@ -146,7 +146,7 @@ export default function LinkShortenerTool() {
     <Stack data-testid="link-shortener" className={`min-h-[60vh] ${idToken ? '' : 'pb-24'}`}>
       <div className="mx-[calc(50%-50vw)] w-screen max-w-[100vw] mt-[calc(clamp(1.5rem,4vw,2.5rem)*-1)] bg-green-600 text-sand-100">
         <div className="wrap py-[clamp(1.4rem,4vw,2rem)] max-w-[46rem] flex flex-col gap-2">
-          <h1 className="font-display rtl:font-ar text-[clamp(1.5rem,4vw,2rem)] font-bold leading-tight" style={{ color: 'var(--sand-100)' }}>{s.heroTitle}</h1>
+          <h2 className="font-display rtl:font-ar text-[clamp(1.5rem,4vw,2rem)] font-bold leading-tight" style={{ color: 'var(--sand-100)' }}>{s.heroTitle}</h2>
           <p className="text-[0.98rem] opacity-90 leading-relaxed max-w-[40rem]">
             {s.heroPre}<span className="whitespace-nowrap">{s.heroLink}</span>{s.heroPost}
           </p>

@@ -50,5 +50,67 @@ export function useDocumentMeta(locale: Locale, subPath = '', title?: string, de
     setMeta('meta[name="twitter:title"]', 'content', fullTitle)
     setMeta('meta[name="twitter:description"]', 'content', desc)
     setHreflangs(subPath)
+
+    const isApp = subPath.startsWith('/apps/')
+    const isPage = subPath !== '' && !isApp
+    const homeName = locale === 'ar' ? 'الرئيسية' : 'Home'
+    const cleanTitle = title || site.title
+    
+    let schemaData: any
+    if (isApp) {
+      schemaData = [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": homeName, "item": `${ORIGIN}/${locale}/` },
+            { "@type": "ListItem", "position": 2, "name": cleanTitle, "item": canonical }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": cleanTitle,
+          "description": desc,
+          "url": canonical,
+          "applicationCategory": "BrowserApplication",
+          "operatingSystem": "Any"
+        }
+      ]
+    } else if (isPage) {
+      schemaData = [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": homeName, "item": `${ORIGIN}/${locale}/` },
+            { "@type": "ListItem", "position": 2, "name": cleanTitle, "item": canonical }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": cleanTitle,
+          "description": desc,
+          "url": canonical
+        }
+      ]
+    } else {
+      schemaData = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": fullTitle,
+        "description": desc,
+        "url": canonical
+      }
+    }
+    
+    let script = document.querySelector('script[type="application/ld+json"]')
+    if (!script) {
+      script = document.createElement('script')
+      script.setAttribute('type', 'application/ld+json')
+      document.head.appendChild(script)
+    }
+    script.textContent = JSON.stringify(schemaData)
   }, [locale, subPath, title, description])
 }
