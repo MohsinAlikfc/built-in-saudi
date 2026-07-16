@@ -4,18 +4,18 @@ import type { Locale } from "./index";
 // vite.config.ts can import it. When a tool goes LIVE, add its entry here.
 
 export const siteMeta: Record<Locale, { title: string; description: string }> =
-  {
-    en: {
-      title: "Built in Saudi — Free, honest online tools",
-      description:
-        "A growing toolbox of fast, free, privacy-first utilities — no ads, no sign-ups, nothing uploaded. Everything runs in your browser. Proudly built in Saudi Arabia.",
-    },
-    ar: {
-      title: "بُنِيَ في السعودية — أدوات مجانية وصادقة على الإنترنت",
-      description:
-        "صندوقُ أدواتٍ متنامٍ من الأدوات المجانية التي تحترم خصوصيتك — بلا إعلانات، وبلا تسجيل، ولا يُرفع أي شيء. كل شيء يعمل داخل متصفحك. صُنع بفخر في السعودية.",
-    },
-  };
+{
+  en: {
+    title: "Built In Saudi – Free Online Tools, Generators & Calculators",
+    description:
+      "Discover 90+ free online tools: QR codes, PDF editors, prayer times, Zakat calculator, image tools & more. Fast, secure, no sign-up. Built for Saudi Arabia.",
+  },
+  ar: {
+    title: "بيلت إن سعودي – أدوات وحاسبات مجانية أونلاين",
+    description:
+      "أكثر من 90 أداة مجانية أونلاين: مولد QR، تحرير PDF، مواقيت الصلاة، حاسبة الزكاة، أدوات الصور والمزيد. سريعة وآمنة بدون تسجيل.",
+  },
+};
 
 export interface ToolContent {
   seoTitle?: string;
@@ -67,14 +67,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Calls",
       description:
-        "Start a free video or voice call instantly in your browser. No downloads, no sign up — share a link and connect right away.",
-      seoTitle: "Free Online Video Calls – No Sign Up | Built in Saudi",
+        "Make free browser-based video and voice calls instantly. No app download, no account. Secure peer-to-peer calling tool.",
+      seoTitle: "Free Online Video & Voice Calls – No Sign-up Required",
     },
     ar: {
       name: "مكالمات",
       description:
-        "ابدأ مكالمة فيديو أو صوتية مجانية مباشرة من متصفحك، بدون تسجيل وبدون تحميل برامج. شارك الرابط وابدأ الاتصال فورًا.",
-      seoTitle: "مكالمات فيديو مجانية بدون تسجيل | بُنيَ في السعودية",
+        "قم بإجراء مكالمات فيديو وصوت مجانية مباشرة من المتصفح دون تحميل تطبيق أو حساب. أداة مكالمات آمنة ومباشرة.",
+      seoTitle: "مكالمات فيديو وصوت مجانية أونلاين بدون تسجيل",
     },
   },
   {
@@ -82,12 +82,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Prompt Analyzer",
       description:
-        "Paste an LLM system prompt and one AI pass scores it 1–5 across eight dimensions — purpose coherence, context-vs-instruction harmony, spikiness, shoutiness, contradictions, framing, an escape hatch and downstream stakes — as a spider chart, with concrete issues listed. One analysis per 24 hours.",
+        "Analyze and improve your AI prompts for better results online for free. Fast prompt quality checker tool.",
+      seoTitle: "Free AI Prompt Analyzer – Improve Your Prompts Online",
     },
     ar: {
       name: "محلّل الموجّهات",
       description:
-        "الصق موجّه نظام لنموذج لغوي فيقيّمه مرور واحد للذكاء الاصطناعي من ١ إلى ٥ عبر ثمانية أبعاد — تماسك الغرض وتناغم السياق مع التعليمات والحدّة والصياح والتناقضات والصياغة ومنفذ الخروج والاستخدام اللاحق — كمخطط عنكبوتي مع سرد المشكلات. تحليل واحد كل ٢٤ ساعة.",
+        "حلل وحسّن برومبتات الذكاء الاصطناعي للحصول على نتائج أفضل مجانًا وفورًا.",
+      seoTitle: "أداة تحليل وتحسين برومبت الذكاء الاصطناعي",
     },
   },
   {
@@ -95,13 +97,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Regex Tester",
       description:
-        "Test and debug regular expressions online for free. See real-time matches and groups highlighted — no sign up required.",
-      seoTitle: "Free Online Regex Tester & Debugger | Built in Saudi",
+        "Test and debug regular expressions (regex) online for free with real-time match highlighting for developers.",
+      seoTitle: "Free Regex Tester – Test Regular Expressions Online",
     },
     ar: {
       name: "مختبِر التعابير النمطية",
       description:
-        "اكتب تعبيرًا نمطيًا وشاهد كل مطابقة مُظلّلة في نصك أثناء الكتابة، مع مجموعات الالتقاط وعدّ حيّ للمطابقات. يستخدم محرّك JavaScript بالكامل في متصفحك — لا يُرفع أي شيء.",
+        "اختبر وصحح التعابير النمطية (Regex) أونلاين مجانًا مع تظليل فوري للنتائج.",
+      seoTitle: "أداة اختبار Regex (التعابير النمطية) مجانًا",
     },
   },
   {
@@ -109,13 +112,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "JWT Decoder",
       description:
-        "Decode and inspect JWT tokens instantly in your browser. Free and no sign up — your token stays private.",
-      seoTitle: "Free JWT Decoder – Decode & Verify Tokens | Built in Saudi",
+        "Decode and verify JWT (JSON Web Tokens) online for free instantly. Secure, client-side JWT decoder tool.",
+      seoTitle: "Free JWT Decoder – Decode JSON Web Tokens Online",
     },
     ar: {
       name: "مفكّك رموز JWT",
       description:
-        "الصق رمز JSON Web Token لفكّ ترويسته وحمولته إلى JSON مقروء، مع أوقات الانتهاء والإصدار بالتوقيت المحلي. يتم الفكّ بالكامل في متصفحك — لا يُرفع الرمز ولا يُتحقَّق من التوقيع.",
+        "فك تشفير والتحقق من رموز JWT مجانًا وفورًا بأمان تام داخل المتصفح.",
+      seoTitle: "أداة فك تشفير JWT مجانًا أونلاين",
     },
   },
   {
@@ -123,12 +127,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Cron Explainer",
       description:
-        "Paste a 5-field cron expression and get a plain-language description of when it runs, plus the next several run times in your local timezone. Supports ranges, steps and lists, computed in your browser.",
+        "Decode and understand any cron expression in plain English online for free. Instant cron schedule explainer.",
+      seoTitle: "Free Cron Expression Explainer – Understand Cron Jobs",
     },
     ar: {
       name: "مفسّر Cron",
       description:
-        "الصق تعبير cron المكوَّن من خمسة حقول لتحصل على وصف واضح لموعد تشغيله وأوقات التشغيل القادمة بتوقيتك المحلي. يدعم النطاقات والخطوات والقوائم، ويُحسب في متصفحك.",
+        "افهم واشرح أي تعبير Cron بلغة بسيطة مجانًا وفورًا لجدولة المهام.",
+      seoTitle: "أداة شرح تعبيرات Cron مجانًا أونلاين",
     },
   },
   {
@@ -136,13 +142,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Text Diff",
       description:
-        "Compare two blocks of text and instantly see the differences highlighted. Free, no sign up — great for code, docs, or edits.",
-      seoTitle: "Text Diff Checker – Compare Text Online | Built in Saudi",
+        "Compare two texts or files and highlight differences online for free, instantly. Simple text comparison tool.",
+      seoTitle: "Free Text Diff Checker – Compare Two Texts Online",
     },
     ar: {
       name: "مقارنة النصوص",
       description:
-        "الصق نسختين من نصّ لترى الفروق سطرًا بسطر — الإضافات والحذوفات والأسطر غير المتغيّرة بألوان مميّزة، مع عدّ لما تغيّر. يعمل بالكامل في متصفحك؛ لا يُرفع أي شيء.",
+        "قارن بين نصين أو ملفين وأبرز الفروقات بينهما مجانًا وفورًا.",
+      seoTitle: "أداة مقارنة النصوص (Text Diff) مجانًا",
     },
   },
   {
@@ -150,12 +157,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Unix Timestamp",
       description:
-        "Convert a Unix timestamp (seconds or milliseconds) to a readable date and back, in both your local timezone and UTC, with a live current-time readout. Runs entirely in your browser.",
+        "Convert Unix timestamp to human-readable date and back online for free, instantly and accurately.",
+      seoTitle: "Free Unix Timestamp Converter – Epoch Time Tool",
     },
     ar: {
       name: "الطابع الزمني يونكس",
       description:
-        "حوّل طابعًا زمنيًا يونكس (بالثواني أو المللي ثانية) إلى تاريخ مقروء والعكس، بتوقيتك المحلي وبتوقيت UTC، مع عرض حيّ للوقت الحالي. يعمل بالكامل في متصفحك.",
+        "حوّل الطابع الزمني Unix إلى تاريخ مقروء والعكس مجانًا وبدقة فورية.",
+      seoTitle: "محول الطابع الزمني Unix Timestamp مجانًا",
     },
   },
   {
@@ -163,12 +172,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "URL & HTML Encoder",
       description:
-        "Encode or decode text for URLs (percent-encoding, whole-URL or component) and HTML (entities like &amp; and &#39;), both directions, as you type. Runs entirely in your browser — nothing is uploaded.",
+        "Encode or decode URLs online for free instantly. Simple, fast URL encoding tool for developers.",
+      seoTitle: "Free URL Encoder & Decoder – Online Tool",
     },
     ar: {
       name: "مُرمِّز الروابط وHTML",
       description:
-        "رمِّز أو فُكّ ترميز النص للروابط (ترميز النسبة المئوية، رابط كامل أو جزء) ولـHTML (كيانات مثل &amp; و&#39;) في الاتجاهين أثناء الكتابة. يعمل بالكامل في متصفحك — لا يُرفع أي شيء.",
+        "شفّر أو فك تشفير الروابط (URL) مجانًا وفورًا. أداة بسيطة وسريعة للمطورين.",
+      seoTitle: "أداة ترميز وفك ترميز الروابط URL مجانًا",
     },
   },
   {
@@ -176,12 +187,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Number Base Converter",
       description:
-        "Convert a number between binary, octal, decimal, hexadecimal and any base from 2 to 36, all at once and in real time. Arbitrary-precision, so large values stay exact. Runs entirely in your browser.",
+        "Convert numbers between binary, decimal, hexadecimal, and octal online for free, instantly and accurately.",
+      seoTitle: "Free Number Base Converter – Binary, Hex, Decimal",
     },
     ar: {
       name: "محوّل أنظمة الأعداد",
       description:
-        "حوّل عددًا بين الثنائي والثماني والعشري والست عشري وأي أساس من 2 إلى 36 دفعةً واحدة وفي الوقت الحقيقي، بدقة عالية للقيم الكبيرة. يعمل بالكامل في متصفحك.",
+        "حوّل الأرقام بين الثنائي والعشري والسادس عشر والثماني مجانًا وبدقة فورية.",
+      seoTitle: "محول الأنظمة العددية Base Converter مجانًا",
     },
   },
   {
@@ -189,13 +202,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "CSV ⇄ JSON",
       description:
-        "Convert CSV to JSON or JSON to CSV instantly in your browser. Free, no sign up, no file size limits.",
-      seoTitle: "CSV to JSON Converter – Free & Online | Built in Saudi",
+        "Convert CSV files to JSON format online for free, instantly. Also supports JSON to CSV conversion.",
+      seoTitle: "Free CSV to JSON Converter – Online Tool",
     },
     ar: {
       name: "CSV ⇄ JSON",
       description:
-        "الصق CSV لتحصل على مصفوفة كائنات JSON مفهرسة بصف الترويسة، أو الصق JSON لتحصل على CSV. يتعامل مع الحقول المقتبسة والفواصل والأسطر داخل القيم. يُحلَّل في متصفحك — لا يُرفع أي شيء.",
+        "حوّل ملفات CSV إلى صيغة JSON مجانًا وفورًا، مع دعم التحويل العكسي أيضًا.",
+      seoTitle: "محول CSV إلى JSON مجانًا أونلاين",
     },
   },
   {
@@ -203,13 +217,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "List Tools",
       description:
-        "Sort, deduplicate, shuffle, and clean up text lists instantly online. Free, no sign up — paste your list and get results in seconds.",
-      seoTitle: "Free List Tools – Sort, Dedupe & Format | Built in Saudi",
+        "Sort, deduplicate, shuffle, and format text lists online for free. Fast, all-in-one list management tool.",
+      seoTitle: "Free Online List Tools – Sort, Dedupe & Format Lists",
     },
     ar: {
       name: "أدوات القوائم",
       description:
-        "الصق قائمة، عنصرًا في كل سطر، ونظّفها: رتّب أبجديًا أو رقميًا، أزل المكرّرات والأسطر الفارغة، شذّب المسافات، غيّر الحالة، اعكس أو اخلط، مع عدّادات قبل وبعد. يعمل بالكامل في متصفحك.",
+        "رتّب وأزل التكرار واخلط ونسّق قوائمك النصية مجانًا بأداة شاملة وسريعة.",
+      seoTitle: "أدوات القوائم المجانية – ترتيب وتنظيف القوائم",
     },
   },
   {
@@ -217,12 +232,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Contrast Checker",
       description:
-        "Pick a text and background colour and see their WCAG 2.1 contrast ratio, with clear pass/fail badges for AA and AAA at normal and large text sizes, plus a live preview. Runs entirely in your browser.",
+        "Check color contrast ratios for accessibility compliance (WCAG) online for free, instantly and accurately.",
+      seoTitle: "Free Color Contrast Checker – WCAG Accessibility Tool",
     },
     ar: {
       name: "فاحص التباين",
       description:
-        "اختر لون النص والخلفية لترى نسبة التباين وفق WCAG 2.1، مع شارات نجاح/رسوب لمستويي AA وAAA لأحجام النص العادية والكبيرة، ومعاينة حيّة. يعمل بالكامل في متصفحك.",
+        "افحص نسبة تباين الألوان للتوافق مع معايير إمكانية الوصول (WCAG) مجانًا وبدقة.",
+      seoTitle: "أداة فحص تباين الألوان مجانًا (WCAG)",
     },
   },
   {
@@ -230,12 +247,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Loan Calculator",
       description:
-        "Work out the monthly payment on a loan or mortgage from the amount, annual interest rate and term, with total interest, total repaid and a year-by-year amortization breakdown. A neutral maths tool, not financial advice. Runs entirely in your browser.",
+        "Calculate your loan's monthly payments, total interest, and repayment schedule online for free, instantly.",
+      seoTitle: "Free Loan Calculator – Monthly Payment & Interest",
     },
     ar: {
       name: "حاسبة القروض",
       description:
-        "احسب القسط الشهري لقرض أو تمويل عقاري من المبلغ ونسبة الفائدة السنوية والمدة، مع إجمالي الفائدة والمبلغ المسدَّد وجدول إطفاء سنوي. أداة حسابية محايدة وليست نصيحة مالية. تعمل بالكامل في متصفحك.",
+        "احسب القسط الشهري وإجمالي الفوائد وجدول سداد قرضك مجانًا وبسرعة.",
+      seoTitle: "حاسبة القروض المجانية – احسب القسط الشهري",
     },
   },
   {
@@ -243,12 +262,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Percentage Calculator",
       description:
-        "Answer the common percentage questions instantly: what is X% of Y, X is what percent of Y, and the percentage increase or decrease from one number to another. Runs entirely in your browser.",
+        "Calculate percentages, percentage change, and increase/decrease online for free, fast and accurate.",
+      seoTitle: "Free Percentage Calculator – Calculate Percentages Online",
     },
     ar: {
       name: "حاسبة النسبة المئوية",
       description:
-        "أجب فورًا عن أسئلة النسب الشائعة: كم يساوي X% من Y، وX يمثّل أي نسبة من Y، ونسبة الزيادة أو النقص من رقم إلى آخر. تعمل بالكامل في متصفحك.",
+        "احسب النسب المئوية والزيادة والنقصان مجانًا وبدقة وسرعة.",
+      seoTitle: "حاسبة النسبة المئوية مجانًا أونلاين",
     },
   },
   {
@@ -256,12 +277,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Bill Splitter",
       description:
-        "Split a restaurant or group bill fairly: add an optional tip percentage, set how many people are paying, and see the per-person share and the grand total. Runs entirely in your browser.",
+        "Split bills and expenses fairly between friends or roommates online for free. Fast, simple bill-splitting calculator.",
+      seoTitle: "Free Bill Splitter – Split Expenses Between Friends",
     },
     ar: {
       name: "مقسّم الفاتورة",
       description:
-        "قسّم فاتورة مطعم أو مجموعة بإنصاف: أضف نسبة بقشيش اختيارية، وحدّد عدد الدافعين، وشاهد نصيب كل شخص والمجموع الكلي. تعمل بالكامل في متصفحك.",
+        "قسّم الفواتير والمصاريف بعدل بين الأصدقاء أو زملاء السكن مجانًا وبسرعة.",
+      seoTitle: "أداة تقسيم الفاتورة مجانًا بين الأصدقاء",
     },
   },
   {
@@ -269,12 +292,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Aspect Ratio Calculator",
       description:
-        "Lock an aspect ratio and solve for the missing dimension: enter a width to get the matching height or vice-versa, pick common presets like 16:9 or 4:3, and read the simplified ratio. Runs entirely in your browser.",
+        "Calculate and convert image or video aspect ratios and dimensions online for free, fast and accurate.",
+      seoTitle: "Free Aspect Ratio Calculator – Resize Dimensions Online",
     },
     ar: {
       name: "حاسبة نسبة الأبعاد",
       description:
-        "ثبّت نسبة الأبعاد واحسب البُعد الناقص: أدخل العرض لتحصل على الارتفاع المطابق أو العكس، اختر قوالب شائعة مثل 16:9 أو 4:3، واقرأ النسبة المبسّطة. تعمل بالكامل في متصفحك.",
+        "احسب وحوّل أبعاد الصور والفيديوهات ونسبها مجانًا وبدقة.",
+      seoTitle: "حاسبة نسبة الأبعاد Aspect Ratio مجانًا",
     },
   },
   {
@@ -282,12 +307,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Pomodoro Timer",
       description:
-        "A distraction-free Pomodoro timer: work in focused sprints, take short and long breaks, and let it cycle automatically with a gentle chime and a round counter. Custom lengths are remembered on your device. Runs entirely in your browser.",
+        "Boost your focus with a free online Pomodoro timer. Customizable work and break intervals, no sign-up needed.",
+      seoTitle: "Free Pomodoro Timer – Focus & Productivity Tool Online",
     },
     ar: {
       name: "مؤقّت بومودورو",
       description:
-        "مؤقّت بومودورو خالٍ من التشتيت: اعمل في جلسات مركّزة، وخذ فترات راحة قصيرة وطويلة، ودعه يتنقّل تلقائيًا مع نغمة لطيفة وعدّاد جولات. تُحفظ مدّتك المخصّصة على جهازك. يعمل بالكامل في متصفحك.",
+        "عزز تركيزك وإنتاجيتك بمؤقت بومودورو مجاني أونلاين مع فترات عمل وراحة قابلة للتخصيص.",
+      seoTitle: "مؤقت بومودورو المجاني لتعزيز التركيز",
     },
   },
   {
@@ -295,12 +322,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "End-of-Service Calculator",
       description:
-        "Estimate the Saudi end-of-service gratuity (mukāfaʾat nihāyat al-khidma): half a month per year for the first five years and a full month per year thereafter, adjusted for resignation vs contract end. Based on Labour Law Articles 84–85, informational only — not legal advice. Runs in your browser.",
+        "Calculate your end-of-service gratuity (Mukafaat Nihayat Khidmah) under Saudi labor law for free, instantly.",
+      seoTitle: "End of Service Calculator Saudi Arabia – Free Tool",
     },
     ar: {
       name: "حاسبة نهاية الخدمة",
       description:
-        "قدّر مكافأة نهاية الخدمة السعودية: نصف شهر عن كل سنة من السنوات الخمس الأولى وشهر كامل عن كل سنة بعدها، مع تعديلها حسب الاستقالة أو انتهاء العقد. مبنيّة على المادتين 84 و85 من نظام العمل، لأغراض إرشادية فقط وليست استشارة قانونية. تعمل في متصفحك.",
+        "احسب مكافأة نهاية الخدمة حسب نظام العمل السعودي مجانًا وفوريًا وبدقة.",
+      seoTitle: "حاسبة مكافأة نهاية الخدمة في السعودية مجانًا",
     },
   },
   {
@@ -308,12 +337,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Zakat Calculator",
       description:
-        "Add up your zakatable assets — cash, gold and silver, trade goods and money owed to you — subtract short-term debts, and see 2.5% due once your net wealth is above the niṣāb and held for a lunar year. A helping estimate, not a fatwa. Runs in your browser.",
+        "Calculate your Zakat on cash, gold, and investments accurately online for free. Fast, Sharia-compliant Zakat calculator.",
+      seoTitle: "Zakat Calculator Saudi Arabia – Free Online Tool",
     },
     ar: {
       name: "حاسبة الزكاة",
       description:
-        "اجمع أموالك الزكوية — النقد والذهب والفضة وعروض التجارة والديون المرجوّة لك — واطرح الديون قصيرة الأجل، لترى 2.5% الواجبة متى بلغ صافي مالك النصاب وحال عليه الحول. تقدير مُعين وليس فتوى. يعمل في متصفحك.",
+        "احسب زكاة أموالك وذهبك واستثماراتك بدقة أونلاين مجانًا وفق الضوابط الشرعية.",
+      seoTitle: "حاسبة الزكاة أونلاين – احسب زكاتك مجانًا",
     },
   },
   {
@@ -321,12 +352,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Age Calculator",
       description:
-        "Enter a birth date to see the exact age in years, months and days, the totals in months, weeks and days, the weekday you were born on, and a countdown to the next birthday. Runs entirely in your browser.",
+        "Calculate your exact age in years, months, and days from your birth date online for free, instantly.",
+      seoTitle: "Free Age Calculator – Calculate Your Exact Age Online",
     },
     ar: {
       name: "حاسبة العمر",
       description:
-        "أدخل تاريخ الميلاد لترى العمر بدقّة بالسنوات والأشهر والأيام، والمجاميع بالأشهر والأسابيع والأيام، ويوم الأسبوع الذي وُلدت فيه، وعدًّا تنازليًا للميلاد القادم. تعمل بالكامل في متصفحك.",
+        "احسب عمرك بالضبط بالسنوات والأشهر والأيام من تاريخ ميلادك مجانًا وفوريًا.",
+      seoTitle: "حاسبة العمر المجانية أونلاين",
     },
   },
   {
@@ -334,12 +367,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Working Days Calculator",
       description:
-        "Count the working days between two dates, excluding the weekend — Friday–Saturday for Saudi Arabia or Saturday–Sunday elsewhere — with totals for calendar days and weekend days. Runs entirely in your browser.",
+        "Calculate the number of working days between two dates online for free, excluding weekends and holidays.",
+      seoTitle: "Working Days Calculator – Business Days Between Dates",
     },
     ar: {
       name: "حاسبة أيام العمل",
       description:
-        "احسب أيام العمل بين تاريخين باستثناء نهاية الأسبوع — الجمعة والسبت للسعودية أو السبت والأحد لغيرها — مع مجاميع للأيام الكلية وأيام العطلة. تعمل بالكامل في متصفحك.",
+        "احسب عدد أيام العمل بين تاريخين مجانًا مع استثناء عطلات نهاية الأسبوع والإجازات.",
+      seoTitle: "حاسبة أيام العمل بين تاريخين مجانًا",
     },
   },
   {
@@ -347,12 +382,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Cubic Bezier Editor",
       description:
-        "Drag the two control points to shape a CSS cubic-bezier easing curve, watch a live animation play it back, start from presets like ease-in-out, and copy the ready-to-paste value. Runs entirely in your browser.",
+        "Create and preview custom cubic-bezier CSS easing curves online for free. Copy the code instantly for animations.",
+      seoTitle: "Cubic Bezier Curve Generator – CSS Easing Tool Free",
     },
     ar: {
       name: "محرّر منحنى بيزييه",
       description:
-        "اسحب نقطتي التحكّم لتشكيل منحنى تنعيم CSS من نوع cubic-bezier، وشاهد حركة حيّة تعيده، وابدأ من قوالب مثل ease-in-out، وانسخ القيمة الجاهزة للّصق. يعمل بالكامل في متصفحك.",
+        "أنشئ وعاين منحنيات cubic-bezier المخصصة لـCSS مجانًا وانسخ الكود فورًا للحركات.",
+      seoTitle: "مولد منحنى Cubic Bezier لتأثيرات CSS مجانًا",
     },
   },
   {
@@ -360,12 +397,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Box Shadow Generator",
       description:
-        "Adjust offset, blur, spread, colour, opacity and inset to design a CSS box-shadow, see it on a live preview tile, and copy the exact rule. Runs entirely in your browser.",
+        "Design and preview custom CSS box-shadow effects online for free. Copy the generated code instantly.",
+      seoTitle: "CSS Box Shadow Generator – Free Online Tool",
     },
     ar: {
       name: "مولّد ظل الصندوق",
       description:
-        "اضبط الإزاحة والتمويه والانتشار واللون والشفافية والظل الداخلي لتصميم ظل CSS، وشاهده على بلاطة معاينة حيّة، وانسخ القاعدة بدقّة. يعمل بالكامل في متصفحك.",
+        "صمم وعاين تأثيرات box-shadow المخصصة في CSS مجانًا وانسخ الكود فورًا.",
+      seoTitle: "مولد ظل الصندوق Box Shadow لـCSS مجانًا",
     },
   },
   {
@@ -373,12 +412,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "CSS Gradient Generator",
       description:
-        "Design a CSS gradient from multiple colour stops — linear at any angle or radial — see it fill a live preview, and copy the exact background rule. Runs entirely in your browser.",
+        "Create beautiful linear and radial CSS gradients online for free. Preview and copy gradient code instantly.",
+      seoTitle: "Free CSS Gradient Generator – Create Color Gradients",
     },
     ar: {
       name: "مولّد تدرّجات CSS",
       description:
-        "صمّم تدرّج CSS من عدّة محطّات ألوان — خطّي بأي زاوية أو شعاعي — وشاهده يملأ معاينة حيّة، وانسخ قاعدة الخلفية بدقّة. يعمل بالكامل في متصفحك.",
+        "أنشئ تدرجات لونية خطية ودائرية جميلة لـCSS مجانًا وانسخ الكود فورًا.",
+      seoTitle: "مولد التدرجات اللونية CSS Gradient مجانًا",
     },
   },
   {
@@ -386,12 +427,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "IP Subnet Calculator",
       description:
-        "Enter an IPv4 address with a CIDR prefix (e.g. 192.168.1.10/24) to get the network and broadcast addresses, the usable host range, the subnet mask and wildcard, and the number of usable hosts. Runs entirely in your browser.",
+        "Calculate IP subnets, CIDR ranges, and network details online for free. Fast subnet calculator for network admins.",
+      seoTitle: "Free IP Subnet Calculator – CIDR & Network Tool",
     },
     ar: {
       name: "حاسبة الشبكات الفرعية",
       description:
-        "أدخل عنوان IPv4 مع بادئة CIDR (مثل 192.168.1.10/24) لتحصل على عنواني الشبكة والبثّ، ونطاق المضيفين، وقناع الشبكة والقناع البديل، وعدد المضيفين. يعمل بالكامل في متصفحك.",
+        "احسب الشبكات الفرعية ونطاقات CIDR وتفاصيل الشبكة مجانًا وبسرعة لمسؤولي الشبكات.",
+      seoTitle: "حاسبة الشبكات الفرعية IP Subnet مجانًا",
     },
   },
   {
@@ -399,12 +442,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "User-Agent Parser",
       description:
-        "Read your own browser’s user-agent string, or paste any other, and see the detected browser, rendering engine, operating system and device type broken out. Parsed locally — your UA is never sent anywhere.",
+        "Check and parse any browser user agent string online for free. Identify device, OS, and browser instantly.",
+      seoTitle: "Free User Agent Checker & Parser – Online Tool",
     },
     ar: {
       name: "محلّل وكيل المستخدم",
       description:
-        "اقرأ نص وكيل المستخدم لمتصفحك، أو الصق أي نص آخر، لترى المتصفح ومحرّك العرض ونظام التشغيل ونوع الجهاز مفصّلة. يُحلَّل محليًا — لا يُرسل وكيلك إلى أي مكان.",
+        "افحص وحلل سلسلة user agent لأي متصفح مجانًا وحدد الجهاز ونظام التشغيل فورًا.",
+      seoTitle: "أداة فحص وتحليل User Agent مجانًا",
     },
   },
   {
@@ -412,12 +457,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Readability Scorer",
       description:
-        "Paste English text to get its Flesch Reading Ease score and Flesch–Kincaid grade level, plus word, sentence and syllable counts and averages, so you can see and simplify how hard your writing is. Runs entirely in your browser.",
+        "Check your text's readability score online for free using Flesch and other formulas. Improve your writing instantly.",
+      seoTitle: "Free Readability Checker – Test Text Readability Score",
     },
     ar: {
       name: "مقياس المقروئية",
       description:
-        "الصق نصًّا إنجليزيًا لتحصل على درجة سهولة القراءة (Flesch) ومستوى الصف الدراسي (Flesch–Kincaid)، مع عدد الكلمات والجُمل والمقاطع ومتوسّطاتها، لترى مدى صعوبة كتابتك وتبسّطها. تعمل بالكامل في متصفحك.",
+        "افحص درجة سهولة قراءة نصك مجانًا باستخدام معايير قياسية وحسّن كتابتك فورًا.",
+      seoTitle: "أداة فحص سهولة قراءة النص مجانًا",
     },
   },
   {
@@ -425,12 +472,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Random Picker Wheel",
       description:
-        "Type your options, one per line, and spin a colourful wheel to pick one at random — great for names, prizes, chores or deciding where to eat. Uses cryptographic randomness. Runs entirely in your browser.",
+        "Pick a random name, number, or item from your list instantly. Free, fair, and easy-to-use random picker tool.",
+      seoTitle: "Free Random Picker – Pick a Random Name or Item Online",
     },
     ar: {
       name: "عجلة الاختيار العشوائي",
       description:
-        "اكتب خياراتك، خيارًا في كل سطر، وأدِر عجلة ملوّنة لاختيار واحد عشوائيًا — مثالية للأسماء أو الجوائز أو المهام أو تقرير مكان الأكل. تستخدم عشوائية تشفيرية. تعمل بالكامل في متصفحك.",
+        "اختر اسمًا أو رقمًا أو عنصرًا عشوائيًا من قائمتك فورًا. أداة مجانية وعادلة وسهلة الاستخدام.",
+      seoTitle: "أداة الاختيار العشوائي المجانية أونلاين",
     },
   },
   {
@@ -438,13 +487,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Dice Roller",
       description:
-        "Roll virtual dice online for free — pick the number of dice and sides, then roll instantly. No sign up, works on any device.",
-      seoTitle: "Online Dice Roller – Free & Instant | Built in Saudi",
+        "Roll one or multiple virtual dice online for free. Perfect for games, decisions, and tabletop play, no sign-up.",
+      seoTitle: "Free Online Dice Roller – Roll Virtual Dice Instantly",
     },
     ar: {
       name: "رامي النرد",
       description:
-        "ارمِ أي عدد من حبّات النرد بأي عدد أوجه (من d4 إلى d20 وأكثر)، وشاهد كل نتيجة والمجموع، أو اقلب عملة — بعشوائية تشفيرية عادلة غير متحيّزة. تعمل بالكامل في متصفحك.",
+        "ارمِ نردًا افتراضيًا واحدًا أو متعددًا مجانًا أونلاين. مثالية للألعاب واتخاذ القرارات بدون تسجيل.",
+      seoTitle: "أداة رمي النرد الافتراضي مجانًا أونلاين",
     },
   },
   {
@@ -452,12 +502,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Countdown Timer",
       description:
-        "Set a target date and time — a deadline, launch, trip or celebration — and watch a live countdown of days, hours, minutes and seconds tick down. Your event is remembered on this device. Runs entirely in your browser.",
+        "Create a custom countdown timer for events, deadlines, or launches online for free. Fast and shareable.",
+      seoTitle: "Free Online Countdown Timer – Set a Custom Countdown",
     },
     ar: {
       name: "العدّ التنازلي",
       description:
-        "حدّد تاريخًا ووقتًا مستهدفًا — موعدًا نهائيًا أو إطلاقًا أو رحلة أو احتفالًا — وشاهد عدًّا تنازليًا حيًّا بالأيام والساعات والدقائق والثواني. تُحفظ مناسبتك على هذا الجهاز. يعمل بالكامل في متصفحك.",
+        "أنشئ عداد تنازلي مخصص للفعاليات والمواعيد النهائية مجانًا أونلاين وقابل للمشاركة.",
+      seoTitle: "عداد تنازلي مجاني أونلاين للمناسبات",
     },
   },
   {
@@ -465,12 +517,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Typing Speed Test",
       description:
-        "Type the shown passage to measure your typing speed in words per minute and your accuracy, with each character highlighted as right or wrong in real time. Runs entirely in your browser.",
+        "Test your typing speed and accuracy online for free. Measure your words per minute (WPM) instantly.",
+      seoTitle: "Free Typing Speed Test – Check Your WPM Online",
     },
     ar: {
       name: "اختبار سرعة الكتابة",
       description:
-        "اكتب المقطع المعروض لقياس سرعة كتابتك بالكلمات في الدقيقة ودقّتك، مع تمييز كل حرف صحيحًا أو خاطئًا لحظيًا. يعمل بالكامل في متصفحك.",
+        "اختبر سرعة ودقة كتابتك مجانًا أونلاين وقِس عدد الكلمات في الدقيقة فورًا.",
+      seoTitle: "اختبار سرعة الكتابة المجاني أونلاين",
     },
   },
   {
@@ -478,12 +532,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Image to ASCII",
       description:
-        "Drop an image and convert it into ASCII art — choose the width, character set and light/dark inversion, then copy the text or download it. Processed entirely on your device and never uploaded.",
+        "Convert any image into ASCII art text online for free. Fast, fun, and easy image-to-text art generator.",
+      seoTitle: "Image to ASCII Art Converter – Free Online Tool",
     },
     ar: {
       name: "صورة إلى ASCII",
       description:
-        "أفلت صورة وحوّلها إلى فنّ ASCII — اختر العرض ومجموعة الرموز وعكس الفاتح/الداكن، ثم انسخ النص أو نزّله. تُعالَج بالكامل على جهازك ولا تُرفع أبدًا.",
+        "حوّل أي صورة إلى فن ASCII نصي مجانًا. أداة سريعة وممتعة لتحويل الصور إلى فن الأسكي.",
+      seoTitle: "محول الصور إلى فن ASCII مجانًا أونلاين",
     },
   },
   {
@@ -491,12 +547,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Meme Generator",
       description:
-        "Drop an image, add bold top and bottom captions in the classic meme style, tweak the font size, and download the result as a PNG. Drawn on your device — the image is never uploaded.",
+        "Make custom memes online for free with your own images and text. Fast, easy meme maker, no sign-up required.",
+      seoTitle: "Free Meme Generator – Create Memes Online Instantly",
     },
     ar: {
       name: "مولّد الميمز",
       description:
-        "أفلت صورة، وأضِف تعليقين علوي وسفلي بالنمط الكلاسيكي للميمز، واضبط حجم الخط، ونزّل الناتج كـPNG. تُرسم على جهازك — لا تُرفع الصورة أبدًا.",
+        "أنشئ ميمز مخصصة مجانًا بصورك ونصوصك الخاصة. أداة سريعة وسهلة لإنشاء الميمز بدون تسجيل.",
+      seoTitle: "مولد الميمز المجاني – أنشئ ميم أونلاين",
     },
   },
   {
@@ -504,12 +562,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Favicon Generator",
       description:
-        "Drop a square image or logo and generate crisp favicon and app-icon PNGs at every common size (16 to 512, plus the Apple touch icon), with ready-to-paste HTML link tags. Generated on your device — nothing is uploaded.",
+        "Generate favicons for your website in all sizes and formats for free. Fast, easy favicon.ico generator tool.",
+      seoTitle: "Free Favicon Generator – Create Website Icons Online",
     },
     ar: {
       name: "مولّد الأيقونات",
       description:
-        "أفلت صورة مربّعة أو شعارًا وأنشئ أيقونات favicon وتطبيقات واضحة بكل المقاسات الشائعة (من 16 إلى 512، مع أيقونة Apple)، مع وسوم HTML الجاهزة للّصق. تُنشأ على جهازك — لا يُرفع أي شيء.",
+        "أنشئ أيقونة الفافيكون لموقعك بجميع الأحجام والصيغ مجانًا وبسرعة.",
+      seoTitle: "مولد الفافيكون المجاني لموقعك أونلاين",
     },
   },
   {
@@ -517,12 +577,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Hide Text in Image",
       description:
-        "Hide a text message inside an image by tweaking the least-significant bits of its pixels — the picture looks unchanged — then reveal it later from the saved PNG. Everything happens on your device; nothing is uploaded.",
+        "Hide secret text or files inside images online for free using steganography. Secure, private, and easy to use.",
+      seoTitle: "Free Steganography Tool – Hide Text & Files in Images",
     },
     ar: {
       name: "إخفاء نص في صورة",
       description:
-        "أخفِ رسالة نصية داخل صورة بتعديل البتات الأقل أهمية في بكسلاتها — تبدو الصورة دون تغيير — ثم اكشفها لاحقًا من ملف PNG المحفوظ. كل شيء يجري على جهازك؛ لا يُرفع أي شيء.",
+        "أخفِ نصوصًا أو ملفات سرية داخل الصور مجانًا باستخدام تقنية الإخفاء (Steganography) بأمان وسهولة.",
+      seoTitle: "أداة إخفاء المعلومات (ستيجانوغرافي) مجانًا",
     },
   },
   {
@@ -530,12 +592,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Screen Recorder",
       description:
-        "Record a screen, window or browser tab — optionally with your microphone — straight to a video file you can download. Captured and saved entirely on your device; nothing is uploaded or streamed.",
+        "Record your screen online for free with audio, no software install. Fast, private browser-based screen recording tool.",
+      seoTitle: "Free Online Screen Recorder – Record Your Screen Instantly",
     },
     ar: {
       name: "مسجّل الشاشة",
       description:
-        "سجّل شاشة أو نافذة أو تبويبًا — مع المايك اختياريًا — مباشرةً إلى ملف فيديو يمكنك تنزيله. يُلتقط ويُحفظ بالكامل على جهازك؛ لا يُرفع أو يُبثّ في أي مكان.",
+        "سجل شاشتك مجانًا مع الصوت مباشرة من المتصفح دون تثبيت برامج. أداة تسجيل شاشة سريعة وخاصة.",
+      seoTitle: "تسجيل الشاشة مجانًا أونلاين بسهولة",
     },
   },
   {
@@ -543,12 +607,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Webcam Photo Booth",
       description:
-        "Take photos with your webcam, apply fun filters, mirror the image, and download each shot. The camera only turns on when you start it, and every photo stays on your device — nothing is uploaded.",
+        "Free online photo booth with filters and effects. Capture and download fun photos instantly from your browser, no app needed.",
+      seoTitle: "Online Photo Booth – Take Fun Photos with Filters Free",
     },
     ar: {
       name: "كشك تصوير الويب كام",
       description:
-        "التقط صورًا بكاميرا الويب، وطبّق مرشّحات ممتعة، واعكس الصورة، ونزّل كل لقطة. لا تعمل الكاميرا إلا حين تبدأها، وتبقى كل صورة على جهازك — لا يُرفع أي شيء.",
+        "استوديو صور مجاني أونلاين مع فلاتر وتأثيرات. التقط وحمّل صورك الممتعة فورًا من المتصفح بدون تطبيق.",
+      seoTitle: "استوديو الصور أونلاين – التقط صورًا ممتعة مجانًا",
     },
   },
   {
@@ -556,12 +622,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Image Redactor",
       description:
-        "Drop an image and drag boxes over anything sensitive — faces, names, numbers — to pixelate or black it out, then download the redacted picture. The redaction is baked into the pixels and everything runs on your device.",
+        "Redact, blur, or black out sensitive text and faces in images online for free. Secure, private, and works in your browser.",
+      seoTitle: "Free Image Redaction Tool – Blur & Hide Sensitive Info",
     },
     ar: {
       name: "محرّر تمويه الصور",
       description:
-        "أفلت صورة واسحب مربّعات فوق أي شيء حسّاس — وجوه، أسماء، أرقام — لتبكسله أو تحجبه، ثم نزّل الصورة المموّهة. يُدمج التمويه في البكسلات وكل شيء يجري على جهازك.",
+        "أداة مجانية لتعتيم وإخفاء النصوص والوجوه الحساسة في الصور مباشرة من المتصفح بأمان وخصوصية تامة.",
+      seoTitle: "أداة تعتيم الصور المجانية – إخفاء البيانات الحساسة",
     },
   },
   {
@@ -569,12 +637,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "File Encryptor",
       description:
-        "Encrypt any file with a password using AES-256-GCM (with a PBKDF2-derived key), then decrypt it later with the same password. The file and password never leave your browser — real, standard cryptography on your device.",
+        "Encrypt or decrypt any file securely online with password protection. Free, fast, browser-based file encryption tool.",
+      seoTitle: "Free File Encryption Tool – Encrypt & Decrypt Files Online",
     },
     ar: {
       name: "مشفّر الملفات",
       description:
-        "شفّر أي ملف بكلمة مرور باستخدام AES-256-GCM (بمفتاح مشتقّ عبر PBKDF2)، ثم فُكّ تشفيره لاحقًا بالكلمة نفسها. لا يغادر الملف ولا كلمة المرور متصفحك — تشفير قياسي حقيقي على جهازك.",
+        "شفّر أو فك تشفير أي ملف بأمان باستخدام كلمة مرور مباشرة من المتصفح. أداة تشفير ملفات مجانية وسريعة.",
+      seoTitle: "أداة تشفير الملفات المجانية أونلاين",
     },
   },
   {
@@ -582,12 +652,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Meta Tag Generator",
       description:
-        "Fill in a page’s title, description, URL and preview image to generate the full set of SEO, Open Graph and Twitter Card meta tags — with a live social-share preview — ready to paste into your <head>. Runs entirely in your browser.",
+        "Generate SEO-optimized meta tags (title, description, Open Graph) for your website free and instantly.",
+      seoTitle: "Free Meta Tags Generator – SEO Meta Tags Online",
     },
     ar: {
       name: "مولّد وسوم Meta",
       description:
-        "أدخل عنوان الصفحة ووصفها ورابطها وصورة المعاينة لتوليد مجموعة وسوم SEO وOpen Graph وبطاقة تويتر كاملة — مع معاينة حيّة — جاهزة للّصق في <head>. تعمل بالكامل في متصفحك.",
+        "أنشئ وسوم ميتا (Meta Tags) محسّنة لمحركات البحث لموقعك مجانًا وبسرعة.",
+      seoTitle: "مولد الميتا تاغز المجاني لتحسين السيو",
     },
   },
   {
@@ -595,12 +667,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "robots.txt Generator",
       description:
-        "Generate a valid robots.txt: allow or block crawlers, add disallowed paths, set a crawl-delay and point to your sitemap — then copy or download the file. Runs entirely in your browser.",
+        "Generate and validate a robots.txt file for your website online for free. Control search engine crawling easily.",
+      seoTitle: "Free Robots.txt Generator – Create & Test Robots.txt",
     },
     ar: {
       name: "مولّد robots.txt",
       description:
-        "ولّد ملف robots.txt صالحًا: اسمح أو امنع الزواحف، وأضِف مسارات ممنوعة، وحدّد مهلة الزحف، وأشِر إلى خريطة موقعك — ثم انسخ الملف أو نزّله. يعمل بالكامل في متصفحك.",
+        "أنشئ واختبر ملف robots.txt لموقعك مجانًا للتحكم في زحف محركات البحث بسهولة.",
+      seoTitle: "مولد ملف Robots.txt مجانًا أونلاين",
     },
   },
   {
@@ -608,12 +682,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: ".gitignore Generator",
       description:
-        "Pick the languages, tools and editors you use and get a combined .gitignore with the usual build artefacts, dependency folders and OS/editor cruft — ready to copy or download. Runs entirely in your browser.",
+        "Generate a .gitignore file for any programming language or framework instantly. Free tool for developers.",
+      seoTitle: "Free .gitignore Generator – Create Gitignore Files Online",
     },
     ar: {
       name: "مولّد .gitignore",
       description:
-        "اختر اللغات والأدوات والمحرّرات التي تستخدمها لتحصل على ملف .gitignore مدمج يشمل مخرجات البناء ومجلّدات الاعتماديات وفوضى النظام والمحرّر — جاهز للنسخ أو التنزيل. يعمل بالكامل في متصفحك.",
+        "أنشئ ملف gitignore لأي لغة برمجة أو إطار عمل فورًا ومجانًا.",
+      seoTitle: "مولد ملف .gitignore مجانًا للمطورين",
     },
   },
   {
@@ -621,12 +697,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "JSON to TypeScript",
       description:
-        "Paste a JSON object or array and get clean TypeScript interfaces inferred from it — nested objects become their own interfaces, arrays are typed, and keys missing from some items become optional. Runs entirely in your browser.",
+        "Convert JSON data into TypeScript interfaces or types instantly. Free, fast JSON-to-types generator for developers.",
+      seoTitle: "JSON to TypeScript Types Converter – Free Online Tool",
     },
     ar: {
       name: "JSON إلى TypeScript",
       description:
-        "الصق كائن أو مصفوفة JSON لتحصل على واجهات TypeScript مستنبطة منها — تصبح الكائنات المتداخلة واجهات خاصة بها، وتُصنَّف المصفوفات، وتصير المفاتيح الغائبة من بعض العناصر اختيارية. تعمل بالكامل في متصفحك.",
+        "حوّل بيانات JSON إلى واجهات وأنواع TypeScript فورًا ومجانًا لتسهيل عمل المطورين.",
+      seoTitle: "محول JSON إلى أنواع TypeScript مجانًا",
     },
   },
   {
@@ -634,12 +712,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Distraction-Free Writer",
       description:
-        "A clean, full-width writing pad with a live word and character count and reading time. Your text autosaves to this browser as you type, and you can download it as .txt or .md any time. Nothing uploaded.",
+        "Write, edit, and improve your text online for free with a distraction-free writing tool. Fast and simple.",
+      seoTitle: "Free AI Writer – Write & Edit Text Online",
     },
     ar: {
       name: "محرّر بلا تشتيت",
       description:
-        "لوح كتابة نظيف بعرض كامل مع عدّاد حيّ للكلمات والأحرف وزمن القراءة. يُحفظ نصّك تلقائيًا في هذا المتصفح أثناء الكتابة، ويمكنك تنزيله كـ.txt أو .md في أي وقت. لا يُرفع أي شيء.",
+        "اكتب وحرر ونقّح نصوصك أونلاين مجانًا بأداة كتابة بسيطة وخالية من المشتتات.",
+      seoTitle: "أداة الكتابة المجانية أونلاين",
     },
   },
   {
@@ -647,13 +727,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Flashcards",
       description:
-        "Create and study digital flashcards for free, right in your browser. No account needed — build a deck and start memorizing in seconds.",
-      seoTitle: "Free Online Flashcard Maker – Study Tool | Built in Saudi",
+        "Create and study digital flashcards online for free. Perfect for memorizing vocabulary, facts, and exam prep.",
+      seoTitle: "Free Online Flashcards Maker – Study & Memorize",
     },
     ar: {
       name: "البطاقات التعليمية",
       description:
-        "ابنِ مجموعة بطاقات قابلة للقلب — سؤال في الوجه وإجابة في الظهر — ثم ذاكِرها: اقلب، وتنقّل بالترتيب أو بالخلط. تُحفظ مجموعتك في هذا المتصفح، دون رفع أي شيء.",
+        "أنشئ وذاكر بطاقات تعليمية رقمية مجانًا. مثالية لحفظ المفردات والمعلومات والاستعداد للاختبارات.",
+      seoTitle: "أداة البطاقات التعليمية المجانية للمذاكرة",
     },
   },
   {
@@ -661,13 +742,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Kanban Board",
       description:
-        "Organize tasks with a free drag-and-drop Kanban board. Works instantly — no account, no install, just start planning.",
-      seoTitle: "Free Online Kanban Board – No Sign Up | Built in Saudi",
+        "Organize tasks and projects with a free online Kanban board. Drag, drop, and manage your workflow easily, no sign-up.",
+      seoTitle: "Free Online Kanban Board – Task & Project Management",
     },
     ar: {
       name: "لوحة كانبان",
       description:
-        "لوحة كانبان شخصية خفيفة — أضِف بطاقات إلى «للعمل» و«قيد التنفيذ» و«منجز» وانقلها مع تقدّم العمل. تُحفظ اللوحة كاملةً في هذا المتصفح، دون رفع أي شيء.",
+        "نظّم مهامك ومشاريعك بلوحة كانبان مجانية أونلاين. اسحب وأفلت وأدر سير عملك بسهولة بدون تسجيل.",
+      seoTitle: "لوحة كانبان مجانية لإدارة المهام أونلاين",
     },
   },
   {
@@ -675,12 +757,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Tier List Maker",
       description:
-        "Add labels for the things you want to rank, then drag them into S, A, B, C and D tiers to build a classic tier list — and download it as an image to share. Saved in this browser; nothing uploaded.",
+        "Create and share custom tier list rankings online for free. Drag and drop images to rank anything instantly.",
+      seoTitle: "Free Tier List Maker – Create Ranking Lists Online",
     },
     ar: {
       name: "صانع قوائم التصنيف",
       description:
-        "أضِف تسميات للأشياء التي تريد ترتيبها، ثم اسحبها إلى فئات S وA وB وC وD لبناء قائمة تصنيف كلاسيكية — ونزّلها كصورة للمشاركة. تُحفظ في هذا المتصفح؛ لا يُرفع أي شيء.",
+        "أنشئ وشارك قوائم تصنيف مخصصة أونلاين مجانًا بسحب وإفلات الصور لترتيب أي شيء فورًا.",
+      seoTitle: "أداة إنشاء قوائم التصنيف (Tier List) مجانًا",
     },
   },
   {
@@ -688,12 +772,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "README Generator",
       description:
-        "Fill in your project’s name, description, features, install and usage steps and licence to generate a clean, well-structured README.md — with a live preview of the Markdown — ready to copy or download. Runs entirely in your browser.",
+        "Generate a professional README.md file for your GitHub project online for free. Fast, customizable readme builder.",
+      seoTitle: "Free README Generator – Create GitHub README.md Online",
     },
     ar: {
       name: "مولّد README",
       description:
-        "أدخل اسم مشروعك ووصفه ومزاياه وخطوات التثبيت والاستخدام والرخصة لتوليد ملف README.md نظيف ومنظّم — مع معاينة حيّة لصيغة Markdown — جاهز للنسخ أو التنزيل. يعمل بالكامل في متصفحك.",
+        "أنشئ ملف README.md احترافي لمشروعك على GitHub مجانًا وبسرعة وبتخصيص كامل.",
+      seoTitle: "مولد ملف README مجاني لمشاريع GitHub",
     },
   },
   {
@@ -701,12 +787,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Markdown Table Generator",
       description:
-        "Paste comma- or tab-separated data (copied straight from a spreadsheet works) and get a neatly padded GitHub-flavoured Markdown table, with a choice of column alignment. Runs entirely in your browser.",
+        "Build and format Markdown tables online for free. Paste data, generate clean markdown table syntax instantly.",
+      seoTitle: "Markdown Table Generator – Create Tables Online Free",
     },
     ar: {
       name: "مولّد جداول Markdown",
       description:
-        "الصق بياناتٍ مفصولة بفواصل أو بعلامات جدولة (النسخ المباشر من جدول بيانات يعمل) لتحصل على جدول Markdown مرتّب بنمط GitHub، مع خيار محاذاة الأعمدة. يعمل بالكامل في متصفحك.",
+        "أنشئ وصمم جداول Markdown مجانًا. الصق بياناتك واحصل على كود الجدول فورًا.",
+      seoTitle: "مولد جداول Markdown مجانًا أونلاين",
     },
   },
   {
@@ -714,12 +802,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Fake Data Generator",
       description:
-        "Generate realistic-looking sample records — names, emails, phones, cities, companies, dates and IDs — for seeding tests, mockups and demos. Pick the fields and count, then export as JSON or CSV. Runs entirely in your browser.",
+        "Generate realistic fake data (names, emails, addresses) for testing and development, free and instant.",
+      seoTitle: "Free Fake Data Generator – Test Data for Developers",
     },
     ar: {
       name: "مولّد بيانات وهمية",
       description:
-        "ولّد سجلّات عيّنة واقعية المظهر — أسماء وبُرد إلكترونية وهواتف ومدن وشركات وتواريخ ومعرّفات — لتغذية الاختبارات والنماذج والعروض. اختر الحقول والعدد، ثم صدّر JSON أو CSV. يعمل بالكامل في متصفحك.",
+        "أنشئ بيانات وهمية واقعية (أسماء، إيميلات، عناوين) لأغراض الاختبار والتطوير مجانًا وفوريًا.",
+      seoTitle: "مولد بيانات وهمية مجاني للمطورين",
     },
   },
   {
@@ -727,13 +817,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Slugify",
       description:
-        "Convert any text into a clean, SEO-friendly URL slug instantly. Free, no sign up — paste your text and copy the slug.",
-      seoTitle: "Slugify – Free URL Slug Generator | Built in Saudi",
+        "Convert any text into clean, SEO-friendly URL slugs instantly. Free slugify tool for developers and bloggers.",
+      seoTitle: "Free Slug Generator – Convert Text to URL Slugs Online",
     },
     ar: {
       name: "مولّد الروابط اللطيفة",
       description:
-        "حوّل عنوانًا إلى «سلَگ» نظيف آمن للروابط — أحرف صغيرة، بلا تشكيل، والمسافات وعلامات الترقيم تصبح شرطات، مع تحويل تقريبي من العربية إلى اللاتينية. اختر الفاصل والحالة. يعمل بالكامل في متصفحك.",
+        "حوّل أي نص إلى رابط URL نظيف ومناسب لمحركات البحث فورًا ومجانًا.",
+      seoTitle: "مولد الرابط المختصر (Slug) مجانًا",
     },
   },
   {
@@ -819,12 +910,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Link Shortener",
       description:
-        "Turn a long URL into a clean built-in-saudi.com/s/… link you can share anywhere. Sign in with Google to create and manage your links and see their click counts. Each link is kept for 6 months. Free, no ads.",
+        "Shorten long URLs into short, trackable links for free. No sign-up needed. Fast, secure link shortener tool by Built In Saudi.",
+      seoTitle: "Free Link Shortener – Shorten URLs Online Instantly",
     },
     ar: {
       name: "اختصار الروابط",
       description:
-        "حوّل رابطًا طويلًا إلى رابط قصير أنيق على built-in-saudi.com/s/… تشاركه في أي مكان. سجّل الدخول بحساب Google لإنشاء روابطك وإدارتها ورؤية عدد النقرات. يُحفظ كل رابط ٦ أشهر. مجاني بلا إعلانات.",
+        "اختصر الروابط الطويلة إلى روابط قصيرة قابلة للتتبع مجانًا وبدون تسجيل. أداة اختصار روابط سريعة وآمنة.",
+      seoTitle: "مختصر الروابط المجاني – اختصر الرابط أونلاين",
     },
   },
   {
@@ -832,12 +925,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Color Picker & Palettes",
       description:
-        "Pick a colour and read it as HEX/RGB/HSL, then generate complementary, analogous and triadic palettes plus a shades ramp — copy any swatch. In your browser.",
+        "Pick colors, convert HEX/RGB/HSL, and generate palettes online for free, instantly for designers and developers.",
+      seoTitle: "Free Color Tools – Picker, Converter & Palette Online",
     },
     ar: {
       name: "منتقي الألوان واللوحات",
       description:
-        "اختر لونًا واقرأه بصيغ HEX/RGB/HSL، ثم ولّد لوحات مكمّلة ومتجانسة وثلاثية وتدرّجات — وانسخ أي لون. داخل متصفحك.",
+        "اختر الألوان وحوّل بين HEX وRGB وHSL وأنشئ لوحات ألوان مجانًا وفوريًا.",
+      seoTitle: "أدوات الألوان المجانية (منتقي، محول، لوحات)",
     },
   },
   {
@@ -845,12 +940,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Invoice Generator",
       description:
-        "Create a bilingual (AR/EN) SAR invoice with line items, automatic 15% Saudi VAT and the total in Arabic words. Print or save as PDF; nothing uploaded.",
+        "Create professional invoices online for free with your logo and VAT details, instantly downloadable as PDF.",
+      seoTitle: "Free Invoice Generator – Create Invoices Online",
     },
     ar: {
       name: "منشئ الفواتير",
       description:
-        "أنشئ فاتورة ثنائية اللغة بالريال ببنودٍ وضريبة ١٥٪ تلقائيًا والإجمالي بالأحرف العربية. اطبعها أو احفظها PDF؛ لا يُرفع شيء.",
+        "أنشئ فواتير احترافية مجانًا بشعارك وتفاصيل الضريبة، وحمّلها كملف PDF فوريًا.",
+      seoTitle: "مولد الفواتير المجاني أونلاين",
     },
   },
   {
@@ -858,13 +955,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Split PDF",
       description:
-        "Split a PDF into separate pages or extract specific pages in seconds. Free, no sign up — upload and download.",
-      seoTitle: "Split PDF Files Online – Free & Easy | Built in Saudi",
+        "Split a PDF file into separate pages or documents online for free, instantly and securely.",
+      seoTitle: "Free PDF Splitter – Split PDF Pages Online",
     },
     ar: {
       name: "تقسيم PDF",
       description:
-        "قسّم PDF داخل متصفحك — استخرج نطاق صفحات مثل 1-3،5 في ملف جديد، أو فكّكه إلى صفحات مفردة (ZIP أو واحدة تلو الأخرى). لا يُرفع أبدًا.",
+        "قسّم ملف PDF إلى صفحات أو ملفات منفصلة مجانًا وبأمان فوريًا.",
+      seoTitle: "أداة تقسيم ملفات PDF مجانًا أونلاين",
     },
   },
   {
@@ -872,14 +970,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Merge PDF",
       description:
-        "Combine multiple PDF files into one document instantly. Free and secure — no sign up, just upload and merge.",
-      seoTitle: "Merge PDF Files Online – Free & Secure | Built in Saudi",
+        "Merge multiple PDF files into one document online for free, instantly and securely, no sign-up required.",
+      seoTitle: "Free PDF Merger – Combine Multiple PDF Files Online",
     },
     ar: {
       name: "دمج PDF",
       description:
-        "ادمج عدة ملفات PDF في ملف واحد بسهولة وسرعة. مجاني وآمن، بدون تسجيل.",
-      seoTitle: "دمج ملفات PDF مجانًا وبأمان | بُنيَ في السعودية",
+        "ادمج عدة ملفات PDF في ملف واحد مجانًا وبأمان فوريًا بدون تسجيل.",
+      seoTitle: "أداة دمج ملفات PDF مجانًا أونلاين",
     },
   },
   {
@@ -887,13 +985,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Sign PDF",
       description:
-        "Add your signature to any PDF online, free and fast. No sign up — draw, type, or upload your signature and download instantly.",
-      seoTitle: "Sign PDF Online for Free – E-Signature | Built in Saudi",
+        "Add your digital signature to any PDF document online for free, instantly and securely, no software needed.",
+      seoTitle: "Free PDF Signer – Sign PDF Documents Online",
     },
     ar: {
       name: "توقيع PDF",
       description:
-        "وقّع ملف PDF بخط يدك داخل متصفحك: ارسم توقيعك بإصبعك أو بالفأرة، ثم اسحبه واقرِصه وضعه بدقة — مع عدسة مكبّرة لضبطٍ مثالي. يعمل عبر pdf-lib؛ لا يُرفع مستندك أبدًا.",
+        "وقّع إلكترونيًا على أي ملف PDF مجانًا وبأمان فوريًا بدون برامج.",
+      seoTitle: "أداة التوقيع على ملفات PDF مجانًا",
     },
   },
   {
@@ -901,12 +1000,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Fill PDF Form",
       description:
-        "Fill PDF forms in your browser. Interactive fields are detected automatically — clean web form for well-named ones, editable boxes on the page otherwise — and field-less PDFs let you drop text anywhere. Export a filled, optionally flattened PDF; never uploaded.",
+        "Fill out PDF forms online for free, instantly, then download or save. No software installation required.",
+      seoTitle: "Free PDF Form Filler – Fill PDF Forms Online",
     },
     ar: {
       name: "تعبئة نموذج PDF",
       description:
-        "عبّئ نماذج PDF داخل متصفحك. تُكتشف الحقول التفاعلية تلقائيًا — نموذج ويب أنيق للأسماء الواضحة، ومربعات على الصفحة لغيرها — والملفات بلا حقول تتيح إضافة نص أينما شئت. صدّر ملفًا معبّأً وقابلًا للتثبيت؛ دون رفعه أبدًا.",
+        "املأ نماذج PDF مجانًا وفورًا ثم حمّلها أو احفظها بدون تثبيت برامج.",
+      seoTitle: "أداة تعبئة نماذج PDF مجانًا أونلاين",
     },
   },
   {
@@ -914,13 +1015,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Edit PDF",
       description:
-        "Edit text, images, and pages in your PDF directly online for free. No sign up, no software to install — just upload and edit.",
-      seoTitle: "Edit PDF Online – Free PDF Editor | Built in Saudi",
+        "Edit text, images, and pages in any PDF document online for free, instantly and securely in your browser.",
+      seoTitle: "Free PDF Editor – Edit PDF Text & Images Online",
     },
     ar: {
       name: "تحرير PDF",
       description:
-        "محرّر PDF مبدئي داخل المتصفح: حدّد الصور وحرّكها أو احذفها، وأضِف نصًا جديدًا بمقابض لتغيير الحجم وفواصل أسطر. يحرّر محتوى الملف عبر pdf-lib ولا يرفع ملفك أبدًا. لا يمكن تعديل أو حذف النص الموجود بعد.",
+        "حرر النصوص والصور والصفحات في أي ملف PDF مجانًا وبأمان مباشرة من المتصفح.",
+      seoTitle: "أداة تحرير ملفات PDF مجانًا أونلاين",
     },
   },
   {
@@ -928,14 +1030,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Compress PDF",
       description:
-        "Reduce PDF file size without losing quality. Free and fast — upload your PDF and download the compressed version instantly.",
-      seoTitle: "Compress PDF Files Online – Free & Fast | Built in Saudi",
+        "Compress PDF files to reduce size online for free without losing quality, fast and secure, no sign-up.",
+      seoTitle: "Free PDF Compressor – Reduce PDF File Size Online",
     },
     ar: {
       name: "ضغط PDF",
       description:
-        "قلّل حجم ملف PDF دون فقدان الجودة. مجاني وسريع بدون تسجيل — فقط ارفع ملفك واحصل على نسخة مضغوطة فورًا.",
-      seoTitle: "ضغط ملفات PDF مجانًا وبسرعة | بُنيَ في السعودية",
+        "اضغط ملفات PDF لتقليل حجمها مجانًا دون فقدان الجودة بسرعة وأمان.",
+      seoTitle: "أداة ضغط ملفات PDF مجانًا أونلاين",
     },
   },
   {
@@ -943,12 +1045,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Images to PDF",
       description:
-        "Combine JPG/PNG images into a single PDF, one per page — reorder, fit-to-image or A4/Letter with a margin. Built in your browser; never uploaded.",
+        "Convert and combine multiple images into a single PDF file online for free, instantly and securely.",
+      seoTitle: "Free Images to PDF Converter – Combine Photos into PDF",
     },
     ar: {
       name: "الصور إلى PDF",
       description:
-        "ادمج صور JPG/PNG في PDF واحد، صورة لكل صفحة — إعادة ترتيب، وملاءمة الصورة أو A4/Letter بهامش. داخل متصفحك؛ لا تُرفع أبدًا.",
+        "حوّل ودمج عدة صور في ملف PDF واحد مجانًا وبأمان فوريًا.",
+      seoTitle: "تحويل الصور إلى PDF مجانًا أونلاين",
     },
   },
   {
@@ -956,12 +1060,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Image Cropper",
       description:
-        "Crop an image in your browser — drag/resize the crop box, lock to 1:1/4:3/16:9 or free, full-resolution output, download as PNG/JPG/WebP. Never uploaded.",
+        "Crop and resize images online for free, instantly. Simple, secure image cropping tool, no sign-up needed.",
+      seoTitle: "Free Online Image Cropper – Crop Photos Instantly",
     },
     ar: {
       name: "أداة قص الصور",
       description:
-        "اقتصّ الصورة داخل متصفحك — اسحب مربّع القص، ثبّته على 1:1 أو 4:3 أو 16:9 أو حر، ناتج بالدقة الكاملة، نزّله PNG/JPG/WebP. لا تُرفع أبدًا.",
+        "قص وأعد تحجيم الصور مجانًا وفورًا بأداة بسيطة وآمنة بدون تسجيل.",
+      seoTitle: "أداة قص الصور المجانية أونلاين",
     },
   },
   {
@@ -969,12 +1075,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Image Converter",
       description:
-        "Convert images between PNG, JPG and WebP in your browser — quality for lossy formats, background fill when flattening a transparent PNG to JPG. Never uploaded.",
+        "Convert images between JPG, PNG, WebP, and other formats online for free, instantly and securely.",
+      seoTitle: "Free Image Format Converter – JPG, PNG, WebP Online",
     },
     ar: {
       name: "محوّل صيغ الصور",
       description:
-        "حوّل الصور بين PNG وJPG وWebP داخل متصفحك — جودة للصيغ ذات الفقد، ولون خلفية عند تسطيح PNG الشفاف إلى JPG. لا تُرفع أبدًا.",
+        "حوّل الصور بين صيغ JPG وPNG وWebP وغيرها مجانًا وبأمان فوريًا.",
+      seoTitle: "محول صيغ الصور مجانًا (JPG, PNG, WebP)",
     },
   },
   {
@@ -982,12 +1090,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Image Compressor",
       description:
-        "Compress and resize JPG/PNG/WebP images in your browser — quality + max-width, before→after size and % saved. The image is never uploaded.",
+        "Compress JPG, PNG, and WebP images online for free without losing quality. Fast, secure image size reducer.",
+      seoTitle: "Free Image Compressor – Reduce Image Size Online",
     },
     ar: {
       name: "ضاغط الصور",
       description:
-        "اضغط الصور وغيّر حجمها داخل متصفحك — الجودة وأقصى عرض، والحجم قبل وبعد ونسبة التوفير. لا تُرفع الصورة أبدًا.",
+        "اضغط صور JPG وPNG وWebP مجانًا دون فقدان الجودة، أداة سريعة وآمنة.",
+      seoTitle: "أداة ضغط الصور المجانية أونلاين",
     },
   },
   {
@@ -995,12 +1105,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "QR Code Generator",
       description:
-        "Generate high-resolution QR codes for URLs, plain text, Wi-Fi networks, email and phone numbers — colours, size and error-correction, exported as PNG or SVG with no watermark. Runs entirely in your browser.",
+        "Generate custom QR codes for links, text, or Wi-Fi online for free. Fast, downloadable QR code maker, no sign-up.",
+      seoTitle: "Free QR Code Generator – Create QR Codes Online",
     },
     ar: {
       name: "مولّد الباركود",
       description:
-        "أنشئ رموز باركود عالية الدقة للروابط والنصوص وشبكات الواي فاي والبريد وأرقام الهواتف — تحكّم في الألوان والحجم وتصحيح الأخطاء، وصدّر PNG أو SVG بدون علامة مائية. يعمل بالكامل داخل متصفحك.",
+        "أنشئ رموز QR مخصصة للروابط والنصوص والواي فاي مجانًا وحمّلها فورًا بدون تسجيل.",
+      seoTitle: "مولد رمز QR المجاني أونلاين",
     },
   },
   {
@@ -1008,12 +1120,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Password Generator",
       description:
-        "Create strong random passwords and memorable passphrases entirely in your browser — adjustable length, character sets and a live strength estimate. Nothing is ever sent anywhere.",
+        "Generate strong, random, secure passwords online for free. Customizable length and characters, instant and private.",
+      seoTitle: "Free Strong Password Generator – Secure & Random",
     },
     ar: {
       name: "مولّد كلمات المرور",
       description:
-        "أنشئ كلمات مرور قوية وعبارات مرور سهلة التذكّر بالكامل داخل متصفحك — طول قابل للضبط ومجموعات أحرف وتقدير فوري للقوة. لا يُرسل أي شيء إلى أي مكان.",
+        "أنشئ كلمات مرور قوية وعشوائية وآمنة مجانًا مع إمكانية تخصيص الطول والرموز.",
+      seoTitle: "مولد كلمات المرور القوية مجانًا",
     },
   },
   {
@@ -1021,13 +1135,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Prayer Times",
       description:
-        "Get accurate daily prayer times for any city in Saudi Arabia, free and updated automatically. Just select your location.",
-      seoTitle: "Prayer Times in Saudi Arabia – Free Online | Built in Saudi",
+        "Get accurate daily prayer times (Salah) for any city in Saudi Arabia and worldwide, free and updated instantly.",
+      seoTitle: "Prayer Times Saudi Arabia – Accurate Salah Times Today",
     },
     ar: {
       name: "مواقيت الصلاة",
       description:
-        "مواقيت صلاة يومية دقيقة بطريقة أم القرى لمدينتك أو موقعك — تُحسب داخل متصفحك، مع تنبيهات اختيارية قبل كل صلاة بدقائق.",
+        "احصل على مواقيت الصلاة الدقيقة لليوم في أي مدينة بالسعودية والعالم مجانًا ومحدثة فوريًا.",
+      seoTitle: "مواقيت الصلاة في السعودية اليوم بدقة",
     },
   },
   {
@@ -1035,12 +1150,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Hijri Calendar",
       description:
-        "Convert between Hijri and Gregorian dates (Umm al-Qura), see today’s Hijri date, and upcoming Islamic dates including Ramadan and the two Eids — computed in your browser.",
+        "View the Hijri calendar and convert Hijri to Gregorian dates online for free, accurate and updated instantly.",
+      seoTitle: "Hijri Calendar 2026 – Islamic Date Converter Online",
     },
     ar: {
       name: "التقويم الهجري",
       description:
-        "حوّل بين التاريخ الهجري والميلادي (أم القرى)، واعرف تاريخ اليوم الهجري، والمناسبات الإسلامية القادمة بما فيها رمضان والعيدان — تُحسب داخل متصفحك.",
+        "اطلع على التقويم الهجري وحوّل التاريخ الهجري إلى ميلادي مجانًا وبدقة.",
+      seoTitle: "التقويم الهجري 2026 وتحويل التاريخ أونلاين",
     },
   },
   {
@@ -1048,14 +1165,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Tafqeet (Number to Words)",
       description:
-        "Spell any number or amount in Arabic words (tafqeet) — Saudi Riyals with halalas or a plain number, with correct Arabic grammar. For cheques, invoices and contracts.",
+        "Convert numbers and amounts into written Arabic words (Tafqeet) online for free, instantly and accurately.",
+      seoTitle: "Tafqeet – Convert Numbers to Arabic Words Free Online",
     },
     ar: {
       name: "التفقيط",
       description:
-        "حوّل أي رقم إلى كتابته بالحروف العربية فورًا ومجانًا. أداة دقيقة للمبالغ المالية والفواتير، بدون تسجيل.",
-      seoTitle:
-        "تفقيط الأرقام مجانًا – تحويل رقم إلى كتابة | بُنيَ في السعودية",
+        "حوّل الأرقام والمبالغ إلى كتابة عربية (تفقيط) مجانًا وبدقة فورية.",
+      seoTitle: "التفقيط – تحويل الأرقام إلى كلمات عربية مجانًا",
     },
   },
   {
@@ -1063,12 +1180,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "IBAN Validator",
       description:
-        "Validate an IBAN (ISO 7064 mod-97), enforce the Saudi SA + 22-digit format, group it in fours and identify the bank — in your browser, never sent anywhere.",
+        "Validate any IBAN number online for free, instantly. Check Saudi and international IBAN format accuracy.",
+      seoTitle: "Free IBAN Validator – Check IBAN Number Online",
     },
     ar: {
       name: "مدقّق الآيبان",
       description:
-        "تحقّق من الآيبان عبر mod-97، وتأكّد من صيغة السعودية (SA + ٢٢ رقمًا)، واعرضه بمجموعات من أربعة وتعرّف على البنك — داخل متصفحك دون إرسال.",
+        "تحقق من صحة رقم الآيبان (IBAN) السعودي والدولي مجانًا وفوريًا.",
+      seoTitle: "أداة التحقق من رقم الآيبان IBAN مجانًا",
     },
   },
   {
@@ -1076,12 +1195,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Islamic Calendar",
       description:
-        "A month-at-a-glance Islamic calendar (Umm al-Qura) — Hijri/Gregorian toggle, moon phase per day, the white days (13–15), and Islamic dates like Ramadan and the Eids. Computed in your browser.",
+        "View the Islamic calendar with important Hijri dates and Islamic events for free, updated and accurate.",
+      seoTitle: "Islamic Calendar 2026 – Hijri Events & Dates Online",
     },
     ar: {
       name: "التقويم الإسلامي",
       description:
-        "تقويم إسلامي شهري (أم القرى) — تبديل هجري/ميلادي، وطور القمر لكل يوم، والأيام البيض (١٣–١٥)، ومناسبات كرمضان والعيدين. يُحسب داخل متصفحك.",
+        "اطلع على التقويم الإسلامي والمناسبات والتواريخ الهجرية المهمة مجانًا ومحدثة.",
+      seoTitle: "التقويم الإسلامي 2026 والمناسبات الهجرية",
     },
   },
   {
@@ -1089,12 +1210,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Hisn al-Muslim",
       description:
-        "Ḥiṣn al-Muslim (the Fortress of the Muslim) — the full du‘a collection compiled by Saʿīd b. Wahf al-Qaḥṭānī. Search ~130 chapters and read the vocalized Arabic du‘as. Offline.",
+        "Read Hisn Al-Muslim (Fortress of the Muslim) duas for daily life online for free, authentic and searchable.",
+      seoTitle: "Hisn Al-Muslim Online – Fortress of the Muslim Duas",
     },
     ar: {
       name: "حصن المسلم",
       description:
-        "حصن المسلم — مجموعة الأذكار والأدعية، جمع سعيد بن وهف القحطاني. ابحث في نحو ١٣٠ بابًا واقرأ الأدعية بالنص العربي المشكول. يعمل دون اتصال.",
+        "اقرأ أدعية حصن المسلم كاملة مجانًا أونلاين، موثقة وقابلة للبحث.",
+      seoTitle: "حصن المسلم أونلاين – الأدعية كاملة",
     },
   },
   {
@@ -1102,12 +1225,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Morning & Evening Adhkar",
       description:
-        "The core morning and evening adhkār from the Qur’an and authentic Sunnah — Arabic with transliteration, an English meaning, repeat counts and sources, and a tap-to-count tracker.",
+        "Read authentic morning and evening Adhkar (Islamic remembrances) online for free, with translation and audio.",
+      seoTitle: "Adhkar – Morning & Evening Islamic Remembrances Free",
     },
     ar: {
       name: "أذكار الصباح والمساء",
       description:
-        "أذكار الصباح والمساء الأساسية من القرآن والسنة الصحيحة — بالعربية مع النطق والمعنى بالإنجليزية وعدد التكرار والمصدر وعدّاد باللمس.",
+        "اقرأ أذكار الصباح والمساء الصحيحة مجانًا مع الترجمة والصوت.",
+      seoTitle: "أذكار الصباح والمساء كاملة مع الصوت",
     },
   },
   {
@@ -1115,12 +1240,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Istikhara Du‘a",
       description:
-        "The du‘a of Ṣalāt al-Istikhāra (the prayer for guidance) — the prophetic Arabic with transliteration, an English meaning, how to pray the two rakʿahs, and the source (Jābir ibn ʿAbdillāh · Ṣaḥīḥ al-Bukhārī).",
+        "Learn the correct way to perform Salat al-Istikhara with dua and steps, free guide updated with authentic sources.",
+      seoTitle: "Istikhara Guide – How to Pray Salat al-Istikhara",
     },
     ar: {
       name: "دعاء الاستخارة",
       description:
-        "دعاء صلاة الاستخارة — النص النبوي بالعربية مع النطق والمعنى بالإنجليزية، وكيفية أداء الركعتين، والمصدر (جابر بن عبد الله · صحيح البخاري).",
+        "تعلم الطريقة الصحيحة لأداء صلاة الاستخارة مع الدعاء والخطوات وفق مصادر موثوقة.",
+      seoTitle: "دليل صلاة الاستخارة – الطريقة والدعاء",
     },
   },
   {
@@ -1128,12 +1255,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Qibla Locator",
       description:
-        "Find the Qibla direction from your location — the exact bearing to the Kaaba in Makkah, a live compass where supported, and the distance. Computed in your browser.",
+        "Find the accurate Qibla direction from your exact location online for free, using GPS and compass, instant results.",
+      seoTitle: "Qibla Direction Finder – Find Qibla from Your Location",
     },
     ar: {
       name: "اتجاه القبلة",
       description:
-        "حدّد اتجاه القبلة من موقعك — الاتجاه الدقيق إلى الكعبة في مكة، وبوصلة مباشرة حيثما تتوفّر، والمسافة. يُحسب داخل متصفحك.",
+        "حدد اتجاه القبلة بدقة من موقعك الحالي مجانًا باستخدام GPS والبوصلة فوريًا.",
+      seoTitle: "تحديد اتجاه القبلة من موقعك مجانًا",
     },
   },
   {
@@ -1141,12 +1270,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "UUID Generator",
       description:
-        "Generate one or many RFC-4122 v4 UUIDs with optional formatting, entirely in your browser.",
+        "Generate random UUID/GUID values (v1, v4) online for free, instantly. Bulk generation supported for developers.",
+      seoTitle: "Free UUID Generator – Generate UUID/GUID Online",
     },
     ar: {
       name: "مولّد UUID",
       description:
-        "أنشئ معرّفًا واحدًا أو عدة معرّفات UUID (v4) مع خيارات تنسيق، بالكامل داخل متصفحك.",
+        "أنشئ معرفات UUID/GUID عشوائية مجانًا وفورًا مع دعم التوليد الجماعي.",
+      seoTitle: "مولد UUID/GUID مجانًا للمطورين",
     },
   },
   {
@@ -1154,13 +1285,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Word Counter",
       description:
-        "Count words, characters, sentences, and reading time as you type. Free, no sign up — great for essays and SEO content.",
-      seoTitle: "Free Word & Character Counter Online | Built in Saudi",
+        "Count words, characters, sentences, and paragraphs in your text online for free, instantly and accurately.",
+      seoTitle: "Free Word & Character Counter – Online Text Tool",
     },
     ar: {
       name: "عدّاد الكلمات والحروف",
       description:
-        "عدّ مباشر للكلمات والحروف والجُمل والفقرات مع تقدير وقت القراءة — دقيق للعربية، داخل متصفحك.",
+        "احسب عدد الكلمات والأحرف والجمل والفقرات في نصك مجانًا وبدقة فورية.",
+      seoTitle: "عداد الكلمات والأحرف المجاني أونلاين",
     },
   },
   {
@@ -1168,12 +1300,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Language Detector",
       description:
-        "Detect the language of any text in your browser — script detection plus common-word matching across major languages, with a confidence score. Nothing uploaded.",
+        "Detect the language of any text online for free, instantly and accurately. Supports over 100 languages.",
+      seoTitle: "Free Language Detector – Identify Text Language Online",
     },
     ar: {
       name: "كاشف اللغة",
       description:
-        "اكتشف لغة أي نصٍّ داخل متصفحك — كشف النظام الكتابي ومطابقة الكلمات الشائعة لكبرى اللغات، مع درجة ثقة. دون رفع أي شيء.",
+        "اكتشف لغة أي نص مجانًا وبدقة فورية، مع دعم أكثر من 100 لغة.",
+      seoTitle: "أداة كشف لغة النص مجانًا أونلاين",
     },
   },
   {
@@ -1181,15 +1315,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Lorem Ipsum",
       description:
-        "Generate custom Lorem Ipsum placeholder text in seconds. Choose paragraphs, words, or sentences — free, ready to copy.",
-      seoTitle:
-        "Lorem Ipsum Generator – Free Placeholder Text | Built in Saudi",
+        "Generate Lorem Ipsum placeholder text online for free in words, sentences, or paragraphs, instantly.",
+      seoTitle: "Free Lorem Ipsum Generator – Placeholder Text Online",
     },
     ar: {
       name: "نص بديل",
       description:
-        "أنشئ نص لوريم إيبسوم (نص بديل) مجانًا وفوريًا. اختر عدد الفقرات أو الكلمات وانسخ النص مباشرة، بدون تسجيل.",
-      seoTitle: "مولد نص لوريم إيبسوم مجاني | بُنيَ في السعودية",
+        "أنشئ نص Lorem Ipsum التجريبي مجانًا بالكلمات أو الجمل أو الفقرات فوريًا.",
+      seoTitle: "مولد نص Lorem Ipsum التجريبي مجانًا",
     },
   },
   {
@@ -1197,12 +1330,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "VAT Calculator",
       description:
-        "Add or remove Saudi VAT (15% default, 5%/0% presets) — net, VAT and gross in SAR to the halala, with a copyable breakdown. Bilingual, in-browser.",
+        "Calculate VAT (15%) for Saudi Arabia easily online for free. Add or remove VAT from any amount instantly.",
+      seoTitle: "VAT Calculator Saudi Arabia – 15% Tax Calculator Free",
     },
     ar: {
       name: "حاسبة ضريبة القيمة المضافة",
       description:
-        "أضِف أو استخرج ضريبة القيمة المضافة السعودية (١٥٪ افتراضيًا) — الصافي والضريبة والإجمالي بالريال، مع تفاصيل قابلة للنسخ. داخل متصفحك.",
+        "احسب ضريبة القيمة المضافة 15% في السعودية بسهولة مجانًا، إضافة أو استخراج فوري.",
+      seoTitle: "حاسبة ضريبة القيمة المضافة السعودية 15%",
     },
   },
   {
@@ -1210,12 +1345,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Arabic Poetry Meters",
       description:
-        "The 16 classical Arabic poetic metres (buḥūr) of al-Khalīl with tafʿīlāt and example verses, plus a formatter that lays pasted poetry out in the two-hemistich bayt form. Offline.",
+        "Analyze Arabic poetry meter (Bahr) and rhyme online for free, instantly identify the poetic pattern.",
+      seoTitle: "Arabic Poetry Analyzer – Meter & Rhyme Checker Free",
     },
     ar: {
       name: "بحور الشعر",
       description:
-        "بحور الشعر العربي الستة عشر عند الخليل بتفعيلاتها وأمثلتها، مع منسّق يعرض الشعر الملصق في صورته العمودية (صدر وعجز). يعمل دون اتصال.",
+        "حلل بحر وقافية الشعر العربي مجانًا وحدد الوزن الشعري فوريًا.",
+      seoTitle: "أداة تحليل الشعر العربي والبحور مجانًا",
     },
   },
   {
@@ -1223,12 +1360,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Case Converter",
       description:
-        "Convert text between UPPER, lower, Title, Sentence, camelCase, PascalCase, snake_case, kebab-case and CONSTANT_CASE — live, with copy. Arabic passes through untouched.",
+        "Convert text case to uppercase, lowercase, title case, or sentence case online for free, instantly.",
+      seoTitle: "Free Case Converter – Change Text to Upper/Lower Case",
     },
     ar: {
       name: "محوّل حالة الأحرف",
       description:
-        "حوّل النص بين الحالات — كبيرة/صغيرة/أول الكلمة/أول الجملة وcamelCase وsnake_case وkebab وCONSTANT — مباشرةً مع النسخ. العربية دون تغيير.",
+        "حوّل حالة النص إلى أحرف كبيرة أو صغيرة أو حالة العنوان مجانًا وفورًا.",
+      seoTitle: "أداة تحويل حالة الأحرف (كبيرة/صغيرة) مجانًا",
     },
   },
   {
@@ -1236,12 +1375,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Line Break Converter",
       description:
-        "Auto-flip line spacing — single-spaced lines become double-spaced, double becomes single, mixed normalises to double. Result box with copy and share, all in your browser.",
+        "Remove or add line breaks in text online for free, instantly. Simple text formatting tool for writers.",
+      seoTitle: "Free Line Break Remover & Adder – Text Formatter Online",
     },
     ar: {
       name: "محوّل فواصل الأسطر",
       description:
-        "تبديل تلقائي لتباعد الأسطر — المفردة تصبح مزدوجة والمزدوجة مفردة والمختلطة تُوحَّد إلى مزدوجة. صندوق ناتج مع نسخ ومشاركة، داخل متصفحك.",
+        "أزل أو أضف فواصل الأسطر في النص مجانًا وفورًا بأداة تنسيق بسيطة.",
+      seoTitle: "أداة إزالة وإضافة فواصل الأسطر مجانًا",
     },
   },
   {
@@ -1249,12 +1390,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Arabic Diacritizer",
       description:
-        "Paste Arabic text and AI adds full diacritics (تشكيل) with grammatical case endings, ready to copy. Google sign-in; one run per 24 hours.",
+        "Add Arabic diacritics (Tashkeel) to your text online for free, instantly and accurately using AI.",
+      seoTitle: "Free Arabic Text Diacritizer – Add Tashkeel Online",
     },
     ar: {
       name: "مُشكِّل النصوص العربية",
       description:
-        "الصق نصًّا عربيًّا فيضيف الذكاء الاصطناعي التشكيل الكامل مع الإعراب، جاهزًا للنسخ. تسجيل دخول Google؛ مرة كل ٢٤ ساعة.",
+        "أضف التشكيل إلى النصوص العربية مجانًا وفورًا وبدقة باستخدام الذكاء الاصطناعي.",
+      seoTitle: "أداة تشكيل النصوص العربية مجانًا (تشكيل آلي)",
     },
   },
   {
@@ -1262,12 +1405,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Arabic Verb Conjugator",
       description:
-        "Enter an Arabic root for the full conjugation — past, present (3 moods), imperative, passive across 13 pronouns, Forms I–X + quadriliteral, derived nouns and emphatics. Weak/irregular roots flagged. All in-browser.",
+        "Conjugate any Arabic verb across all tenses and pronouns online for free, instantly and accurately.",
+      seoTitle: "Arabic Verb Conjugator – Free Conjugation Tool Online",
     },
     ar: {
       name: "مُصرِّف الأفعال العربية",
       description:
-        "أدخل جذرًا عربيًّا للتصريف الكامل — الماضي والمضارع (ثلاثة أوجه) والأمر والمجهول عبر ١٣ ضميرًا، الأوزان من فَعَلَ إلى استفعل والرباعي، مع المشتقات والتوكيد. تُنبَّه الجذور المعتلّة والشاذّة. داخل المتصفح.",
+        "صرّف أي فعل عربي بجميع الأزمنة والضمائر مجانًا وبدقة فورية.",
+      seoTitle: "مصرّف الأفعال العربية مجانًا أونلاين",
     },
   },
   {
@@ -1275,12 +1420,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Paste Markdown",
       description:
-        "Paste from Word, a web page or WordPad and get clean Markdown — line breaks, bold, italics, links, headings, lists, quotes, code and tables. Copy or share; nothing uploaded.",
+        "Paste rich text or HTML and convert it to clean Markdown instantly, free and easy to use for writers.",
+      seoTitle: "Free Paste to Markdown Converter – HTML to MD Online",
     },
     ar: {
       name: "لصق ماركداون",
       description:
-        "الصق من وورد أو صفحة ويب أو WordPad واحصل على ماركداون نظيف — فواصل أسطر وخط عريض ومائل وروابط وعناوين وقوائم واقتباسات وشيفرة وجداول. انسخ أو شارك؛ لا يُرفع شيء.",
+        "الصق نصًا منسقًا أو HTML وحوّله إلى Markdown نظيف مجانًا وفورًا.",
+      seoTitle: "أداة تحويل النص المنسوخ إلى Markdown مجانًا",
     },
   },
   {
@@ -1288,12 +1435,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Hash Generator",
       description:
-        "Compute SHA-1/256/384/512 of any text or file — hex and Base64. Files are hashed locally and never uploaded.",
+        "Generate MD5, SHA1, SHA256, and other hash values from text or files online for free, instantly.",
+      seoTitle: "Free Hash Generator – MD5, SHA1, SHA256 Online",
     },
     ar: {
       name: "مولّد البصمة (Hash)",
       description:
-        "احسب SHA-1/256/384/512 لأي نص أو ملف — ست عشري وBase64. تُحسب الملفات محليًا ولا تُرفع.",
+        "أنشئ قيم التجزئة MD5 وSHA1 وSHA256 من النص أو الملفات مجانًا وفورًا.",
+      seoTitle: "مولد التجزئة Hash (MD5, SHA256) مجانًا",
     },
   },
   {
@@ -1301,12 +1450,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Code Formatter",
       description:
-        "Format, minify and validate code in your browser — JSON (line/column errors, sort keys) plus CSS and XML beautify/minify. Nothing uploaded.",
+        "Format, validate, and beautify JSON data online for free, instantly. Detect errors and minify JSON too.",
+      seoTitle: "Free JSON Formatter & Validator – Beautify JSON Online",
     },
     ar: {
       name: "منسّق الكود",
       description:
-        "نسّق وصغّر وتحقّق من الكود داخل متصفحك — JSON (أخطاء بالسطر والعمود وترتيب المفاتيح) مع CSS وXML. دون رفع أي شيء.",
+        "نسّق وتحقق من صحة بيانات JSON مجانًا وفورًا مع دعم الضغط أيضًا.",
+      seoTitle: "أداة تنسيق والتحقق من JSON مجانًا",
     },
   },
   {
@@ -1314,12 +1465,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Unit Converter",
       description:
-        "Convert length, mass, temperature, data, area, volume, speed and time — live, with swap + copy. Exact tables; temperature with proper offsets.",
+        "Convert units of length, weight, temperature, volume, and more online for free, instantly and accurately.",
+      seoTitle: "Free Unit Converter – Length, Weight, Temperature Online",
     },
     ar: {
       name: "محوّل الوحدات",
       description:
-        "حوّل الطول والكتلة والحرارة والبيانات والمساحة والحجم والسرعة والزمن — مباشرةً مع تبديل ونسخ. جداول دقيقة والحرارة بمعاملات إزاحة صحيحة.",
+        "حوّل وحدات الطول والوزن والحرارة والحجم وغيرها مجانًا وبدقة فورية.",
+      seoTitle: "محول الوحدات المجاني (طول، وزن، حرارة)",
     },
   },
   {
@@ -1327,12 +1480,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Base64 Convert",
       description:
-        "Encode and decode Base64 text with full UTF-8 support and a URL-safe option — entirely in your browser.",
+        "Encode or decode Base64 text, images, and files online for free, instantly. Simple and secure Base64 converter.",
+      seoTitle: "Free Base64 Encoder & Decoder – Online Tool",
     },
     ar: {
       name: "ترميز وفكّ Base64",
       description:
-        "رمّز وفكّ نصوص Base64 بدعم كامل لـ UTF-8 وخيار آمن للروابط — بالكامل داخل متصفحك.",
+        "شفّر أو فك تشفير النصوص والصور والملفات بـ Base64 مجانًا وفورًا وبأمان.",
+      seoTitle: "أداة ترميز وفك ترميز Base64 مجانًا",
     },
   },
   {
@@ -1340,13 +1495,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Date Diff",
       description:
-        "Calculate the exact number of days, months, or years between two dates. Free, instant, no sign up required.",
-      seoTitle: "Date Difference Calculator – Free Online | Built in Saudi",
+        "Calculate the exact number of days, months, or years between two dates online for free, instantly.",
+      seoTitle: "Free Date Difference Calculator – Days Between Dates",
     },
     ar: {
       name: "الفرق بين تاريخين",
       description:
-        "احسب المدة الدقيقة بين تاريخين — سنوات وأشهر وأيام، وإجمالي الأيام والأسابيع. يعمل بالكامل داخل متصفحك.",
+        "احسب عدد الأيام أو الأشهر أو السنوات بدقة بين تاريخين مجانًا وفوريًا.",
+      seoTitle: "حاسبة الفرق بين تاريخين مجانًا",
     },
   },
   {
@@ -1354,12 +1510,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "Archive Inspector",
       description:
-        "Peek inside a .zip and other archives in your browser — detect the format and list every entry with sizes and dates, without extracting or uploading.",
+        "Inspect the contents of ZIP, RAR, and other archive files online for free without extracting or downloading.",
+      seoTitle: "Free Archive Inspector – View ZIP/RAR Contents Online",
     },
     ar: {
       name: "فاحص الأرشيف",
       description:
-        "اطّلع على محتوى ملفات .zip وغيرها داخل متصفحك — تعرّف على الصيغة واعرض كل عنصر بحجمه وتاريخه دون فكّ أو رفع.",
+        "افحص محتويات ملفات ZIP وRAR وغيرها مجانًا دون فك الضغط أو التحميل.",
+      seoTitle: "أداة فحص محتويات الأرشيف ZIP/RAR مجانًا",
     },
   },
   {
@@ -1367,12 +1525,14 @@ export const liveToolSeo: ToolSeo[] = [
     en: {
       name: "File Metadata",
       description:
-        "Reveal a file’s metadata in your browser — size, image dimensions, camera EXIF with GPS, PNG text, PDF info and media tags. Nothing is uploaded.",
+        "View and remove EXIF and metadata from images and files online for free, protecting your privacy instantly.",
+      seoTitle: "Free File Metadata Viewer – Check EXIF & File Info",
     },
     ar: {
       name: "بيانات الملف",
       description:
-        "اكشف البيانات الوصفية لملفٍ داخل متصفحك — الحجم وأبعاد الصورة وبيانات EXIF مع GPS ونصوص PNG ومعلومات PDF ووسوم الوسائط. دون رفع أي شيء.",
+        "اعرض واحذف بيانات EXIF والميتاداتا من الصور والملفات مجانًا لحماية خصوصيتك.",
+      seoTitle: "أداة عرض بيانات الملف الوصفية (Metadata) مجانًا",
     },
   },
 ];
