@@ -18,6 +18,12 @@ export function Layout() {
   const { lang } = useParams()
   const location = useLocation()
 
+  // Enforce trailing slash so /en/apps/tier-list → /en/apps/tier-list/
+  // This prevents duplicate-URL crawling (canonical always uses trailing slash).
+  if (!location.pathname.endsWith('/')) {
+    return <Navigate to={`${location.pathname}/${location.search}${location.hash}`} replace />
+  }
+
   // Unknown / missing locale → prepend the visitor's locale to the full path.
   if (!isLocale(lang)) {
     const target = getStoredLocale() ?? detectLocale()
