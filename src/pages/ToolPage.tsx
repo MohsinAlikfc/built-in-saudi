@@ -23,7 +23,8 @@ function LoadedTool({ tool }: { tool: Tool }) {
   const { locale, t } = useLocale()
   const l = localizeTool(tool, locale)
   // The tool name now lives in the app-bar (Header); the page goes straight to the tool.
-  useDocumentMeta(locale, `/apps/${tool.id}`, l.name, l.description)
+  const seoData = liveToolSeo.find((x) => x.id === tool.id)?.[locale]
+  useDocumentMeta(locale, `/apps/${tool.id}`, l.name, seoData?.description || l.description, seoData?.seoTitle)
 
   const ToolComponent = tool.component!
   
@@ -31,7 +32,7 @@ function LoadedTool({ tool }: { tool: Tool }) {
     .filter((tl) => tl.id !== tool.id && tl.category === tool.category)
     .slice(0, 6)
 
-  const seoData = liveToolSeo.find((x) => x.id === tool.id)?.[locale]
+
   const tr = t.toolPage.trust
 
   return (

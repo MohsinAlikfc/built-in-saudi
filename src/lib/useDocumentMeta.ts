@@ -4,6 +4,7 @@ import { siteMeta } from '../i18n/seo'
 
 const ORIGIN = 'https://built-in-saudi.com'
 const SUFFIX: Record<Locale, string> = { en: ' — Built in Saudi', ar: ' — بُنِيَ في السعودية' }
+const APP_SUFFIX: Record<Locale, string> = { en: ' — Free Tool | Built in Saudi', ar: ' — أداة مجانية | بُنِيَ في السعودية' }
 // Pages are served with a trailing slash (directory index); point canonical /
 // hreflang at that form so they don't reference a URL that 301-redirects.
 const slash = (sub: string) => `${sub}/`.replace(/\/+$/, '/')
@@ -33,10 +34,12 @@ function setHreflangs(subPath: string) {
  * `subPath` is like '' (home) or '/apps/qr-code'. `title`/`description` override
  * the locale defaults (used by tool pages).
  */
-export function useDocumentMeta(locale: Locale, subPath = '', title?: string, description?: string) {
+export function useDocumentMeta(locale: Locale, subPath = '', title?: string, description?: string, seoTitle?: string) {
   useEffect(() => {
+    const isApp = subPath.startsWith('/apps/')
     const site = siteMeta[locale]
-    const fullTitle = title ? `${title}${SUFFIX[locale]}` : site.title
+    const suffixToUse = isApp ? APP_SUFFIX[locale] : SUFFIX[locale]
+    const fullTitle = seoTitle || (title ? `${title}${suffixToUse}` : site.title)
     const desc = description ?? site.description
     const canonical = `${ORIGIN}/${locale}${slash(subPath)}`
 
@@ -59,7 +62,6 @@ export function useDocumentMeta(locale: Locale, subPath = '', title?: string, de
     setMeta('meta[name="twitter:description"]', 'content', desc)
     setHreflangs(subPath)
 
-    const isApp = subPath.startsWith('/apps/')
     const isPage = subPath !== '' && !isApp
     const homeName = locale === 'ar' ? 'الرئيسية' : 'Home'
     const cleanTitle = title || site.title

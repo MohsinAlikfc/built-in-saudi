@@ -13,6 +13,7 @@ const LOCALES = ['en', 'ar'] as const
 type Loc = (typeof LOCALES)[number]
 const dicts = { en, ar }
 const suffix: Record<Loc, string> = { en: ' — Built in Saudi', ar: ' — بُنِيَ في السعودية' }
+const appSuffix: Record<Loc, string> = { en: ' — Free Tool | Built in Saudi', ar: ' — أداة مجانية | بُنِيَ في السعودية' }
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const escAttr = (s: string) => esc(s).replace(/"/g, '&quot;')
@@ -208,7 +209,8 @@ function prerenderPlugin(): Plugin {
         for (const tool of liveToolSeo) {
           const ts = tool[locale]
           const sub = `/apps/${tool.id}`
-          let page = applyHead(shell, { locale, dir, title: `${ts.name}${suffix[locale]}`, desc: ts.description, canonical: `${ORIGIN}/${locale}${sub}/`, sub, type: 'WebApplication' })
+          const title = ts.seoTitle || `${ts.name}${appSuffix[locale]}`
+          let page = applyHead(shell, { locale, dir, title, desc: ts.description, canonical: `${ORIGIN}/${locale}${sub}/`, sub, type: 'WebApplication' })
           page = injectContent(page, toolContent(locale, tool))
           write(`${locale}${sub}`, page)
         }
