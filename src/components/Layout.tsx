@@ -12,6 +12,7 @@ import { Spinner } from './ui'
 import { UpdatedToast } from './UpdatedToast'
 import { useVersionCheck } from '../lib/useVersionCheck'
 import { clearStaleNotifications } from '../lib/push'
+import { Breadcrumbs } from './Breadcrumbs'
 
 export function Layout() {
   const { lang } = useParams()
@@ -28,6 +29,7 @@ export function Layout() {
 function LocalizedLayout({ locale }: { locale: Locale }) {
   const t = dicts[locale]
   const hideFooter = useSyncExternalStore(hideFooterStore.subscribe, hideFooterStore.get, hideFooterStore.get)
+  const location = useLocation()
   useVersionCheck()
 
   useEffect(() => {
@@ -52,6 +54,7 @@ function LocalizedLayout({ locale }: { locale: Locale }) {
         {/* The booking page is a standalone, chrome-free view (its own intro box). */}
         {!/\/book\//.test(location.pathname) && <Header />}
         <main id="main" className="flex-1 shrink-0 basis-auto [overflow-x:clip] max-[560px]:pb-[5.5rem]">
+          <Breadcrumbs />
           <Suspense fallback={<div className="wrap py-20 flex justify-center"><Spinner /></div>}>
             <Outlet />
           </Suspense>
